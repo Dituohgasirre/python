@@ -1,0 +1,112 @@
+安装kvm虚拟机软件
+
+# sudo apt install libvirt-bin virt-manager qemu-kvm qemu-system-x86
+
+
+安装两个一模一样的虚拟机
+
+装好系统后，在virt-manager图形化界面，右键点击虚拟机，选择克隆 (clone) 即可复制一份一模一样的虚拟机。
+
+
+
+kvm 虚拟机如何与物理机（宿主机）通讯
+
+1. 虚拟机的网络选择 NAT
+    1. 关闭虚拟机
+    2. 在虚拟机的属性页（点击图案为 i 的图标），选择 NIC...
+    3. 在右边的 source device 位置，选择 virtual network 'default': NAT
+    4. 点“应用” (apply)
+2. 查看物理机上的virbr0 的IP地址，假设是 192.168.122.1，虚拟机能ping通此IP地址则表示虚拟机和物理机可以通讯
+    # ip a s virbr0
+3. 给虚拟机设置与物理机同一个网段的IP地址，以下操作都在虚拟机上执行
+    1. 如果安装系统的时候安装了图形界面，则要关闭NetworkManager 服务，如果没有图形界面，此步省略
+    service NetworkManager stop
+    chkconfig --level 2345 NetworkManager off
+
+    2. 查找虚拟机网卡的名称，假设这里查到的是eth0
+    ip link show
+
+    3. 这里的eth0必须是上一步查到的虚拟机网卡的实际名称
+    ip a add 192.168.122.20/24 dev eth0
+
+    4. 尝试从虚拟机中ping物理机，假设物理机的ip是192.168.122.1
+    ping 192.168.122.1
+4. 用ssh从物理机传输文件到虚拟机，假设虚拟机ip是192.168.122.20
+    # 传输一个名叫file的文件
+    cat file | ssh root@192.168.122.20 "cat > /tmp/file"
+
+    # 传输多个文件，存放到远程机的/tmp 下
+    tar cf - file1 file2 | ssh root@192.168.122.20 "tar xf - -C /tmp"
+
+
+
+在CentOS中安装redis
+
+1. 配置yum源
+    1. 虚拟机关机的状态下
+    2. 在虚拟机属性中，选择 IDE CDROM ...
+    3. 点击右边的 connect （连接），定位到CentOS 的ISO文件
+    4. 开机
+    5. 删除目录 /etc/yum.repos.d/ 下所有 *.repo 文件，目的是清楚之前存在的旧配置
+        rm -f /etc/yum.repos.d/*.repo
+    6. 创建文件 /etc/yum.repos.d/dvd.repo，内容如下
+        [dvd]
+        name=dvd
+        baseurl=file:///yum
+        enabled=1
+        gpgcheck=0
+    7. 把CentOS的光盘（iso）挂载起来
+        mkdir /yum
+        mount /dev/sr0 /yum
+    8. 检查，以下命令的结果中应能看到 dvd 字样，如果没有，就回头重新检查
+        yum repolist
+
+2. 安装编译环境
+
+    yum groupinstall "development tools"
+
+3. 解压redis的安装包，并进入源码目录
+    tar xf redis-4.0.9.tar.gz
+    cd redis-4.0.9
+
+4. 通过查看文档INSTALL，依照文档的指引安装，redis 4.0.9 版本的官方提供了编译源码的安装方式
+    less INSTALL        <-- 查看文档
+    less README.md      <-- 查看文档
+    make install        <-- 文档中指示了这样的安装命令
+
+5. 运行redis服务器
+    1. 复制源码包中的redis.conf
+        cp redis.conf /etc
+    2. 运行服务器
+        redis-server /etc/redis.conf
+
+6. 客户端尝试连接
+    1. 检查redis服务器的状况
+        netstat -tlpn | grep redis
+    2. 连接
+        redis-cli
+
+
+
+
+
+
+在python中使用redis
+
+1. 安装模块
+
+    pip install redis
+
+2. 导入模块
+
+    import redis
+
+3. 连接服务器
+
+    r = redis.StrictRedis()
+
+4. 发送命令
+
+    r.keys()
+    r.set('name', 'value')
+    r.get('name')

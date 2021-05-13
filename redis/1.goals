@@ -1,0 +1,101 @@
+使用kvm虚拟机
+在kvm虚拟机中安装centos 6.9
+在centos 6.9 中安装配置redis服务器 (安装包中的redis.conf文件)
+redis命令行客户端的使用 (交互式，非交互式)
+
+redis几种常用的数据结构 (string, list, hash, set, sorted set)
+redis帮助信息/文档的查找 (help, Tab, https://redis.io/commands)
+
+redis 的string 数据结构的常用操作
+    修改/创建
+        设置: set, +expire, +exists/nonexists, mset, msetnx
+        修改: setrange, append
+        算数运算: incr, incrby, incrbyfloat, decr, decrby
+        过期时间: expire/pexpire/expireat/pexpireat/persist
+    查询
+        内容: get, getrange, getset, mget
+        长度: strlen
+        过期时间: ttl/pttl
+    操作
+        创建一个字符串，指定一个值
+        仅当指定的key不存在时才创建字符串
+        仅当指定的key存在时才创建字符串
+        创建字符串时指定字符串的过期时间（秒/毫秒）
+        查询字符串的过期时间 (ttl/pttl)
+        设置字符串的过期时间 (expire/pexpire/expireat/pexpireat)
+        删除字符串的过期时间 (persist)
+        在字符串后面附加字符串
+        覆盖一个字符串的某段内容
+        给一个正数自加3
+
+redis 的list 数据结构的常用操作
+    修改/创建
+        弹出: lpop/rpop, rpoplpush, +block
+        添加: lpush/rpush, rpoplpush, +exists, linsert
+        修改: lset
+        删除: lrem
+        修剪: ltrim
+    查询
+        索引: lindex
+        长度: llen
+        切片: lrange
+    操作
+        创建一个列表
+        删除一个列表
+        在列表右边添加元素，列表不存在就创建
+        在列表左边添加元素，仅当列表存在时添加
+        把列表尾部的一个元素移动到该列表的头部
+        获取列表偏移量为3的元素
+        获取列表最后一个元素
+        获取列表的全部元素
+        弹出列表中头部的元素，列表为空时阻塞
+        查询列表的长度
+
+redis 的set 数据结构的常用操作
+    修改/创建
+        添加: sadd
+        弹出: spop
+        移动: smove
+        删除: srem
+    查询
+        获取所有成员: smember
+        获取随机成员: srandmember
+        成员身份判断: sismember
+    集合操作
+        sdiff, sdiffstore, sinter, sinterstore, sunion, sunionstore
+    操作
+        创建一个集合，指定若干个元素
+        判断某个值是否在集合里面
+        列出集合中所有的成员
+        从集合中每次随机取出3个成员
+        合并两个集合，存储到一个新的集合中
+        找出出现在集合1中但是不在集合2中的值，存放到新的集合中
+
+redis 的hash 数据结构的常用操作
+    修改/创建
+        添加: hset, hmset, hsetnx
+        修改元素: hincrby, hincrbyfloat
+        删除: hdel
+    查询
+        获取成员: hget, hgetall, hkeys, hvals, hmget
+        获取长度: hlen
+        判断成员存在: hexists
+    操作
+        创建一个哈希表，指定多个键值对
+        在一个已有的哈希表中添加新的键值对
+        修改一个已有的哈希表中指定键的值
+        修改一个已有的哈希表中指定键的值，仅当该键不存在时操作
+        获取哈希表中指定的若干个键的值
+        获取哈希表中所有的键值对/键/值
+        计算哈希表的长度
+        判断哈希表中是否存在某个键
+
+redis常用命令
+    del, dump, restore, exists, expire/expireat/pexpire/pexpireat, keys,
+    persist, rename/renamenx, sort, ttl/pttl, type
+
+在python中连接使用redis
+redis的登录验证 (配置语句: requirepass，客户端命令：auth)
+redis的数据持久化 (save, cp, service restart)
+MySQL主从复制
+MySQL主从复制的应用
