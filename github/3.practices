@@ -1,0 +1,112 @@
+1. 安装并配置git
+
+    1. 安装git
+
+        # apt install git       <-- debian like system
+        # yum install git       <-- red hat like system
+
+    2. 配置git，以配置用户的全局配置为例
+        修改/创建文件 ~/.gitconfig，写入以下内容
+
+        [user]
+                name = <user name>
+                email = <email>
+        [alias]
+                last = log -1
+                pwd = branch -vv
+                st = status
+                ck = checkout
+                r = remote
+                b = branch
+                c = commit -v
+                a = add
+                l = log
+                d = diff
+        [core]
+                quotepath = off
+        
+    3. 检查配置
+
+        git config --global -l
+
+
+
+2. 对比差异
+
+    1. 对比工作区与缓存区的差异
+        git diff
+    2. 对比缓存区与HEAD的差异
+        git diff --cached
+    3. 对比两个commit 之间的差异
+        git diff <commit-id1> <commit-id2>
+
+
+
+3. 操练add命令，理解缓存区的用处
+
+    1. 修改工作目录的某个文件
+        vi
+    2. 删除工作目录的某个文件
+        git rm file-name
+        rm file-name
+    3. 添加文件到当前工作目录
+        cp
+        mv
+    4. 只提交对文件的删除操作，其它更改暂时不提交
+        git add -A deleted-file-name1
+        git add -A deleted-file-name2
+        git commit
+
+
+4. 循环地把工作区的变动添加到缓存区
+
+    1. 更改一个已经存在的文件的内容，在文件尾部添加两个新行
+        echo 'line 1' >> file
+        echo 'line 2' >> file
+
+    2. 添加到缓存区，查看缓存区的内容
+        git add file
+        git diff --cached
+        
+    3. 又更改文件的内容，删除最后一行
+        sed -i '$d' file
+
+    4. 又添加到缓存区，两次所添加的更改会被自动合并
+        git add file
+
+    5. 这个时候，因为缓存区的数据被自动合并，所以缓存区只会看到增加了一行
+
+        git diff --cached
+
+
+5. 操练git commit --amend 的用法
+
+    1. 修改最近一次commit 的信息
+
+        git commit --amend
+
+    2. 把新的变动附加到最近一次的commit中
+
+        git add some-file       <-- 把新的变动添加到缓存区
+        git commit --amend      <-- 提交更改，但是不创建新的commit，而是附加到最近的一个commit中
+        git log --name-only     <-- 查看变化
+
+
+
+6. 操练远程仓库
+
+    1. 创建远程仓库
+
+        mkdir /tmp/repo1
+        cd /tmp/repo1
+        git init --bare --shared
+
+    2. 通过clone把远程仓库的数据拉下来，远程关系会被自动创建
+
+        git clone file:///tmp/repo1
+
+    3. 本地修改，提交，然后推送到远程仓库
+        git add ...
+        git commit ...
+        git push origin master          <-- 把本地的更改推送到远程服务器
+        git push origin master:master2  <-- 推送，改名

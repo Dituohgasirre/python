@@ -1,0 +1,227 @@
+什么是数据分析
+
+对数据进行整理分析，得出某种规律，通过规律推测（预测）走向/未来
+
+利用数学、统计学、计算机科学等领域的原理、技术、工具，对数据做研究，以发现事物之间的关系，用来做支持决策。
+
+数据
+对数据的敏感
+爱钻研
+爱探索
+好奇心
+
+
+数据分析学 (analytics)
+数据分析术 (analysis)  术
+
+
+
+常见的与数据相关的名词
+
+    数据科学 (data science)
+    数据分析 (data analysis)
+    大数据 (big data)
+    大数据分析
+    数据挖掘 (data mining)
+    机器学习 (machine learning)
+    人工智能 (AI)
+    商业智能 (Business intelligence)
+
+
+与数据分析相关的常见职位
+
+    数据科学家 (data scientist)
+    数据工程师 (data engineer)
+    数据分析师 (data analyst, statistician)
+    数据分析工程师
+    数据挖掘工程师
+    数据分析员
+    数据分析研究员
+    网站数据分析师
+    游戏运营数据分析
+    数据分析开发工程师
+    高级数据分析开发工程师
+    大数据分析产品经理
+    大数据分析工程师
+    大数据分析师
+    资深大数据分析师
+    数据分析专家
+    数据挖掘分析工程师
+    数据挖掘工程师
+    精准推荐/大数据分析工程师
+    国际广告网络大数据分析师
+
+    * 添加修饰词：初级，资深，高级
+    * 添加具体应用：网站，游戏，广告，推荐
+
+
+数据分析职位所需众多技能中，以下可以算是最重要的几种
+
+    数学能力（统计，概率，线性代数，微积分，高等数学）
+    技术能力（python, Java, C, R, 各种库，框架，工具等，SQL, NoSQL, Spark, Hadoop, PPT）
+    沟通能力（沟通，展示）
+    了解市场/产品
+
+
+
+安装numpy/matplotlib/pandas/scipy/ipython/jupyter等工具
+
+1. 通过Anaconda 安装
+2. pip
+
+
+不同平台的下载地址：
+
+https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86_64.sh
+https://repo.continuum.io/archive/Anaconda3-5.1.0-Linux-x86.sh
+https://repo.continuum.io/archive/Anaconda3-5.1.0-MacOSX-x86_64.pkg
+https://repo.continuum.io/archive/Anaconda3-5.1.0-Windows-x86_64.exe
+https://repo.continuum.io/archive/Anaconda3-5.1.0-Windows-x86.exe
+
+运行安装程序：
+
+$ bash Anaconda3-5.1.0-Linux-x86_64.sh
+
+
+同学之间快速共享文件的方法
+
+共享单个文件：
+
+    发送方：
+    cat file | nc -l 3.3.3.X 30000
+
+    接收方：
+    nc 3.3.3.X 30000 > file
+
+
+共享多个文件：
+
+    发送方：
+    tar cf - file1 file2 | nc -l 3.3.3.X 30000
+
+    接收方：
+    nc 3.3.3.X 30000 > files.tar
+
+
+
+
+1. 运行安装脚本
+
+bash 
+
+
+安装pyenv，通过pyenv管理多版本python
+
+1. 创建目录，进入目录
+
+mkdir ~/.pyenv
+cd ~/.pyenv
+
+2. 下载pyenv，注意命令末尾有一个点
+
+git clone https://github.com/pyenv/pyenv.git .
+
+3. 修改 ~/.bashrc，在后面添加以下代码
+
+    # pyenv settings
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PYENV_ROOT/libexec:$PATH"
+    eval "$(pyenv init -)"
+
+
+
+通过pyenv管理anaconda3
+
+1. 安装pyenv
+
+2. 把anaconda3 纳入pyenv的version当中
+
+    ln -sv ~/anaconda3 ~/.pyenv/versions/
+
+3. 查看pyenv的可用版本
+
+    pyenv versions
+
+4. 在某个shell中临时切换成anaconda3版本
+
+    pyenv shell anaconda3
+
+5. 永久切换成anaconda3
+
+    pyenv global anaconda3 IPython 的基本使用
+
+注：
+
+    <Tab> 表示按Tab键
+    <Enter> 表示按回车键
+
+
+1. 查找对象的帮助文档
+    name?<Enter>
+
+2. 查看对象的源代码
+    name??<Enter>
+
+3. 列出对象的所有属性
+    name.<Tab>
+
+4. 按照名字中的部分字符串查找属性
+    name.*pid*?<Enter>
+
+5. 启用vi模式
+    1. 定位配置文件所在的目录
+        $ ipython locate profile
+        /home/joshua/.ipython/profile_default
+    2. 修改目录中的python_config.py文件，加入（或修改）以下配置项
+        c.TerminalInteractiveShell.editing_mode = 'vi'
+        c.TerminalInteractiveShell.editor = 'vi'
+
+        如果配置文件不存在，就用以下shell 命令创建
+            ipython profile create
+
+6. 几个有用的magic命令
+    %timeit     <-- 测试代码的运行时间（反复多次运行，算平均值）
+    %time       <-- 测试代码运行时间跨度（运行一次实际消耗的时间）
+    %edit       <-- 调出编辑器编辑代码
+    %magic      <-- 列出所有的magic命令
+
+7. IPython的内部引用
+
+
+
+Jupyter notebook
+
+1. 运行notebook
+
+    jupyter notebook
+
+2. 给notebook 添加vim的键绑定
+
+    https://github.com/lambdalisue/jupyter-vim-binding
+
+    安装流程：
+    1. 创建所需目录
+        mkdir -p $(jupyter --data-dir)/nbextensions
+    2. 获取插件的代码
+        cd $(jupyter --data-dir)/nbextensions
+        git clone https://github.com/lambdalisue/jupyter-vim-binding vim_binding
+    3. 启用插件
+        jupyter nbextension enable vim_binding/vim_binding
+
+
+
+安装 Numpy
+
+1. 通过anaconda自动安装
+2. 通过pip安装
+    pip install numpy
+
+
+
+用阵列来做索引，索引两外一个阵列（原阵列） 
+
+1. 结果的值来自原阵列
+2. 结果的数据类型来自原阵列
+3. 结果的形状来自索引阵列
+
+当用一维阵列做索引时，可以用python列表代替numpy的阵列；不过，当要用多维阵列做索引时，不能用嵌套的python列表代替numpy的多维阵列。

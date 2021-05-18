@@ -1,0 +1,62 @@
+# Git是什么，能做什么
+# 安装配置Git
+# Git的一般工作流程 (init, add, commit)
+# Git的命令结构 (subcommands)
+# 查找Git的帮助信息 (man, --help)
+# 添加一个/多个文件
+# 添加目录中的文件
+# 能否添加目录？
+# Git的几个数据存储区域 (working directory/staging area/commit)
+# Git的commit之间的关系图 (HEAD, parent)
+# Git的目录结构
+# Git的存储方式与数据丢失的风险
+# 查看文件变化状态 (status)
+# 查看差异 (wd <> index, index <> commit, commit <> commit)
+# 添加所做的变动 (add, -A)
+# 忽略某些文件 (.gitignore)
+# 撤销所添加的变动 (reset)
+# 提交commit (一条命令，编辑文字)
+# commit信息的书写规则 (标题和正文之间有一行空行，注意标题(<=50) 和正文的长度)
+# 移除文件 (rm, add -A)
+# 查看commit历史 (log)
+# 精简历史输出的信息 (--oneline)
+# 在历史信息中显示关键标签的位置 (--decorate)
+# 在历史信息中显示分支关系图 (--graph)
+# 格式化输出信息 (--pretty)
+# 显示历史信息时指定起始commit
+# 查看最近的commit (-1, -2, -10)
+# 查看指定时间段内的commit (--after, --before)
+# 只查看指定作者的commit (--author)
+# 查找commit中的信息 (log --reg=<pattern>, -E)
+# 查看commit历史中发生更改的文件 (--name-only)
+# 列出所有与某个文件相关联的commit (git log file-path)
+# 查看commit与commit之间的变动 (diff <commit> <commit>)
+# 撤消工作区的变动 (手动编辑，checkout)
+# 撤消index中的的变动 (reset, add)
+# 撤消commit (reset, --hard, --soft, git reflog master)
+# 更改commit信息 (commit --amend)
+# 更改一系列的commit历史信息 (rebase -i)
+# 与最近的commit合并 (add, commit --amend)
+# 远程仓库的协议类型 (file://, http://, ssh://)
+# 创建远程仓库 (init)
+# 克隆远程仓库 (clone)
+# 添加与远程仓库的关系 (remote --add)
+# 删除与远程仓库的关系 (remote --remove)
+# 更新到远程仓库 (push, -f, 改名)
+# 获取远程仓库的更新 (fetch)
+# fetch与pull的区别
+# 一个项目使用多个远程仓库
+# Git的分支是什么？
+# Git分支的使用策略
+# 分支的创建 (git checkout -b branch-name start-point)
+# 分支的查看 (git branch -v)
+# 分支的切换 (git checkout branch-name)
+# 分支的合并 (git merge remote-branch-name)
+# 分支的删除 (git branch -d branch-name)
+# 对比分支的commit差异 (git diff commit1 commit2
+# GitHub的使用
+    # 创建github账户
+    # 创建github仓库
+    # 克隆github仓库/添加github仓库
+    # 用ssh登录github
+    # github多人协作开发

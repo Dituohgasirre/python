@@ -1,0 +1,370 @@
+软件管理
+    软件安装 -> 解压文件到指定位置
+    把已编译好的程序打包 -> rpm/deb
+
+    rpm包需要使用rpm工具来解包, deb包需要使用dpkg工具来解包
+
+    包的命名规则:
+        软件包名-[是否为开发包-]版本号-系统-平台信息.后缀
+        libvorbis-dev_1.3.5-3ubuntu0.1_amd64.deb
+        yap-devel-5.1.3-2.1.el6.x86_64.rpm
+
+        软件包信息
+            dev/devel       代表此包为开发库
+
+        平台信息
+            amd64/x86_64    代表64位的软件包,只能安装到64位操作系统中
+            all/noarch      代表与平台无关
+            i686            代表32位的软件包
+
+        src/source          代表源码包
+
+    rpm包网站: rpmfind.net
+
+    rpm的包安装
+        rpm -ivh yap-devel-5.1.3-2.1.el6.x86_64.rpm
+            i   代表安装
+            v   代表显示进度
+            h   检验hash
+
+        批量安装
+            rpm -ivh samba*
+
+        安装成功有两个进度条
+        安装出现类似提示needed by字符串, 代表此包的依赖未处理
+        安装出现conflicts的字符串, 代表此包已安装, 版本冲突
+
+    安装rpm源码包
+        rpm -ivh coreutils-8.4-46.src.rpm
+            安装完成后将源代码解压到/usr/src/redhat/SOURCES/目录里
+
+        rpmbulid --rebuild coreutils-8.4-46.src.rpm
+            将rpm源码包解压编译再重新打包新的rpm包
+
+            重新编译好的rpm放到/usr/src/redhat/RPMS/i386
+
+-------------------------------------------------------------------------------
+    查看命令出自哪个rpm包
+        rpm -qf /bin/w3m
+            w3m-0.5.2-19.el6.x86_64
+
+    查看是否安装某个包
+        rpm -qa vmware
+            没有安装没有任务输出
+
+    查看已安装的rpm的安装信息
+        查看此包会释放哪些文件
+            rpm -ql coreutils-8.4-46.el6.x86_64
+
+        查看此包会释放哪些配置文件
+            rpm -qc coreutils-8.4-46.el6.x86_64
+
+        查看此包会释放哪些文档
+            rpm -qd coreutils-8.4-46.el6.x86_64
+
+        查看此包详细信息
+            rpm -qi coreutils-8.4-46.el6.x86_64
+
+        查看此包会依赖哪些文件
+            rpm -qR coreutils-8.4-46.el6.x86_64
+
+    查看rpm包文件信息
+        查看此包会释放哪些文件
+            rpm -qlp w3m-0.5.2-19.el6.x86_64.rpm
+
+        查看此包详细信息
+            rpm -qip w3m-0.5.2-19.el6.x86_64.rpm
+
+        查看此包会依赖哪些文件
+            rpm -qRp w3m-0.5.2-19.el6.x86_64.rpm
+
+    卸载
+        rpm -e rpm包名
+
+        必须找到RPM包名
+            rpm -qf /usr/bin/w3m
+
+        rpm -e $(rpm -qf $(which w3m))
+
+-------------------------------------------------------------------------------
+yum
+    rpm包有依赖性, yum为了解决自动处理rpm包依赖问题
+
+    yum的配置文件(/etc/yum.repos.d/*.repo)
+    [kyo]       仓库配置名
+    #仓库名
+    name=kyo
+    #配置仓库地址
+    baseurl=file:///iso/cd1
+            file:///iso/cd2
+    #仓库是否开启(0为关, 1为开)
+    enabled=1
+    仓库gpg检验密钥配置(0为不检验)
+    gpgcheck=0
+
+    配置网络仓库
+        baseurl=http://3.3.3.1/centos1
+                http://3.3.3.1/centos2
+
+    163/aliyun的网络源
+        wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo
+            或
+        wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.163.com/repo/Centos-6.repo
+
+yum操作
+    清除yum缓冲
+        yum clean all
+
+    重新创建新仓库缓冲
+        yum makecache
+
+    列表仓库所有rpm包
+        yum list
+
+    搜索rpm包
+        按包名搜索
+            yum search 关键词
+
+        按包释放文件搜索
+            yum provides "*/libgc.so.1*"
+
+    安装包
+        yum install 包名
+
+        指定安装路径(不推荐):
+            yum install --installroot=/usr/src/ 包名
+
+    卸载包
+        yum remove 包名
+
+    查看rpm组包
+        yum grouplist
+
+    安装组
+        yum groupinstall "组名"
+
+    卸载组
+        yum groupremove "组名"
+
+-------------------------------------------------------------------------------
+源码包安装
+    源码包是压缩包, 里面保存的是源代码, 使用autoconf项目制作源码包
+
+    解压(tar.gz/tar.xz/tar.bz2)
+        tar -xf 源码包 -C 解压到哪去
+
+        例:
+            tar -xf MPlayer-1.2.tar.xz -C /usr/src/
+
+    探测配置
+        ./configure --help
+            得到此源码包的配置帮助
+
+        ./configure --prefix=/usr/src/kyo/
+
+    编译
+        make -j2
+
+    安装
+        make install
+
+    卸载
+        make uninstall
+
+
+stardict:
+    1. intltool >= 0.22...
+        yum install intltool -y
+
+    2. error: Enchant library not found or too old
+        yum install enchant-devel -y
+
+    3. gucharmap找不到
+        yum install gucharmap-devel -y
+
+    4. checking for festival/festival.h... no
+    configure: error: Festival library not found. Use --disable-festival to
+    build without festival plugin.
+        yum install festival-devel -y
+
+        关闭festival插件:
+            ./configure --disable-festival
+
+    5. espeak找不开
+        yum install espeak-devel -y
+        关闭espeak插件:
+             ./configure --disable-festival --disable-espeak
+
+    6. libgnomeui-2.0 找不到
+        yum install libgnomeui-devel -y
+
+    7. configure: error: zlib not found, or gcc-c++ not installed
+        yum install gcc-c++ -y
+
+    8. 编译时xml2po找不到
+        yum provides "*bin/xml2po"
+            gnome-doc-utils-0.18.1-1.el6.noarch
+
+
+    安装词库 再运行stardict命令
+
+-------------------------------------------------------------------------------
+NTFS-3g:
+    tar -xf ntfs-3g-2009.4.4.tar.gz -C /usr/src/
+    cd /usr/src/ntfs-3g-2009.4.4/
+    ./configure && make && make install
+
+    以上安装有依赖才安装以下源码包:
+        tar -xf fuse-2.7.4.tar.gz -C /usr/src/
+        cd /usr/src/fuse-2.7.4
+        ./configure && make && make install
+
+    测试:
+        mount.ntfs-3g /dev/sdb1 /mnt
+
+-------------------------------------------------------------------------------
+tmux:
+    提示curses找不到:
+        yum install ncurses-devel -y
+
+    提示libevent找不到:
+        tar -xf libevent.tar.bz2 -C /usr/src/
+        cd /usr/src/lib/libevent
+        ./configure && make && make install
+
+        还是找不到则查看/etc/ld.so.conf是否有/usr/local/lib, 没有则追加此路径, 再运行ldconfig
+
+mplayer:
+    安装依赖:
+        yum install xorg* gtk* -y
+
+    安装yasm:
+        tar -xf yasm.tar -C /usr/src/
+        cd /usr/src/yasm
+        ./configure && make -j4 && make install
+
+        还是找不到则查看/etc/ld.so.conf是否有/usr/local/lib, 没有则追加此路径, 再运行ldconfig
+
+    tar -xf Mplayer-1.2.tar.xz  -C /usr/src/
+    cd /usr/src/Mplayer-1.2
+    ./configure --enable-gui
+    make -j4
+    make install
+
+    没有声音:
+        mknod /dev/dsp c 14 3
+        chmod 666 /dev/dsp
+
+
+ktouch
+    yum install cmake kdelibs git -y
+    cd ktouch
+    git checkout v4.8.5
+    cmake .
+    make
+    make install
+
+-------------------------------------------------------------------------------
+运行程序时提示以下错误信息:
+    error while loading shared libraries: libevent-2.0.so.5: cannot open shared
+    object file: No such file or directory
+
+    遇到类型错误, 只是libevent-2.0.so.5这段内容换成其它库
+    验证本系统中有没有此库:
+        updatedb
+        locate libevent-2.0.so.5
+            输出库所在路径(/usr/local/lib)
+
+    临时解决方法:
+        export LD_LIBRARY_PATH=/usr/local/lib
+
+
+    永久解决方法:
+        echo '/usr/local/lib' >> /etc/ld.so.conf
+        ldconfig (不管用重启电脑)
+
+-------------------------------------------------------------------------------
+打包/解包
+    打包: 将多个文件合并成一个文件
+    打包命令: tar
+        创建包
+            tar -cf /tmp/test.tar  /etc /kyo /boot/grub/grub.cfg
+
+            -v      显示打包进度
+                tar -cvf /tmp/test.tar  /etc /kyo /boot/grub/grub.cfg
+
+            打包/etc/目录排除/etc/yum.repos.d
+                tar -cf /tmp/etc.tar /etc/ --exclude=/etc/yum.repos.d
+
+        查看包
+            tar -tf /tmp/test.tar
+
+        更新包
+            tar -rf /tmp/test.tar /root/.bashrc
+                将/root/.bashrc追加到test.tar文件中
+
+            tar -uf /tmp/test.tar /root/.bashrc
+                将/root/.bashrc更新到test.tar文件中(文件存在会更新文件)
+
+        删除包中文件
+            tar -f /tmp/test.tar --delete newtest.file
+
+        解包
+            解包到当前目录
+                tar -xf /tmp/test.tar
+
+            解包到指定目录
+                tar -xf /tmp/test.tar -C /usr/src/
+
+-------------------------------------------------------------------------------
+压缩/解压
+    压缩只能针对一个文件, 不能直接对目录进行压缩(必须先打包再压缩)
+
+    windows:
+        *.rar/*.zip/*.7z
+    linux:
+        compress    *.Z (淘汰)
+        gzip        *.gz
+        bzip2       *.bz2
+        xz          *.xz
+        zip         *.zip
+        rar         *.rar
+
+    gzip
+        打包压缩
+            tar -cf - etc | gzip > etc.tar.gz
+
+        解压
+            gzip -d etc.tar.gz
+
+        tar可以调用gzip工具
+            打包压缩
+                tar -czf etc.tar.gz etc
+
+            解压解包
+                tar -xzf etc.tar.gz etc
+                可以简化(万能解压):
+                    tar -xf etc.tar.gz etc
+
+    xz/bzip2与gzip用户一样
+        tar -czf -> gzip
+        tar -cjf -> bzip2
+        tar -cJf -> xz
+
+    rar
+        安装:
+            apt install rar -y
+
+        压缩:
+            rar a -r etc.rar etc
+
+        解压:
+            rar x etc.rar
+
+    zip
+        压缩
+            zip -r etc.zip etc
+
+        解压
+            unzip etc.zip
+

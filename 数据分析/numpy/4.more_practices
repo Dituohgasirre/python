@@ -1,0 +1,211 @@
+1. 导入numpy，查看版本
+
+import numpy as np
+print(np.__version__)
+
+
+2. 创建一个值如以下所示的一维数组
+    array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+
+3. 创建一个 (3,7) 形状的布尔数组，值全为True
+
+
+4. 从一个以为数组中按条件提取数据
+从数组a 中提取所有的奇数
+
+    a = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+
+5. 按条件给数组中的元素赋值
+把数组中所有的负数变成零。
+输入数据：
+    a = np.array([ 4,  2,  0,  3,  6,  1,  4,  6, -1,  1])
+
+
+6. 按条件给数组中的元素赋值，不修改原有数据
+把数组中所有的负数变成零。
+输入数据：
+    a = np.array([ 4,  2,  0,  3,  6,  1,  4,  6, -1,  1])
+解决方法：
+    1. 复制一份数组的副本
+    2. 使用np.where
+
+
+7. 按要求操作
+输入：
+    a = np.array([1,2,3])
+期待输出：array([1, 1, 1, 2, 2, 2, 3, 3, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3])
+参考函数：np.repeat, np.tile
+
+
+8. 取出阵列a和b的公共元素 (np.intersect1d)
+输入：
+    a = np.array([1,2,4,3])
+    b = np.array([7,2,10,4,7])
+期待输出：array([2, 4])
+
+
+9. 从a中去除b中存在的元素，即去除公共元素 (np.setdiff1d)
+输入：
+    a = np.array([1,2,3,4,5])
+    b = np.array([5,6,7,8,9])
+期待输出：array([1,2,3,4])
+
+
+10. 找出两个阵列中元素值相等的索引 (np.where, a == b)
+输入：
+    a = np.array([1,2,3,2,3])
+    b = np.array([7,2,10,2,7])
+期待输出：(array([1, 3]),)
+
+
+11. 按多条件抽取数据 (np.logical_XXX, &, |, ~)
+输入：a = np.array([ 7,  8, 14,  1, 11, 10,  9,  6, 12,  4,  3,  5, 13,  2,  0])
+
+取出a中大于10或者小于5的值
+取出a中大于5且小于10的值
+
+
+12. 使一个用来处理标量的python函数能够处理numpy 矢量 (np.vectorize)
+转换以下函数 getmax 使之能处理两个numpy阵列
+def getmax(x, y):
+    if x >= y:
+        return x
+    else:
+        return y
+
+
+13. 按要求做以下操作
+输入：a = np.arange(9).reshape(3,3)
+
+    把阵列a的第一和第二列调换 (a[:, [1,0,2]])
+    把阵列a的第一和第二行调换 (a[[1,0,2], :])
+    颠倒行的顺序 (a[::-1])
+    颠倒列的顺序 (a[:, ::-1])
+
+
+14. 按要求操练
+打印numpy阵列时，最多打印小数点后3位
+    参考： np.set_printoptions(precision=3)
+显示小数时不使用科学计数法
+    参考： np.set_printoptions(suppress=True)
+限制数组打印时最多输出10个元素
+    参考：np.set_printoptions(threshold=10)
+打印数组时输出所有元素
+    参考：np.set_printoptions(threshold=np.nan)
+
+
+15. 导入数据，并保留其中的文本 (dtype=XXX)
+数据来源：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+参考方法：
+    iris = np.genfromtxt(url, delimiter=',', dtype='object')
+    iris = np.genfromtxt(url, delimiter=',', dtype=None)
+
+
+16. 接上例的第二个做法，取出species中的前面3个数据
+    列的名字如下：
+        names = ('sepallength', 'sepalwidth', 'petallength', 'petalwidth', 'species')
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris = np.genfromtxt(url, delimiter=',', dtype=None)
+    iris['f4'][:3]
+
+
+17. 接上例，把包含元组的一维数组转换成二维数组
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    a = np.genfromtxt(url, delimiter=',', dtype=None)
+    参考做法：
+        np.hstack([a['f0'][:,None], a['f1'][:,None], a['f2'][:,None], a['f3'][:,None]])
+        np.column_stack([a['f0'], a['f1'], a['f2'], a['f3']]).shape
+
+
+18. 对Iris的萼叶长度做常态化处理，使值落在0到1之间。萼叶长度是第一列。
+
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    sepallength = np.genfromtxt(url, delimiter=',', dtype='float', usecols=[0])
+    s = (sepallength - sepallength.min()) / sepallength.ptp()
+
+
+19. 从鸢尾花的萼叶长度中找出第5个和第95个百分位数
+    参考做法：np.percentile(sepallength, q=[5, 95])
+
+
+20. 找出数组中空值的数量和位置
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris_2d = np.genfromtxt(url, delimiter=',', dtype='float')
+    iris_2d[np.random.randint(150, size=20), np.random.randint(4, size=20)] = np.nan
+找出iris_2d中空值的数量和索引位置：
+    参考函数：np.where, np.isnan
+
+
+21. 按两个或多个条件对阵列做过滤
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris_2d = np.genfromtxt(url, delimiter=',', dtype='float', usecols=[0,1,2,3])
+抽取出萼叶长度（第一列）小于5且花瓣长度（第三列）大于1.5的记录
+    参考：布尔阵列求逻辑与，再用布尔阵列来索引
+
+
+22. 抽取阵列中没有包含np.nan值的行
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris_2d = np.genfromtxt(url, delimiter=',', dtype='float', usecols=[0,1,2,3])
+    iris_2d[np.random.randint(150, size=20), np.random.randint(4, size=20)] = np.nan
+参考做法： iris_2d[np.sum(np.isnan(iris_2d), axis=1) == 0]
+
+
+23. 找出阵列中两个列之间的相关性
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris = np.genfromtxt(url, delimiter=',', dtype='float', usecols=[0,1,2,3])
+找出萼叶（第一列）长度和花瓣（第三列）长度之间的相关性
+参考做法：
+    1. np.corrcoef(iris[:,0], iris[:,2])[0,1]
+    2. from scipy.stats.stats import pearsonr  
+       corr, p_value = pearsonr(iris[:,0], iris[:,2])
+
+
+24. 找出阵列中是否包含空值
+输入：
+    array([[ 1.,  7.,  2.,  3.],
+       [ 9., nan,  1.,  2.],
+       [ 2.,  3.,  2.,  7.]])
+参考做法：
+    np.isnan(a).any()
+
+
+25. 计算鸢尾花数据集中类别（第五列）的唯一值及各个唯一值的出现的总数
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris = np.genfromtxt(url, delimiter=',', dtype='object')
+    列的名称：'sepallength', 'sepalwidth', 'petallength', 'petalwidth', 'species'
+参考做法：
+    species = iris['f4']
+    vals, counts = np.unique(species, return_counts=True)
+
+
+26. 把数字型的阵列转换成类别
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    petallength = np.genfromtxt(url, delimiter=',', dtype=None, usecols=[2])
+对花瓣的长度分类，使得数值与类别的对应关系如下：
+    X < 3       -- small
+    3 <= X < 5  -- medium
+    X >= 5      -- large
+参考做法：
+    bins = np.digitize(petallength, [0, 3, 5, 10])
+    label_map = {'small': 1, 'medium': 2, 'large': 3, np.nan: 4}
+    cats = np.empty_like(bins, dtype='U6')
+    for cat, val in label_map.items():
+        cat[bin==val] = cat
+    
+
+27. 按照萼叶（第一列）的长度对鸢尾花数据集排序
+输入：
+    url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data'
+    iris = np.genfromtxt(url, delimiter=',', dtype='object')
+    names = ('sepallength', 'sepalwidth', 'petallength', 'petalwidth', 'species')
+参考做法：
+    iris[iris[:,0].astype(float).argsort()]

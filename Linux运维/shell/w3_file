@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+i=1
+for file in $(find /usr/share/doc -name "index.html") ; do
+    cp $file /tmp/index/index.html.$i
+    let i++
+done

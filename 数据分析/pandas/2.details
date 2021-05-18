@@ -1,0 +1,3409 @@
+给IPython添加自动导入功能
+
+
+1. 定位配置文件目录的位置
+
+$ ipython locate profile
+/home/joshua/.ipython/profile_default
+
+2. 进入相应目录
+
+$ cd /home/joshua/.ipython/profile_default
+$ cd startup/
+
+3. 添加自定义的模块，名字随意起，此模块是一个常规模块，在ipython启动时被自动导入
+
+$ vi customized_code.py
+
+参考内容
+------------------------
+
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import pandas as pd
+from pandas import Series, DataFrame
+
+
+def desc(data):
+    d = data.describe()
+    var = d.loc['std'] ** 2
+    iqr = d.loc['75%'] - d.loc['25%']
+    upper = d.loc['75%'] + 1.5 * iqr
+    lower = d.loc['25%'] - 1.5 * iqr
+    index = list(d.index)
+    index.insert(2, 'var')
+    index.extend(['iqr', 'upper', 'lower', 'outlier'])
+    r = d.reindex(index)
+    r.loc['var'] = var
+    r.loc['iqr'] = iqr
+    r.loc['upper'] = upper
+    r.loc['lower'] = lower
+    r.loc['outlier'] = (data > r.loc['upper']).sum() + (data < r.loc['lower']).sum()
+    return r
+
+
+plt.ion()
+
+
+
+
+
+创建DataFrame的方法
+
+数据框是一个2D的结构，因此创建时传进来的数据至少得有2个维度，基本上传进来的是两类数据。
+
+1. list ()
+2. dict ()
+
+
+
+按照列的值对行（记录）做过滤
+
+In [321]: df
+Out[321]: 
+   h  i  j  k  l  m
+a  9  3  8  5  8  4
+b  9  1  0  9  0  7
+c  4  2  4  8  2  5
+d  3  3  2  6  0  8
+e  5  0  1  9  2  4
+f  1  5  2  3  1  7
+g  1  6  1  9  0  5
+
+In [322]: df[df.h>5]
+Out[322]: 
+   h  i  j  k  l  m
+a  9  3  8  5  8  4
+b  9  1  0  9  0  7
+
+In [323]: df[df.h>=5]
+Out[323]: 
+   h  i  j  k  l  m
+a  9  3  8  5  8  4
+b  9  1  0  9  0  7
+e  5  0  1  9  2  4
+
+In [325]: df[(df.h>=5) & (df.m<5)]
+Out[325]:
+   h  i  j  k  l  m
+a  9  3  8  5  8  4
+e  5  0  1  9  2  4
+
+
+
+** Series.value_counts 的用法
+
+
+In [614]: s = Series(['语文','数学','外语']*3 + ['外语','物理'])
+
+In [615]: s
+Out[615]:
+0     语文
+1     数学
+2     外语
+3     语文
+4     数学
+5     外语
+6     语文
+7     数学
+8     外语
+9     外语
+10    物理
+dtype: object
+
+In [616]: s.value_counts()
+Out[616]:
+外语    4
+数学    3
+语文    3
+物理    1
+dtype: int64
+
+
+df.apply 的用法
+
+In [649]: df.apply(Series.value_counts)
+Out[649]:
+     h    i    j    k    l    m    n
+0  NaN  NaN  NaN  NaN  1.0  NaN  1.0
+1  1.0  3.0  1.0  4.0  1.0  1.0  NaN
+2  NaN  1.0  1.0  NaN  3.0  NaN  1.0
+3  1.0  1.0  2.0  NaN  1.0  NaN  NaN
+4  1.0  NaN  1.0  1.0  NaN  NaN  1.0
+5  1.0  1.0  1.0  NaN  1.0  2.0  3.0
+6  NaN  NaN  NaN  1.0  NaN  2.0  NaN
+7  NaN  1.0  NaN  NaN  NaN  1.0  1.0
+8  1.0  NaN  NaN  1.0  NaN  1.0  NaN
+9  2.0  NaN  1.0  NaN  NaN  NaN  NaN
+
+
+
+** df.applymap 的用法
+
+
+In [645]: df
+Out[645]:
+          h         i         j         k         l         m         n
+a  0.525560 -1.129390 -1.602840 -0.706130 -0.947071  1.173207  0.528114
+b -0.191591  0.653634 -0.311539 -0.752942  0.660893 -0.812840 -0.692974
+c -0.629364 -1.651173  0.414397  0.085547 -0.895359 -1.521343  0.026355
+d  0.701753 -0.626721 -1.219583 -1.019442 -1.175186 -0.492248 -0.726489
+e  0.118647 -1.521693 -1.450471 -0.510211 -0.913242  0.318938  0.602951
+f  1.304000  1.659054  2.059211 -0.680683 -0.142828 -0.244673 -0.962413
+g  1.124690  0.383274 -0.714291 -0.569184 -0.216465  0.192762 -1.324253
+
+In [646]: df.applymap(lambda x: '%.2f' % x)
+Out[646]:
+       h      i      j      k      l      m      n
+a   0.53  -1.13  -1.60  -0.71  -0.95   1.17   0.53
+b  -0.19   0.65  -0.31  -0.75   0.66  -0.81  -0.69
+c  -0.63  -1.65   0.41   0.09  -0.90  -1.52   0.03
+d   0.70  -0.63  -1.22  -1.02  -1.18  -0.49  -0.73
+e   0.12  -1.52  -1.45  -0.51  -0.91   0.32   0.60
+f   1.30   1.66   2.06  -0.68  -0.14  -0.24  -0.96
+g   1.12   0.38  -0.71  -0.57  -0.22   0.19  -1.32
+
+
+
+
+构建一个DataFrame
+
+In [695]: empinfo = DataFrame(np.zeros((7,4)))
+In [696]: empinfo
+Out[696]:
+     0    1    2    3
+0  0.0  0.0  0.0  0.0
+1  0.0  0.0  0.0  0.0
+2  0.0  0.0  0.0  0.0
+3  0.0  0.0  0.0  0.0
+4  0.0  0.0  0.0  0.0
+5  0.0  0.0  0.0  0.0
+6  0.0  0.0  0.0  0.0
+
+In [697]: empinfo.columns = ['name', 'gender', 'age', 'salary']
+In [698]: empinfo
+Out[698]:
+   name  gender  age  salary
+0   0.0     0.0  0.0     0.0
+1   0.0     0.0  0.0     0.0
+2   0.0     0.0  0.0     0.0
+3   0.0     0.0  0.0     0.0
+4   0.0     0.0  0.0     0.0
+5   0.0     0.0  0.0     0.0
+6   0.0     0.0  0.0     0.0
+
+In [700]: empinfo['name'] = ['Alice', 'Bob', 'Charlie', 'Jacky', 'John', 'Angle', 'David']
+In [701]: empinfo
+Out[701]:
+      name  gender  age  salary
+0    Alice     0.0  0.0     0.0
+1      Bob     0.0  0.0     0.0
+2  Charlie     0.0  0.0     0.0
+3    Jacky     0.0  0.0     0.0
+4     John     0.0  0.0     0.0
+5    Angle     0.0  0.0     0.0
+6    David     0.0  0.0     0.0
+
+In [702]: empinfo.dtypes
+Out[702]:
+name       object
+gender    float64
+age       float64
+salary    float64
+dtype: object
+
+In [703]: empinfo['gender'] = ['f','m','m','m','m','f','m']
+In [704]: empinfo
+Out[704]:
+      name gender  age  salary
+0    Alice      f  0.0     0.0
+1      Bob      m  0.0     0.0
+2  Charlie      m  0.0     0.0
+3    Jacky      m  0.0     0.0
+4     John      m  0.0     0.0
+5    Angle      f  0.0     0.0
+6    David      m  0.0     0.0
+
+In [705]: empinfo['age'] = np.random.randint(20,30,empinfo.index.size)
+
+In [706]: empinfo
+Out[706]:
+      name gender  age  salary
+0    Alice      f   26     0.0
+1      Bob      m   28     0.0
+2  Charlie      m   26     0.0
+3    Jacky      m   26     0.0
+4     John      m   27     0.0
+5    Angle      f   29     0.0
+6    David      m   21     0.0
+
+In [707]: empinfo['salary'] = np.random.randint(10000,20000,empinfo.index.size)
+In [708]: empinfo
+Out[708]:
+      name gender  age  salary
+0    Alice      f   26   13938
+1      Bob      m   28   16720
+2  Charlie      m   26   11138
+3    Jacky      m   26   18100
+4     John      m   27   12148
+5    Angle      f   29   15877
+6    David      m   21   19221
+
+In [709]: emp = empinfo
+In [710]: emp
+Out[710]:
+      name gender  age  salary
+0    Alice      f   26   13938
+1      Bob      m   28   16720
+2  Charlie      m   26   11138
+3    Jacky      m   26   18100
+4     John      m   27   12148
+5    Angle      f   29   15877
+6    David      m   21   19221
+
+In [717]: emp.sort_values(['age', 'salary'])
+Out[717]:
+      name gender  age  salary
+6    David      m   21   19221
+2  Charlie      m   26   11138
+0    Alice      f   26   13938
+3    Jacky      m   26   18100
+4     John      m   27   12148
+1      Bob      m   28   16720
+5    Angle      f   29   15877
+
+In [721]: emp.sort_values(['age', 'salary'], ascending=[True, False])
+Out[721]:
+      name gender  age  salary
+6    David      m   21   19221
+3    Jacky      m   26   18100
+0    Alice      f   26   13938
+2  Charlie      m   26   11138
+4     John      m   27   12148
+1      Bob      m   28   16720
+5    Angle      f   29   15877
+
+
+
+** isin 的用发
+
+In [797]: emp[(emp.name == 'Alice') | (emp.name == 'Jacky')]
+Out[797]:
+    name gender  age  salary
+0  Alice      f   26   13938
+3  Jacky      m   26   18100
+
+In [798]: emp[emp.name.isin(['Alice','Jacky'])]
+Out[798]:
+    name gender  age  salary
+0  Alice      f   26   13938
+3  Jacky      m   26   18100
+
+
+
+** 删除空值记录
+
+In [859]: df.loc['c'] = np.nan
+
+In [860]: df
+Out[860]:
+     h    i    j    k    l    n
+a  NaN  2.0  3.0  1.0  1.0  7.0
+a  NaN  1.0  3.0  4.0  3.0  5.0
+b  9.0  1.0  1.0  8.0  0.0  5.0
+c  NaN  NaN  NaN  NaN  NaN  NaN
+b  5.0  7.0  9.0  1.0  5.0  4.0
+d  9.0  5.0  NaN  1.0  NaN  0.0
+g  1.0  1.0  2.0  6.0  2.0  2.0
+
+In [861]: df.dropna(how='all')
+Out[861]:
+     h    i    j    k    l    n
+a  NaN  2.0  3.0  1.0  1.0  7.0
+a  NaN  1.0  3.0  4.0  3.0  5.0
+b  9.0  1.0  1.0  8.0  0.0  5.0
+b  5.0  7.0  9.0  1.0  5.0  4.0
+d  9.0  5.0  NaN  1.0  NaN  0.0
+g  1.0  1.0  2.0  6.0  2.0  2.0
+
+In [862]: df.dropna(how='any')
+Out[862]:
+     h    i    j    k    l    n
+b  9.0  1.0  1.0  8.0  0.0  5.0
+b  5.0  7.0  9.0  1.0  5.0  4.0
+g  1.0  1.0  2.0  6.0  2.0  2.0
+
+
+
+* reindex/set_index/reset_index 的区别
+
+reindex 函数是按照指定的索引，把原阵列里面的数据抽取出来，如果原阵列不包含所指定的索引，那么相应位置的值将会是 np.nan.
+set_index 是把数据框中某个列的值作为数据框新的index
+reset_index 是把数据框的index变成数据框的一个新的列
+
+
+
+merge/join的异同
+
+join就是merge，只不过join默认情况下是拿两个数据集的index作用merge的条件。join可以修改左边数据集所使用的条件，也就是说左边的数据集可以不用index，而采用另外的值。
+
+df1.join(df2)       <--> pd.merge(df1, df2, left_index=True, right_index=True)
+
+
+
+
+生成一个阵列的dummy/indicator
+
+In  55: df = DataFrame({
+   ....: 'key': list('bbacab'),
+   ....: 'data1': range(6)})
+
+In  56: df
+Out 56:
+   data1 key
+0      0   b
+1      1   b
+2      2   a
+3      3   c
+4      4   a
+5      5   b
+
+
+序列中有多少个唯一值，dummy 中就会有多少个列，列名就是序列中对应的值，行数与原数据相同，row index和原数据相同：
+
+In  57: pd.get_dummies(df.key)
+Out 57:
+     a    b    c
+0  0.0  1.0  0.0
+1  0.0  1.0  0.0
+2  1.0  0.0  0.0
+3  0.0  0.0  1.0
+4  1.0  0.0  0.0
+5  0.0  1.0  0.0
+
+
+可以给dummy 设置列名的前缀：
+
+In  58: dummies = pd.get_dummies(df.key, prefix='key'); dummies
+Out 58:
+   key_a  key_b  key_c
+0    0.0    1.0    0.0
+1    0.0    1.0    0.0
+2    1.0    0.0    0.0
+3    0.0    0.0    1.0
+4    1.0    0.0    0.0
+5    0.0    1.0    0.0
+
+In  60: df_with_dummy = df[['data1']].join(dummies); df_with_dummy
+Out 60:
+   data1  key_a  key_b  key_c
+0      0    0.0    1.0    0.0
+1      1    0.0    1.0    0.0
+2      2    1.0    0.0    0.0
+3      3    0.0    0.0    1.0
+4      4    1.0    0.0    0.0
+5      5    0.0    1.0    0.0
+
+
+如果数据中有的行属于多个类，那么可以按照以下方法计算数据的dummy：
+
+In  83: head -n1 movies.dat
+1::Toy Story (1995)::Animation|Children's|Comedy
+
+In  84: mnames = ['movie_id', 'title', 'genres']
+
+In  85: movies = read_csv('movies.dat', sep='::', header=None, names=mnames); movies.head()
+Out 85:
+   movie_id                               title                        genres
+0         1                    Toy Story (1995)   Animation|Children's|Comedy
+1         2                      Jumanji (1995)  Adventure|Children's|Fantasy
+2         3             Grumpier Old Men (1995)                Comedy|Romance
+3         4            Waiting to Exhale (1995)                  Comedy|Drama
+4         5  Father of the Bride Part II (1995)                        Comedy
+
+
+通过set.union 来方便地取出所有的Genre 的唯一值：
+
+In  86: genre_iter = (set(x.split('|')) for x in movies.genres)
+
+In  87: genres = sorted(set.union(*genre_iter))
+
+In  88: genres
+Out 88:
+['Action',
+ 'Adventure',
+ 'Animation',
+ "Children's",
+ 'Comedy',
+ 'Crime',
+ 'Documentary',
+ 'Drama',
+ 'Fantasy',
+ 'Film-Noir',
+ 'Horror',
+ 'Musical',
+ 'Mystery',
+ 'Romance',
+ 'Sci-Fi',
+ 'Thriller',
+ 'War',
+ 'Western']
+
+
+首先生成值全为零的dummy：
+
+In  89: dummies = DataFrame(np.zeros((len(movies), len(genres))), columns=genres)
+
+In  90: dummies.head()
+Out 90:
+   Action  Adventure  Animation  Children's  Comedy  Crime  Documentary  \
+0     0.0        0.0        0.0         0.0     0.0    0.0          0.0
+1     0.0        0.0        0.0         0.0     0.0    0.0          0.0
+2     0.0        0.0        0.0         0.0     0.0    0.0          0.0
+3     0.0        0.0        0.0         0.0     0.0    0.0          0.0
+4     0.0        0.0        0.0         0.0     0.0    0.0          0.0
+
+   Drama  Fantasy  Film-Noir  Horror  Musical  Mystery  Romance  Sci-Fi  \
+0    0.0      0.0        0.0     0.0      0.0      0.0      0.0     0.0
+1    0.0      0.0        0.0     0.0      0.0      0.0      0.0     0.0
+2    0.0      0.0        0.0     0.0      0.0      0.0      0.0     0.0
+3    0.0      0.0        0.0     0.0      0.0      0.0      0.0     0.0
+4    0.0      0.0        0.0     0.0      0.0      0.0      0.0     0.0
+
+   Thriller  War  Western
+0       0.0  0.0      0.0
+1       0.0  0.0      0.0
+2       0.0  0.0      0.0
+3       0.0  0.0      0.0
+4       0.0  0.0      0.0
+
+
+根据原数据的genres 列逐个给dummy 中的元素赋值：
+
+In  95: for i, g in enumerate(movies.genres):
+   ....:     dummies.loc[dummies.index[i], g.split('|')] = 1
+   ....:
+
+In  100: movies_with_indic = movies.join(dummies.add_prefix('Genre_'))
+
+In  101: movies_with_indic.iloc[0]
+Out 101:
+movie_id                                       1
+title                           Toy Story (1995)
+genres               Animation|Children's|Comedy
+Genre_Action                                   0
+Genre_Adventure                                0
+Genre_Animation                                1
+Genre_Children's                               1
+Genre_Comedy                                   1
+Genre_Crime                                    0
+Genre_Documentary                              0
+Genre_Drama                                    0
+Genre_Fantasy                                  0
+Genre_Film-Noir                                0
+Genre_Horror                                   0
+Genre_Musical                                  0
+Genre_Mystery                                  0
+Genre_Romance                                  0
+Genre_Sci-Fi                                   0
+Genre_Thriller                                 0
+Genre_War                                      0
+Genre_Western                                  0
+Name: 0, dtype: object
+
+
+
+最简单方法是使用Series.str.get_dummies方法
+
+dummies = df.genres.str.get_dummies('|')
+
+
+
+
+
+用dict 或者Series 实例来作为分组的key
+
+In  45: people = DataFrame(np.random.randn(5, 5),
+   ....: columns=list('abcde'),
+   ....: index=['Joe', 'Steve', 'Wes', 'Jim', 'Travis'])
+
+In  47: people.loc[2:3, ['b', 'c']] = np.nan
+
+In  48: people
+Out 48:
+               a         b         c         d         e
+Joe    -0.055073 -1.021052  0.038174 -1.522483 -1.203075
+Steve  -1.209476 -0.385876 -1.206041 -1.654223 -0.343409
+Wes    -0.991753       NaN       NaN  1.080838  0.526763
+Jim    -0.622867  1.562514  1.695571 -0.348908 -0.532158
+Travis -0.675915  0.711003  0.079612  0.952753 -1.416627
+
+In  49: mapping = {
+   ....: 'a': 'red', 'b': 'red', 'c': 'blue',
+   ....: 'd': 'blue', 'e': 'red', 'f': 'orange'}
+
+
+可以生成一个列表，用来分组：
+
+In  50: keys = [mapping[x] for x in people.columns]
+
+In  51: keys
+Out 51: ['red', 'red', 'blue', 'blue', 'red']
+
+In  52: people.groupby(keys, axis=1).sum()
+Out 52:
+            blue       red
+Joe    -1.484308 -2.279200
+Steve  -2.860264 -1.938761
+Wes     1.080838 -0.464990
+Jim     1.346663  0.407489
+Travis  1.032365 -1.381540
+
+
+也可以直接用mapping 字典来做分组，更方便：
+
+In  53: people.groupby(mapping, axis=1).sum()
+Out 53:
+            blue       red
+Joe    -1.484308 -2.279200
+Steve  -2.860264 -1.938761
+Wes     1.080838 -0.464990
+Jim     1.346663  0.407489
+Travis  1.032365 -1.381540
+
+
+用Series 来分组也可以：
+
+In  61: map_series = Series(mapping)
+
+In  62: people.groupby(map_series, axis=1).sum()
+Out 62:
+            blue       red
+Joe    -1.484308 -2.279200
+Steve  -2.860264 -1.938761
+Wes     1.080838 -0.464990
+Jim     1.346663  0.407489
+Travis  1.032365 -1.381540
+
+
+从方便性上说，使用字典和Series 可能更好，
+但是如果数据集巨大，需要考虑性能时，则可以考虑使用列表：
+
+In  55: %timeit people.groupby(keys, axis=1).sum()
+1000 loops, best of 3: 1.63 ms per loop
+
+In  58: %timeit people.groupby(mapping, axis=1).sum()
+1000 loops, best of 3: 1.66 ms per loop
+
+In  64: %timeit people.groupby(map_series, axis=1).sum()
+100 loops, best of 3: 2.04 ms per loop
+
+
+
+用函数来作为key 进行分组
+
+当key 是一个函数时，pandas 将会把被分组的轴上的每一个
+index 传给该函数，生成的结果就是实质上用来分组的数据，
+当按0轴分组时，传给函数的是row 的名字，当按1轴分组时，
+传给函数的是column 的名字。
+
+In  69: people
+Out 69:
+               a         b         c         d         e
+Joe    -0.055073 -1.021052  0.038174 -1.522483 -1.203075
+Steve  -1.209476 -0.385876 -1.206041 -1.654223 -0.343409
+Wes    -0.991753       NaN       NaN  1.080838  0.526763
+Jim    -0.622867  1.562514  1.695571 -0.348908 -0.532158
+Travis -0.675915  0.711003  0.079612  0.952753 -1.416627
+
+In  70: people.groupby(len).min()
+Out 70:
+          a         b         c         d         e
+3 -0.991753 -1.021052  0.038174 -1.522483 -1.203075
+5 -1.209476 -0.385876 -1.206041 -1.654223 -0.343409
+6 -0.675915  0.711003  0.079612  0.952753 -1.416627
+
+In  72: key_list
+Out 72: ['one', 'one', 'one', 'two', 'two']
+
+
+相当於用两个key 来做分组：
+
+In  73: people.groupby([len, key_list]).min()
+Out 73:
+              a         b         c         d         e
+3 one -0.991753 -1.021052  0.038174 -1.522483 -1.203075
+  two -0.622867  1.562514  1.695571 -0.348908 -0.532158
+5 one -1.209476 -0.385876 -1.206041 -1.654223 -0.343409
+6 two -0.675915  0.711003  0.079612  0.952753 -1.416627
+
+
+用3个key 来做分组：
+
+In  75: people.groupby([len, str.upper, people.index]).min()
+Out 75:
+                        a         b         c         d         e
+3 JIM    Jim    -0.622867  1.562514  1.695571 -0.348908 -0.532158
+  JOE    Joe    -0.055073 -1.021052  0.038174 -1.522483 -1.203075
+  WES    Wes    -0.991753       NaN       NaN  1.080838  0.526763
+5 STEVE  Steve  -1.209476 -0.385876 -1.206041 -1.654223 -0.343409
+6 TRAVIS Travis -0.675915  0.711003  0.079612  0.952753 -1.416627
+
+
+
+
+
+
+按照index 的level 做分组
+
+In  81: columns = pd.MultiIndex.from_arrays([
+   ....: ['US', 'US', 'US', 'JP', 'JP'],
+   ....: [1, 3, 5, 1, 3]], names=['cty', 'tenor'])
+
+In  82: df = DataFrame(np.random.randn(4, 5), columns=columns)
+
+In  83: df
+Out 83:
+cty          US                            JP
+tenor         1         3         5         1         3
+0     -0.555264  1.115275  0.787850 -0.471344  0.673063
+1     -1.396598 -0.640452 -0.396473  0.587380  1.405871
+2      0.947773  0.375005  0.162554 -0.345563 -0.437878
+3     -0.353701  0.658397  0.903277  0.325957 -0.519990
+
+In  84: df.groupby(level='cty', axis=1).count()
+Out 84:
+cty  JP  US
+0     2   3
+1     2   3
+2     2   3
+3     2   3
+
+
+
+
+利用agg 方法给分组应用处理函数/方法
+
+除了直接通过分组对象调用一些聚合函数外，也可以通过agg 方法来指定需要应用于各个分组上的函数，
+agg 是aggregate 的別名。对分组应用函数时，自定义函数通常比pandas 内置的函数的效率低，因为
+有一些比较显著的开销，比如函数的调用，数据的重新整理。
+
+In  125: grouped.agg(np.sum)
+Out 125:
+         data1     data2
+key1
+a    -0.710611  2.765159
+b    -1.534215 -1.852599
+
+
+当调用mean, min, max, sum 等方法时，除了传对象，也可以将其名字传给agg：
+
+In  156: grouped.mean()
+Out 156:
+         data1     data2
+key1
+a    -0.236870  0.921720
+b    -0.767107 -0.926299
+
+In  157: grouped.agg('mean')
+Out 157:
+         data1     data2
+key1
+a    -0.236870  0.921720
+b    -0.767107 -0.926299
+
+
+
+
+
+给分组应用多个函数，并定义结果中列的名字
+
+In  150: tips = pd.read_csv('tips.csv')
+
+In  151: tips.head()
+Out 151:
+   total_bill   tip     sex smoker  day    time  size
+0       16.99  1.01  Female     No  Sun  Dinner     2
+1       10.34  1.66    Male     No  Sun  Dinner     3
+2       21.01  3.50    Male     No  Sun  Dinner     3
+3       23.68  3.31    Male     No  Sun  Dinner     2
+4       24.59  3.61  Female     No  Sun  Dinner     4
+
+In  152:
+
+In  152: tips['tip_pct'] = tips.tip / tips.total_bill
+
+In  153: tips.head()
+Out 153:
+   total_bill   tip     sex smoker  day    time  size   tip_pct
+0       16.99  1.01  Female     No  Sun  Dinner     2  0.059447
+1       10.34  1.66    Male     No  Sun  Dinner     3  0.160542
+2       21.01  3.50    Male     No  Sun  Dinner     3  0.166587
+3       23.68  3.31    Male     No  Sun  Dinner     2  0.139780
+4       24.59  3.61  Female     No  Sun  Dinner     4  0.146808
+
+In  158: grouped = tips.groupby(['sex', 'smoker'])
+
+In  159: grouped_pct = grouped['tip_pct']
+
+
+把函数的名字传给agg 方法：
+
+In  160: grouped_pct.agg('mean')
+Out 160:
+sex     smoker
+Female  No        0.156921
+        Yes       0.182150
+Male    No        0.160669
+        Yes       0.152771
+Name: tip_pct, dtype: float64
+
+In  162: def peak_to_peak(g):
+   .....:     return g.max() - g.min()
+   .....:
+
+
+应用多个函数：
+
+In  163: grouped_pct.agg(['mean', 'std', peak_to_peak])
+Out 163:
+                   mean       std  peak_to_peak
+sex    smoker
+Female No      0.156921  0.036421      0.195876
+       Yes     0.182150  0.071595      0.360233
+Male   No      0.160669  0.041849      0.220186
+       Yes     0.152771  0.090588      0.674707
+
+In  164:
+
+
+自定义结果中列的名字：
+
+In  164: grouped_pct.agg([('A', 'mean'), ('B', 'std')])
+Out 164:
+                      A         B
+sex    smoker
+Female No      0.156921  0.036421
+       Yes     0.182150  0.071595
+Male   No      0.160669  0.041849
+       Yes     0.152771  0.090588
+
+In  165:
+
+
+
+
+
+
+对DataFrame 分组指定的列应用指定的函数
+
+当需要对指定的列应用指定的处理方法时，需要用到dict，dict 的key
+就是列的名字，dict 的value 就是需要用到的函数，可以是一个函数，
+也可以是放在列表中的多个函数，甚者可以对函数生成的结果定义列名。
+
+记忆要点：
+1. 需要为列指定处理函数时，使用dict
+2. 需要为函数的结果指定名称时，使用list 嵌套tuple
+
+
+In  165: functions = ['count', 'mean', 'max']
+
+In  166: result = grouped['tip_pct', 'total_bill'].agg(functions)
+
+
+当涉及多个函数和多个列时，所得的结果中就会有层级式的index：
+
+In  167: result
+Out 167:
+              tip_pct                     total_bill
+                count      mean       max      count       mean    max
+sex    smoker
+Female No          54  0.156921  0.252672         54  18.105185  35.83
+       Yes         33  0.182150  0.416667         33  17.977879  44.30
+Male   No          97  0.160669  0.291990         97  19.791237  48.33
+       Yes         60  0.152771  0.710345         60  22.284500  50.81
+
+In  168: result['tip_pct']
+Out 168:
+               count      mean       max
+sex    smoker
+Female No         54  0.156921  0.252672
+       Yes        33  0.182150  0.416667
+Male   No         97  0.160669  0.291990
+       Yes        60  0.152771  0.710345
+
+
+也可以指定结果中列的名字：
+
+In  169: ftuples = [('XX', 'mean'), ('YY', np.var)]
+
+In  170: grouped['tip_pct', 'total_bill'].agg(ftuples)
+Out 170:
+                tip_pct           total_bill
+                     XX        YY         XX         YY
+sex    smoker
+Female No      0.156921  0.001327  18.105185  53.092422
+       Yes     0.182150  0.005126  17.977879  84.451517
+Male   No      0.160669  0.001751  19.791237  76.152961
+       Yes     0.152771  0.008206  22.284500  98.244673
+
+
+对指定的列应用指定的函数：
+
+默认处理所有的列：
+
+In  175: grouped.agg('sum')
+Out 175:
+               total_bill     tip  size    tip_pct
+sex    smoker
+Female No          977.68  149.77   140   8.473732
+       Yes         593.27   96.74    74   6.010962
+Male   No         1919.75  302.00   263  15.584865
+       Yes        1337.07  183.07   150   9.166271
+
+
+指定了一个dict 后，有两个影响：
+1. 确定了需要处理的列
+2. 指定了各个列需要应用的函数
+
+In  176: grouped.agg({'tip': np.max, 'size': 'sum'})
+Out 176:
+                tip  size
+sex    smoker
+Female No       5.2   140
+       Yes      6.5    74
+Male   No       9.0   263
+       Yes     10.0   150
+
+
+对某列应用多个函数：
+
+In  177: grouped.agg({'tip': [np.max, np.min], 'size': 'sum'})
+Out 177:
+                tip       size
+               amax  amin  sum
+sex    smoker
+Female No       5.2  1.00  140
+       Yes      6.5  1.00   74
+Male   No       9.0  1.25  263
+       Yes     10.0  1.00  150
+
+
+为函数的结果指定名字，和不使用dict 的情况一样：
+
+In  178: grouped.agg({'tip': [('MAX', np.max), ('MIN', np.min)], 'size': 'sum'})
+Out 178:
+                tip       size
+                MAX   MIN  sum
+sex    smoker
+Female No       5.2  1.00  140
+       Yes      6.5  1.00   74
+Male   No       9.0  1.25  263
+       Yes     10.0  1.00  150
+
+
+
+
+使得分组所用的key 不成为聚合结果中的index
+
+In  195: grouped = tips.groupby(['sex', 'smoker'])
+
+In  196: grouped.sum()
+Out 196:
+               total_bill     tip  size    tip_pct
+sex    smoker
+Female No          977.68  149.77   140   8.473732
+       Yes         593.27   96.74    74   6.010962
+Male   No         1919.75  302.00   263  15.584865
+       Yes        1337.07  183.07   150   9.166271
+
+
+把index 变成数据的新的列：
+
+In  197: grouped.sum().reset_index()
+Out 197:
+      sex smoker  total_bill     tip  size    tip_pct
+0  Female     No      977.68  149.77   140   8.473732
+1  Female    Yes      593.27   96.74    74   6.010962
+2    Male     No     1919.75  302.00   263  15.584865
+3    Male    Yes     1337.07  183.07   150   9.166271
+
+
+分组的时候指定不把key放到index 中：
+
+In  198: tips.groupby(['sex', 'smoker'], as_index=False).sum()
+Out 198:
+      sex smoker  total_bill     tip  size    tip_pct
+0  Female     No      977.68  149.77   140   8.473732
+1  Female    Yes      593.27   96.74    74   6.010962
+2    Male     No     1919.75  302.00   263  15.584865
+3    Male    Yes     1337.07  183.07   150   9.166271
+
+
+
+理解transform 函数的原理
+
+如果需要给每一行数据加多两列，分別是分组中data1, data2
+的mean 值，可以有两种做法：
+1. 用聚合的方法生成一个结果，然后把这个结果和原数据做merge 操作
+2. 用transform 函数，加上concat 方法
+
+函数 transform 的工作原理：
+1. 用函数处理分组得到一个结果
+2. 如果第一步的结果是scalar，就使用broadcast
+   把相同的值放到分组中所有的数据点的位置；
+   如果第一步的结果是array (same size as the original)，
+   把结果放到分组中各个数据点的位置
+
+
+In  202: df
+Out 202:
+      data1     data2 key1 key2
+0 -1.496125  1.951598    a  one
+1  0.300124 -1.059062    a  two
+2 -2.277272  1.566959    b  one
+3  0.584277  0.510141    b  two
+4  1.546615  0.797259    a  one
+
+In  203: k1_means = df.groupby('key1').mean().add_prefix('mean_')
+
+In  204: k1_means
+Out 204:
+      mean_data1  mean_data2
+key1
+a       0.116871    0.563265
+b      -0.846498    1.038550
+
+In  206: pd.merge(df, k1_means, left_on='key1', right_index=True)
+Out 206:
+      data1     data2 key1 key2  mean_data1  mean_data2
+0 -1.496125  1.951598    a  one    0.116871    0.563265
+1  0.300124 -1.059062    a  two    0.116871    0.563265
+4  1.546615  0.797259    a  one    0.116871    0.563265
+2 -2.277272  1.566959    b  one   -0.846498    1.038550
+3  0.584277  0.510141    b  two   -0.846498    1.038550
+
+
+使用transform 和concat：
+
+In  207: df.groupby('key1').transform(np.mean)
+Out 207:
+      data1     data2
+0  0.116871  0.563265
+1  0.116871  0.563265
+2 -0.846498  1.038550
+3 -0.846498  1.038550
+4  0.116871  0.563265
+
+In  208: pd.concat([df, _], axis=1)
+Out 208:
+      data1     data2 key1 key2     data1     data2
+0 -1.496125  1.951598    a  one  0.116871  0.563265
+1  0.300124 -1.059062    a  two  0.116871  0.563265
+2 -2.277272  1.566959    b  one -0.846498  1.038550
+3  0.584277  0.510141    b  two -0.846498  1.038550
+4  1.546615  0.797259    a  one  0.116871  0.563265
+
+
+
+
+
+
+组操作的分类
+
+1. 聚合操作用agg(aggregation)，要求函数生成一维的数据
+2. 转换操作用transform，要求函数生成scalar 或者size 和原数据一样的阵列
+3. 其它操作用apply，是通用的组操作方法，要求函数生成一个scalar，或者pandas 对象
+
+
+使用apply 方法给分组应用各种处理函数/方法
+
+In  25: tips = pd.read_csv('tips.csv')
+
+In  26: tips['tip_pct'] = tips.tip / tips.total_bill
+
+In  34: tips.head()
+Out 34:
+   total_bill   tip     sex smoker  day    time  size   tip_pct
+0       16.99  1.01  Female     No  Sun  Dinner     2  0.059447
+1       10.34  1.66    Male     No  Sun  Dinner     3  0.160542
+2       21.01  3.50    Male     No  Sun  Dinner     3  0.166587
+3       23.68  3.31    Male     No  Sun  Dinner     2  0.139780
+4       24.59  3.61  Female     No  Sun  Dinner     4  0.146808
+
+In  35: def top(df, n=5, column='tip_pct'):
+   ....:     return df.sort_values(column)[-n:]
+   ....:
+
+In  40: top(tips)
+Out 40:
+     total_bill   tip     sex smoker  day    time  size   tip_pct
+183       23.17  6.50    Male    Yes  Sun  Dinner     4  0.280535
+232       11.61  3.39    Male     No  Sat  Dinner     2  0.291990
+67         3.07  1.00  Female    Yes  Sat  Dinner     1  0.325733
+178        9.60  4.00  Female    Yes  Sun  Dinner     2  0.416667
+172        7.25  5.15    Male    Yes  Sun  Dinner     2  0.710345
+
+In  41: top(tips, column='size')
+Out 41:
+     total_bill   tip     sex smoker   day    time  size   tip_pct
+155       29.85  5.14  Female     No   Sun  Dinner     5  0.172194
+143       27.05  5.00  Female     No  Thur   Lunch     6  0.184843
+156       48.17  5.00    Male     No   Sun  Dinner     6  0.103799
+141       34.30  6.70    Male     No  Thur   Lunch     6  0.195335
+125       29.80  4.20  Female     No  Thur   Lunch     6  0.140940
+
+
+使用apply 把top 函数应用于各个分组：
+
+In  42: tips.groupby('smoker').apply(top)
+Out 42:
+            total_bill   tip     sex smoker   day    time  size   tip_pct
+smoker
+No     88        24.71  5.85    Male     No  Thur   Lunch     2  0.236746
+       185       20.69  5.00    Male     No   Sun  Dinner     5  0.241663
+       51        10.29  2.60  Female     No   Sun  Dinner     2  0.252672
+       149        7.51  2.00    Male     No  Thur   Lunch     2  0.266312
+       232       11.61  3.39    Male     No   Sat  Dinner     2  0.291990
+Yes    109       14.31  4.00  Female    Yes   Sat  Dinner     2  0.279525
+       183       23.17  6.50    Male    Yes   Sun  Dinner     4  0.280535
+       67         3.07  1.00  Female    Yes   Sat  Dinner     1  0.325733
+       178        9.60  4.00  Female    Yes   Sun  Dinner     2  0.416667
+       172        7.25  5.15    Male    Yes   Sun  Dinner     2  0.710345
+
+
+可以通过位置参数的方式，或者keyword 参数的方式把处理函数
+所需要的参数通过apply 传递：
+
+In  50: tips.groupby('smoker').apply(top, 2, 'total_bill')
+Out 50:
+            total_bill    tip   sex smoker  day    time  size   tip_pct
+smoker
+No     59        48.27   6.73  Male     No  Sat  Dinner     4  0.139424
+       212       48.33   9.00  Male     No  Sat  Dinner     4  0.186220
+Yes    182       45.35   3.50  Male    Yes  Sun  Dinner     3  0.077178
+       170       50.81  10.00  Male    Yes  Sat  Dinner     3  0.196812
+
+In  51: tips.groupby('smoker').apply(top, column='total_bill', n=2)
+Out 51:
+            total_bill    tip   sex smoker  day    time  size   tip_pct
+smoker
+No     59        48.27   6.73  Male     No  Sat  Dinner     4  0.139424
+       212       48.33   9.00  Male     No  Sat  Dinner     4  0.186220
+Yes    182       45.35   3.50  Male    Yes  Sun  Dinner     3  0.077178
+       170       50.81  10.00  Male    Yes  Sat  Dinner     3  0.196812
+
+
+
+
+利用pd.cut, pd.qcut 的结果作为分组的key，做bucket analysis
+
+In  82: frame = DataFrame({
+   ....: 'data1': np.random.randn(1000),
+   ....: 'data2': np.random.randn(1000)})
+
+In  83: factor = pd.cut(frame.data1, 4)
+
+In  85: factor[:5]
+Out 85:
+0     (-0.279, 1.296]
+1       (1.296, 2.87]
+2     (-0.279, 1.296]
+3    (-1.854, -0.279]
+4     (-0.279, 1.296]
+Name: data1, dtype: category
+Categories (4, object): [(-3.436, -1.854] < (-1.854, -0.279] < (-0.279, 1.296] < (1.296, 2.87]]
+
+In  97: def get_stats(g):
+   ....:     return {'min': g.min(), 'max': g.max()}
+   ....:
+
+In  98: grouped = frame.groupby(factor)['data2']
+
+In  99: grouped.apply(get_stats)
+Out 99:
+data1
+(-3.436, -1.854]  max    2.013349
+                  min   -1.892379
+(-1.854, -0.279]  max    3.106655
+                  min   -3.009467
+(-0.279, 1.296]   max    3.492930
+                  min   -2.843463
+(1.296, 2.87]     max    3.627022
+                  min   -2.445889
+dtype: float64
+
+In  100: grouped.apply(get_stats).unstack()
+Out 100:
+                       max       min
+data1
+(-3.436, -1.854]  2.013349 -1.892379
+(-1.854, -0.279]  3.106655 -3.009467
+(-0.279, 1.296]   3.492930 -2.843463
+(1.296, 2.87]     3.627022 -2.445889
+
+
+使用pd.qcut 来分割：
+
+In  101: grouping = pd.qcut(frame.data1, 10, labels=False)
+
+In  102: grouped = frame.data2.groupby(grouping)
+
+In  103: grouped.apply(get_stats).unstack()
+Out 103:
+            max       min
+data1
+0      2.013349 -2.334936
+1      2.785289 -3.009467
+2      3.106655 -2.446982
+3      2.210268 -2.320717
+4      2.407574 -2.843463
+5      2.604459 -2.479212
+6      3.492930 -2.192746
+7      3.067161 -2.453862
+8      2.177350 -2.395261
+9      3.627022 -2.445889
+
+
+
+
+在做填补缺失值操作时针对不同的分组使用不同的值
+
+可以为各个分组定义不同的填充值，存放在一个dict 里面，
+在处理函数中调用。
+
+
+In  107: states = ['Ohio', 'New York', 'Vermont', 'Florida',
+   .....: 'Oregon', 'Nevada', 'California', 'Idaho']
+
+In  108: group_key = ['East'] * 4 + ['West'] * 4
+
+In  109: states
+Out 109:
+['Ohio',
+ 'New York',
+ 'Vermont',
+ 'Florida',
+ 'Oregon',
+ 'Nevada',
+ 'California',
+ 'Idaho']
+
+In  110: group_key
+Out 110: ['East', 'East', 'East', 'East', 'West', 'West', 'West', 'West']
+
+In  111: data = Series(np.random.randn(8), index=states)
+
+In  112: data[['Vermont', 'Nevada', 'Idaho']] = np.nan
+
+In  113: data
+Out 113:
+Ohio         -1.438383
+New York      1.237233
+Vermont            NaN
+Florida      -0.563280
+Oregon        0.215506
+Nevada             NaN
+California    1.161662
+Idaho              NaN
+dtype: float64
+
+In  114: data.groupby(group_key).mean()
+Out 114:
+East   -0.254810
+West    0.688584
+dtype: float64
+
+In  115: fill_mean = lambda g: g.fillna(g.mean())
+
+In  116: data.groupby(group_key).apply(fill_mean)
+Out 116:
+Ohio         -1.438383
+New York      1.237233
+Vermont      -0.254810
+Florida      -0.563280
+Oregon        0.215506
+Nevada        0.688584
+California    1.161662
+Idaho         0.688584
+dtype: float64
+
+In  117:
+
+In  117: fill_values = {'East': 1, 'West': 2}
+
+In  118: fill_func = lambda g: g.fillna(fill_values[g.name])
+
+In  119: data.groupby(group_key).apply(fill_func)
+Out 119:
+Ohio         -1.438383
+New York      1.237233
+Vermont       1.000000
+Florida      -0.563280
+Oregon        0.215506
+Nevada        2.000000
+California    1.161662
+Idaho         2.000000
+dtype: float64
+
+
+
+
+对分组做随机取样
+
+In  161: def draw(deck, n=5):
+   .....:         return deck.take(np.random.permutation(len(deck))[:n])
+   .....:
+
+In  162: suits = ['H', 'S', 'C', 'D']
+
+In  163: card_values = range(1, 14) * 4
+
+In  164: card_names  = ['A'] + range(2, 11) + ['J', 'Q', 'K']
+
+In  165: cards = [str(n) + s for s in suits for n in card_names]
+
+In  166: deck = Series(card_values, index=cards)
+
+In  167: draw(deck)
+Out 167:
+JC     11
+8H      8
+7S      7
+7D      7
+10D    10
+dtype: int64
+
+In  168: draw(deck, n=2)
+Out 168:
+4C    4
+7D    7
+dtype: int64
+
+In  169: get_suit = lambda s: s[-1]
+
+In  170: deck.groupby(get_suit).apply(draw, n=2)
+Out 170:
+C  2C      2
+   9C      9
+D  9D      9
+   6D      6
+H  JH     11
+   5H      5
+S  7S      7
+   10S    10
+dtype: int64
+
+In  171: deck.groupby(get_suit, group_keys=False).apply(draw, n=2)
+Out 171:
+5C     5
+2C     2
+6D     6
+3D     3
+AH     1
+3H     3
+QS    12
+7S     7
+dtype: int64
+
+
+
+
+在分组的处理函数中再做groupby 操作，嵌套式地用分组操作来处理数据
+
+In  16: def get_top_amounts(group, key, n=5):
+   ....:     totals = group.groupby(key)['contb_receipt_amt'].sum()
+   ....:     return totals.sort_values(ascending=False)[:n]
+   ....:
+
+In  29: grouped = fec_mrbo.groupby('cand_nm')
+
+In  30: grouped.apply(get_top_amounts, 'contbr_occupation', n=7)
+Out 30:
+cand_nm        contbr_occupation
+Obama, Barack  RETIRED              25305116.38
+               ATTORNEY             11141982.97
+               NOT PROVIDED          4866973.96
+               HOMEMAKER             4248875.80
+               PHYSICIAN             3735124.94
+               LAWYER                3160478.87
+               CONSULTANT            2459912.71
+Romney, Mitt   RETIRED              11508473.59
+               NOT PROVIDED         11396894.84
+               HOMEMAKER             8147446.22
+               ATTORNEY              5364718.82
+               PRESIDENT             2491244.89
+               CEO                   2324297.03
+               EXECUTIVE             2300947.03
+Name: contb_receipt_amt, dtype: float64
+
+
+
+
+
+
+通过计算百分比的方式来常规化数据
+
+In  60: bucket_sums = grouped.contb_receipt_amt.sum().unstack(0)
+
+In  61: bucket_sums
+Out 61:
+cand_nm              Obama, Barack  Romney, Mitt
+contb_receipt_amt
+(0, 1]                      318.24         77.00
+(1, 10]                  337267.62      29819.66
+(10, 100]              20288981.41    1987783.76
+(100, 1000]            54798531.46   22363381.69
+(1000, 10000]          51753705.67   63942145.42
+(10000, 100000]           59100.00      12700.00
+(100000, 1000000]       1490683.08           NaN
+(1000000, 10000000]     7148839.76           NaN
+
+
+计算多个分组中各组数据所佔的百分比：
+
+In  63: normed_sums = bucket_sums.div(bucket_sums.sum(axis=1), axis=0)
+
+In  64: normed_sums
+Out 64:
+cand_nm              Obama, Barack  Romney, Mitt
+contb_receipt_amt
+(0, 1]                    0.805182      0.194818
+(1, 10]                   0.918767      0.081233
+(10, 100]                 0.910769      0.089231
+(100, 1000]               0.710176      0.289824
+(1000, 10000]             0.447326      0.552674
+(10000, 100000]           0.823120      0.176880
+(100000, 1000000]         1.000000           NaN
+(1000000, 10000000]       1.000000           NaN
+
+
+通过堆叠的方式绘图，能明显地看出百分比之间的差別：
+
+In  70: normed_sums[:-2].plot(kind='barh', stacked=True)
+Out 70: <matplotlib.axes._subplots.AxesSubplot at 0x7f8362476610>
+
+
+
+
+
+
+创建任意时间的datetime 实例对象
+
+In  2: from datetime import datetime, timedelta
+
+In  3: now = datetime.now()
+
+In  4: now
+Out 4: datetime.datetime(2016, 6, 13, 20, 23, 55, 579721)
+
+
+指定年月日，甚至时分秒：
+
+In  5: old = datetime(2016, 5, 1, 20, 33)
+
+In  6: old
+Out 6: datetime.datetime(2016, 5, 1, 20, 33)
+
+
+两个datetime 对象相减，生成一个timedelta 对象：
+
+In  8: d = now - old
+
+In  9: d
+Out 9: datetime.timedelta(42, 85855, 579721)
+
+In  10: d.days
+Out 10: 42
+
+In  11: d.seconds
+Out 11: 85855
+
+In  13: d.microseconds
+Out 13: 579721
+
+In  18: d.total_seconds()
+Out 18: 3714655.579721
+
+In  19: d.total_seconds() / 3600 / 24
+Out 19: 42.993698839363425
+
+In  23: start = datetime(2011, 1, 7)
+
+
+datetime 对象和timedelta 运算生成新的datetime 对象：
+
+In  24: start + timedelta(12)
+Out 24: datetime.datetime(2011, 1, 19, 0, 0)
+
+In  25: start - 2 * timedelta(12)
+Out 25: datetime.datetime(2010, 12, 14, 0, 0)
+
+
+
+
+
+
+把datetime 对象转换成str 对象
+
+In  34: stamp = datetime(2016, 6, 13, 20, 35, 1)
+
+In  35: stamp
+Out 35: datetime.datetime(2016, 6, 13, 20, 35, 1)
+
+In  36: str(stamp)
+Out 36: '2016-06-13 20:35:01'
+
+In  37: stamp.strftime('%Y-%m-%d %H:%M:%S')
+Out 37: '2016-06-13 20:35:01'
+
+
+
+
+
+
+把str 转换成datetime 对象
+
+In  38: value = '2016-06-13 20:37:33'
+
+In  39: value
+Out 39: '2016-06-13 20:37:33'
+
+
+当日期的格式已知时，使用datetime.strptime 来做转换是最好的：
+
+In  40: datetime.strptime(value, '%Y-%m-%d %H:%M:%S')
+Out 40: datetime.datetime(2016, 6, 13, 20, 37, 33)
+
+In  41: datestrs = ['1/1/2015', '6/1/2016']
+
+In  43: [datetime.strptime(x, '%m/%d/%Y') for x in datestrs]
+Out 43: [datetime.datetime(2015, 1, 1, 0, 0), datetime.datetime(2016, 6, 1, 0, 0)]
+
+
+书写日期格式稍显不便，这时可以使用第三方模块dateutil，
+该模块的parser.parse 方法几乎可以识別人能够理解的所有日期表示法，
+但是该模块并非完美，使用时应小心测试验证：
+
+In  45: from dateutil.parser import parse
+
+In  46: parse('1/Jun/2016')
+Out 46: datetime.datetime(2016, 6, 1, 0, 0)
+
+In  47: parse('2016-06-13 20:44:03')
+Out 47: datetime.datetime(2016, 6, 13, 20, 44, 3)
+
+In  48: parse('Jun 13, 2016 8:44 PM')
+Out 48: datetime.datetime(2016, 6, 13, 20, 44)
+
+In  49: parse('Jun 13, 2016 8:44 AM')
+Out 49: datetime.datetime(2016, 6, 13, 8, 44)
+
+In  50: parse('1st/Jun/2016')
+Out 50: datetime.datetime(2016, 6, 1, 0, 0)
+
+In  51: parse('3rd/Jun/2016')
+Out 51: datetime.datetime(2016, 6, 3, 0, 0)
+
+
+国际应用上，把“天”放在前面是比较常见的事：
+
+In  53: parse('6/12/2016')
+Out 53: datetime.datetime(2016, 6, 12, 0, 0)
+
+In  54: parse('6/12/2016', dayfirst=True)
+Out 54: datetime.datetime(2016, 12, 6, 0, 0)
+
+
+
+
+
+
+使用pd.to_datetime 来生成日期时间index
+
+这个方法可以用来转换单个日期字符串，也可以用来把一系列的字符串转成时间序列index。
+
+
+In  63: pd.to_datetime('7/6/2016')
+Out 63: Timestamp('2016-07-06 00:00:00')
+
+In  64: pd.to_datetime('2016-07-06')
+Out 64: Timestamp('2016-07-06 00:00:00')
+
+In  65: pd.to_datetime('1/jun/2016')
+Out 65: Timestamp('2016-06-01 00:00:00')
+
+In  66: pd.to_datetime('jun/1/2016')
+Out 66: Timestamp('2016-06-01 00:00:00')
+
+In  68: pd.to_datetime(['2016-06-13', '2016-06-14'])
+Out 68: DatetimeIndex(['2016-06-13', '2016-06-14'], dtype='datetime64[ns]', freq=None)
+
+
+
+
+
+
+创建时间序列
+
+In  69: dates = [datetime(2016, 6, 1), datetime(2016, 6, 3), datetime(2016, 6, 5),
+   ....: datetime(2016, 6, 7), datetime(2016, 6, 8), datetime(2016, 6, 10)]
+
+In  70: dates
+Out 70:
+[datetime.datetime(2016, 6, 1, 0, 0),
+ datetime.datetime(2016, 6, 3, 0, 0),
+ datetime.datetime(2016, 6, 5, 0, 0),
+ datetime.datetime(2016, 6, 7, 0, 0),
+ datetime.datetime(2016, 6, 8, 0, 0),
+ datetime.datetime(2016, 6, 10, 0, 0)]
+
+In  71: ts = Series(np.random.randn(6), index=dates)
+
+In  72: ts
+Out 72:
+2016-06-01    0.990811
+2016-06-03    0.793033
+2016-06-05    0.620204
+2016-06-07   -0.612839
+2016-06-08    0.193313
+2016-06-10    0.183102
+dtype: float64
+
+In  74: type(ts.index)
+Out 74: pandas.tseries.index.DatetimeIndex
+
+In  77: ts.index
+Out 77:
+DatetimeIndex(['2016-06-01', '2016-06-03', '2016-06-05', '2016-06-07',
+               '2016-06-08', '2016-06-10'],
+              dtype='datetime64[ns]', freq=None)
+
+
+时间序列做Series的index，同样也是对齐的：
+
+In  80: ts + ts[::2]
+Out 80:
+2016-06-01   -0.076989
+2016-06-03         NaN
+2016-06-05   -0.802783
+2016-06-07         NaN
+2016-06-08    0.116106
+2016-06-10         NaN
+dtype: float64
+
+
+精确到纳秒(ns)级別：
+
+In  82: ts.index.dtype
+Out 82: dtype('<M8[ns]')
+
+
+DatetimeIndex 中的元素是Timestamp 类型：
+
+In  83: ts.index[0]
+Out 83: Timestamp('2016-06-01 00:00:00')
+
+
+也可以用pd.to_datetime 来生成时间index：
+
+In  89: dates = pd.to_datetime(['2016/06/13', '2016/06/14', '2016/06/15'])
+
+In  90: dates
+Out 90: DatetimeIndex(['2016-06-13', '2016-06-14', '2016-06-15'], dtype='datetime64[ns]', freq=None)
+
+In  91: ts = Series(np.random.randn(3), index=dates)
+
+In  92: ts
+Out 92:
+2016-06-13   -0.600822
+2016-06-14    1.683547
+2016-06-15    0.750558
+dtype: float64
+
+
+
+
+
+
+对时间序列做按索引定位，切片
+
+
+In  7: dates = [datetime(2016, 6, 1), datetime(2016, 6, 3), datetime(2016, 6, 5),
+datetime(2016, 6, 7), datetime(2016, 6, 8), datetime(2016, 6, 10)]
+
+In  9: ts = Series(np.random.randn(6), index=dates)
+
+In  10: ts
+Out 10:
+2016-06-01   -0.570223
+2016-06-03   -0.921849
+2016-06-05    1.520734
+2016-06-07    0.866905
+2016-06-08    0.783759
+2016-06-10    0.028707
+dtype: float64
+
+In  11: stamp = ts.index[2]
+
+In  15: stamp
+Out 15: Timestamp('2016-06-05 00:00:00')
+
+
+用Timestamp instance 来定位：
+
+In  12: ts[stamp]
+Out 12: 1.5207338076860759
+
+
+直接用能被理解的日期字符串来定位：
+
+In  16: ts['5/jun/2016']
+Out 16: 1.5207338076860759
+
+In  19: ts['20160605']
+Out 19: 1.5207338076860759
+
+
+In  20: longer_ts = Series(np.random.randn(1000),
+   ....: index=pd.date_range('2000-01-01', periods=1000))
+
+In  21: longer_ts.head()
+Out 21:
+2000-01-01    0.234994
+2000-01-02    0.186301
+2000-01-03    1.063978
+2000-01-04   -0.502855
+2000-01-05    0.960414
+Freq: D, dtype: float64
+
+
+以“年”或以“月”为单位抽取：
+
+In  22: longer_ts['2001']
+Out 22:
+2001-01-01    0.873401
+2001-01-02   -0.836297
+                ...
+2001-12-30    0.995222
+2001-12-31   -0.276587
+Freq: D, dtype: float64
+
+In  23: len(longer_ts['2001'])
+Out 23: 365
+
+In  24: len(longer_ts['2001-05'])
+Out 24: 31
+
+In  28: longer_ts
+Out 28:
+2000-01-01    0.234994
+2000-01-02    0.186301
+                ...
+2002-09-25   -0.307164
+2002-09-26    1.135920
+Freq: D, dtype: float64
+
+
+做切片也和通常的Series 一样，只是用时间来表示index 而已：
+
+rn  29: longer_ts[datetime(2002, 9, 1):]
+Out 29:
+2002-09-01   -0.819427
+2002-09-02   -1.001871
+2002-09-03    0.013720
+2002-09-04   -1.250344
+2002-09-05    0.479958
+2002-09-06   -1.585020
+2002-09-07    2.946399
+2002-09-08    0.697290
+2002-09-09   -1.674278
+2002-09-10   -1.435021
+2002-09-11    0.602645
+2002-09-12    2.228010
+2002-09-13    0.465583
+2002-09-14   -0.597733
+2002-09-15   -1.116901
+2002-09-16    0.186669
+2002-09-17    0.418166
+2002-09-18   -0.601680
+2002-09-19    0.948295
+2002-09-20    1.317545
+2002-09-21   -1.189786
+2002-09-22    0.375029
+2002-09-23   -0.387431
+2002-09-24   -1.887253
+2002-09-25   -0.307164
+2002-09-26    1.135920
+Freq: D, dtype: float64
+
+In  30: longer_ts['2002-09-01':]
+Out 30:
+2002-09-01   -0.819427
+2002-09-02   -1.001871
+2002-09-03    0.013720
+2002-09-04   -1.250344
+2002-09-05    0.479958
+2002-09-06   -1.585020
+2002-09-07    2.946399
+2002-09-08    0.697290
+2002-09-09   -1.674278
+2002-09-10   -1.435021
+2002-09-11    0.602645
+2002-09-12    2.228010
+2002-09-13    0.465583
+2002-09-14   -0.597733
+2002-09-15   -1.116901
+2002-09-16    0.186669
+2002-09-17    0.418166
+2002-09-18   -0.601680
+2002-09-19    0.948295
+2002-09-20    1.317545
+2002-09-21   -1.189786
+2002-09-22    0.375029
+2002-09-23   -0.387431
+2002-09-24   -1.887253
+2002-09-25   -0.307164
+2002-09-26    1.135920
+Freq: D, dtype: float64
+
+
+包括了结束点：
+
+In  31: longer_ts['2002-09-01':'2002-09-15']
+Out 31:
+2002-09-01   -0.819427
+2002-09-02   -1.001871
+2002-09-03    0.013720
+2002-09-04   -1.250344
+2002-09-05    0.479958
+2002-09-06   -1.585020
+2002-09-07    2.946399
+2002-09-08    0.697290
+2002-09-09   -1.674278
+2002-09-10   -1.435021
+2002-09-11    0.602645
+2002-09-12    2.228010
+2002-09-13    0.465583
+2002-09-14   -0.597733
+2002-09-15   -1.116901
+Freq: D, dtype: float64
+
+
+Series.truncate 方法和[start:end] 等效：
+
+In  35: longer_ts.truncate(before='2002-09-10', after='2002-09-15')
+Out 35:
+2002-09-10   -1.435021
+2002-09-11    0.602645
+2002-09-12    2.228010
+2002-09-13    0.465583
+2002-09-14   -0.597733
+2002-09-15   -1.116901
+Freq: D, dtype: float64
+
+
+上面的定位和切片操作同样适用于DataFrame 时间序列：
+
+In  37: dates = pd.date_range('2000-01-01', periods=100, freq='W-WED')
+
+In  38: long_df = DataFrame(np.random.randn(100, 4),
+   ....: index=dates,
+   ....: columns=['Holy', 'Righteous', 'Merciful', 'Jealous'])
+
+In  39: long_df.ix['2001-05']
+Out 39:
+                Holy  Righteous  Merciful   Jealous
+2001-05-02 -0.286194  -0.834771 -1.175503 -0.481435
+2001-05-09 -2.264101  -0.225437  0.694456  0.838130
+2001-05-16  1.820266   1.402428 -0.804198  0.571439
+2001-05-23  0.897471   0.708142 -1.048303  0.415675
+2001-05-30 -1.725177   0.118055 -1.503257 -0.120906
+
+In  43: long_df.ix['2001-05':'2001-06']
+Out 43:
+                Holy  Righteous  Merciful   Jealous
+2001-05-02 -0.286194  -0.834771 -1.175503 -0.481435
+2001-05-09 -2.264101  -0.225437  0.694456  0.838130
+2001-05-16  1.820266   1.402428 -0.804198  0.571439
+2001-05-23  0.897471   0.708142 -1.048303  0.415675
+2001-05-30 -1.725177   0.118055 -1.503257 -0.120906
+2001-06-06 -1.079452   0.006316  0.086729  0.193536
+2001-06-13 -0.733695  -2.008806  1.807103 -1.006536
+2001-06-20 -0.611977  -1.452436  0.077330 -1.873176
+2001-06-27  1.182447  -0.422058 -0.542051  0.352036
+
+
+
+
+
+
+检测序列是否有重复的index，并去除重复
+
+In  59: dates = pd.DatetimeIndex([
+   ....: '1/1/2016', '1/2/2016', '1/2/2016', '1/2/2016', '1/3/2016'])
+
+In  60: dup_ts = Series(np.arange(5), index=dates)
+
+In  61: dup_ts
+Out 61:
+2016-01-01    0
+2016-01-02    1
+2016-01-02    2
+2016-01-02    3
+2016-01-03    4
+dtype: int64
+
+
+用Series.index.is_unique 可以检测序列的index 是否唯一：
+
+In  64: dup_ts.index.is_unique
+Out 64: False
+
+
+定位抽取的结果是scalar 还是Series，取决於该index 是否唯一：
+
+In  65: dup_ts['1/3/2016']
+Out 65: 4
+
+In  66: dup_ts['1/2/2016']
+Out 66:
+2016-01-02    1
+2016-01-02    2
+2016-01-02    3
+dtype: int64
+
+
+可以按照level 做groupby，并用聚合方法去除重复：
+
+In  69: grouped = dup_ts.groupby(level=0)
+
+In  70: grouped.mean()
+Out 70:
+2016-01-01    0
+2016-01-02    2
+2016-01-03    4
+dtype: int64
+
+In  71: grouped.count()
+Out 71:
+2016-01-01    1
+2016-01-02    3
+2016-01-03    1
+dtype: int64
+
+
+
+
+
+
+创建时间范围
+
+In  77: index = pd.date_range('4/1/2016', '6/1/2016')
+
+
+默认的频率是“每天”：
+
+In  78: index
+Out 78:
+DatetimeIndex(['2016-04-01', '2016-04-02', '2016-04-03', '2016-04-04',
+               '2016-04-05', '2016-04-06', '2016-04-07', '2016-04-08',
+               '2016-04-09', '2016-04-10', '2016-04-11', '2016-04-12',
+               '2016-04-13', '2016-04-14', '2016-04-15', '2016-04-16',
+               '2016-04-17', '2016-04-18', '2016-04-19', '2016-04-20',
+               '2016-04-21', '2016-04-22', '2016-04-23', '2016-04-24',
+               '2016-04-25', '2016-04-26', '2016-04-27', '2016-04-28',
+               '2016-04-29', '2016-04-30', '2016-05-01', '2016-05-02',
+               '2016-05-03', '2016-05-04', '2016-05-05', '2016-05-06',
+               '2016-05-07', '2016-05-08', '2016-05-09', '2016-05-10',
+               '2016-05-11', '2016-05-12', '2016-05-13', '2016-05-14',
+               '2016-05-15', '2016-05-16', '2016-05-17', '2016-05-18',
+               '2016-05-19', '2016-05-20', '2016-05-21', '2016-05-22',
+               '2016-05-23', '2016-05-24', '2016-05-25', '2016-05-26',
+               '2016-05-27', '2016-05-28', '2016-05-29', '2016-05-30',
+               '2016-05-31', '2016-06-01'],
+              dtype='datetime64[ns]', freq='D')
+
+
+只指定开始，或者结束点的话，就必须指定periods 参数：
+
+In  80: pd.date_range(start='4/1/2016', periods=20)
+Out 80:
+DatetimeIndex(['2016-04-01', '2016-04-02', '2016-04-03', '2016-04-04',
+               '2016-04-05', '2016-04-06', '2016-04-07', '2016-04-08',
+               '2016-04-09', '2016-04-10', '2016-04-11', '2016-04-12',
+               '2016-04-13', '2016-04-14', '2016-04-15', '2016-04-16',
+               '2016-04-17', '2016-04-18', '2016-04-19', '2016-04-20'],
+              dtype='datetime64[ns]', freq='D')
+
+In  81: pd.date_range(end='6/1/2016', periods=20)
+Out 81:
+DatetimeIndex(['2016-05-13', '2016-05-14', '2016-05-15', '2016-05-16',
+               '2016-05-17', '2016-05-18', '2016-05-19', '2016-05-20',
+               '2016-05-21', '2016-05-22', '2016-05-23', '2016-05-24',
+               '2016-05-25', '2016-05-26', '2016-05-27', '2016-05-28',
+               '2016-05-29', '2016-05-30', '2016-05-31', '2016-06-01'],
+              dtype='datetime64[ns]', freq='D')
+
+
+BM 是'business end of month' 的意思，就是每月最后一个工作日：
+
+In  82: pd.date_range('1/1/2016', '12/1/2016', freq='BM')
+Out 82:
+DatetimeIndex(['2016-01-29', '2016-02-29', '2016-03-31', '2016-04-29',
+               '2016-05-31', '2016-06-30', '2016-07-29', '2016-08-31',
+               '2016-09-30', '2016-10-31', '2016-11-30'],
+              dtype='datetime64[ns]', freq='BM')
+
+
+时间点可以包含“时间”：
+
+In  83: pd.date_range('5/2/2016 12:56:31', periods=5)
+Out 83:
+DatetimeIndex(['2016-05-02 12:56:31', '2016-05-03 12:56:31',
+               '2016-05-04 12:56:31', '2016-05-05 12:56:31',
+               '2016-05-06 12:56:31'],
+              dtype='datetime64[ns]', freq='D')
+
+
+可以用normalize 参数把“时间”定到“午夜”：
+
+In  84: pd.date_range('5/2/2016 12:56:31', periods=5, normalize=True)
+Out 84:
+DatetimeIndex(['2016-05-02', '2016-05-03', '2016-05-04', '2016-05-05',
+               '2016-05-06'],
+              dtype='datetime64[ns]', freq='D')
+
+
+
+
+
+
+按照常见的重复频率创建时间范围
+
+频率的表示，可以直接使用pandas 的预定义值，也可以根据这些频率自定义任意的频率。
+
+
+In  26: from pandas.tseries.offsets import Hour, Minute
+
+In  27: Hour()
+Out 27: <Hour>
+
+In  28: Hour(2)
+Out 28: <2 * Hours>
+
+In  29: Minute(5)
+Out 29: <5 * Minutes>
+
+In  30: Hour(2) + Minute(5)
+Out 30: <125 * Minutes>
+
+
+pandas 提供的频率表示法除了Hour和Minute之外还有別的：
+
+Type: Day (D)
+Desc: Calendar daily
+
+Type: BusinessDay (B)
+Desc: Business daily
+
+Type: Hour (H)
+Desc: Hourly
+
+Type: Minute (T or min)
+Desc: Minutely
+
+Type: Second (S)
+Desc: Secondly
+
+Type: Milli (L or ms)
+Desc: Millisecond
+
+Type: Micro (U)
+Desc: Microsecond
+
+Type: MonthBegin (MS)
+Desc: First calendar day of month
+
+Type: MonthEnd (M)
+Desc: Last calendar day of month
+
+Type: BusinessMonthBegin (BMS)
+Desc: First business day (weekday) of month
+
+Type: BusinessMonthEnd (BM)
+Desc: Last business day (weekday) of month
+
+Type: Week (W-MON, W-TUE, ...)
+Desc: Weekly on given day of week, like MON, TUE, ...
+
+Type: WeekOfMonth (WOM-1MON, WOM-2FRI, ...)
+Desc: One weekday per month in the first, second, third, fourth week.
+
+Type: QuarterBegin (QS-JAN, QS-FEB, ...)
+Desc: First day of the month step quarterly, start with the specified month
+
+Type: QuarterEnd (Q-JAN, Q-FEB, ...)
+Desc: Last day of the month step quarterly, start with the specified month
+
+Type: BusinessQuarterBegin (BQS-JAN, BQS-FEB, ...)
+Desc: First weekday of the month step quarterly, start with the specified month
+
+Type: BusinessQuarterEnd (BQ-JAN, BQ-FEB, ...)
+Desc: Last weekday of the month step quarterly, start with the specified month
+
+Type: YearBegin (AS-JAN, AS-FEB, ...)
+Desc: First day of the month step yearly, start with the specified month
+
+Type: YearEnd (A-JAN, A-FEB, ...)
+Desc: Last day of the month step yearly, start with the specified month
+
+Type: BusinessYearBegin (BAS-JAN, BAS-FEB, ...)
+Desc: First weekday of the month step yearly, start with the specified month
+
+Type: BusinessYearEnd (BA-JAN, BA-FEB, ...)
+Desc: Last weekday of the month step yearly, start with the specified month
+
+
+以上所列的各个频率的使用例子：
+
+In  54: list(pd.date_range('2016-06-15', periods=3, freq='D'))
+Out 54:
+[Timestamp('2016-06-15 00:00:00', offset='D'),
+ Timestamp('2016-06-16 00:00:00', offset='D'),
+ Timestamp('2016-06-17 00:00:00', offset='D')]
+
+In  56: list(pd.date_range('2016-06-15', periods=7, freq='B'))
+Out 56:
+[Timestamp('2016-06-15 00:00:00', offset='B'),
+ Timestamp('2016-06-16 00:00:00', offset='B'),
+ Timestamp('2016-06-17 00:00:00', offset='B'),
+ Timestamp('2016-06-20 00:00:00', offset='B'),
+ Timestamp('2016-06-21 00:00:00', offset='B'),
+ Timestamp('2016-06-22 00:00:00', offset='B'),
+ Timestamp('2016-06-23 00:00:00', offset='B')]
+
+In  57: list(pd.date_range('2016-06-15', periods=3, freq='H'))
+Out 57:
+[Timestamp('2016-06-15 00:00:00', offset='H'),
+ Timestamp('2016-06-15 01:00:00', offset='H'),
+ Timestamp('2016-06-15 02:00:00', offset='H')]
+
+In  58: list(pd.date_range('2016-06-15', periods=3, freq='min'))
+Out 58:
+[Timestamp('2016-06-15 00:00:00', offset='T'),
+ Timestamp('2016-06-15 00:01:00', offset='T'),
+ Timestamp('2016-06-15 00:02:00', offset='T')]
+
+In  59: list(pd.date_range('2016-06-15', periods=3, freq='5min'))
+Out 59:
+[Timestamp('2016-06-15 00:00:00', offset='5T'),
+ Timestamp('2016-06-15 00:05:00', offset='5T'),
+ Timestamp('2016-06-15 00:10:00', offset='5T')]
+
+In  62: list(pd.date_range('2016-06-15', periods=7, freq='11S'))
+Out 62:
+[Timestamp('2016-06-15 00:00:00', offset='11S'),
+ Timestamp('2016-06-15 00:00:11', offset='11S'),
+ Timestamp('2016-06-15 00:00:22', offset='11S'),
+ Timestamp('2016-06-15 00:00:33', offset='11S'),
+ Timestamp('2016-06-15 00:00:44', offset='11S'),
+ Timestamp('2016-06-15 00:00:55', offset='11S'),
+ Timestamp('2016-06-15 00:01:06', offset='11S')]
+
+In  63: list(pd.date_range('2016-06-15', periods=7, freq='L'))
+Out 63:
+[Timestamp('2016-06-15 00:00:00', offset='L'),
+ Timestamp('2016-06-15 00:00:00.001000', offset='L'),
+ Timestamp('2016-06-15 00:00:00.002000', offset='L'),
+ Timestamp('2016-06-15 00:00:00.003000', offset='L'),
+ Timestamp('2016-06-15 00:00:00.004000', offset='L'),
+ Timestamp('2016-06-15 00:00:00.005000', offset='L'),
+ Timestamp('2016-06-15 00:00:00.006000', offset='L')]
+
+In  64: list(pd.date_range('2016-06-15', periods=7, freq='U'))
+Out 64:
+[Timestamp('2016-06-15 00:00:00', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000001', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000002', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000003', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000004', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000005', offset='U'),
+ Timestamp('2016-06-15 00:00:00.000006', offset='U')]
+
+In [782]: list(pd.date_range('2018-03-14', periods=7, freq='N'))
+Out[782]:
+[Timestamp('2018-03-14 00:00:00', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000001', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000002', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000003', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000004', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000005', freq='N'),
+ Timestamp('2018-03-14 00:00:00.000000006', freq='N')]
+
+In  65: list(pd.date_range('2016-06-15', periods=3, freq='MS'))
+Out 65:
+[Timestamp('2016-07-01 00:00:00', offset='MS'),
+ Timestamp('2016-08-01 00:00:00', offset='MS'),
+ Timestamp('2016-09-01 00:00:00', offset='MS')]
+
+In  66: list(pd.date_range('2016-06-15', periods=3, freq='M'))
+Out 66:
+[Timestamp('2016-06-30 00:00:00', offset='M'),
+ Timestamp('2016-07-31 00:00:00', offset='M'),
+ Timestamp('2016-08-31 00:00:00', offset='M')]
+
+In  69: list(pd.date_range('2016-06-15', periods=7, freq='BMS'))
+Out 69:
+[Timestamp('2016-07-01 00:00:00', offset='BMS'),
+ Timestamp('2016-08-01 00:00:00', offset='BMS'),
+ Timestamp('2016-09-01 00:00:00', offset='BMS'),
+ Timestamp('2016-10-03 00:00:00', offset='BMS'),
+ Timestamp('2016-11-01 00:00:00', offset='BMS'),
+ Timestamp('2016-12-01 00:00:00', offset='BMS'),
+ Timestamp('2017-01-02 00:00:00', offset='BMS')]
+
+In  71: list(pd.date_range('2016-06-15', periods=3, freq='BM'))
+Out 71:
+[Timestamp('2016-06-30 00:00:00', offset='BM'),
+ Timestamp('2016-07-29 00:00:00', offset='BM'),
+ Timestamp('2016-08-31 00:00:00', offset='BM')]
+
+In  72: list(pd.date_range('2016-06-15', periods=3, freq='W-FRI'))
+Out 72:
+[Timestamp('2016-06-17 00:00:00', offset='W-FRI'),
+ Timestamp('2016-06-24 00:00:00', offset='W-FRI'),
+ Timestamp('2016-07-01 00:00:00', offset='W-FRI')]
+
+In  73: list(pd.date_range('2016-06-15', periods=3, freq='WOM-3FRI'))
+Out 73:
+[Timestamp('2016-06-17 00:00:00', offset='WOM-3FRI'),
+ Timestamp('2016-07-15 00:00:00', offset='WOM-3FRI'),
+ Timestamp('2016-08-19 00:00:00', offset='WOM-3FRI')]
+
+In  74: list(pd.date_range('2016-06-15', periods=3, freq='QS-FEB'))
+Out 74:
+[Timestamp('2016-08-01 00:00:00', offset='QS-FEB'),
+ Timestamp('2016-11-01 00:00:00', offset='QS-FEB'),
+ Timestamp('2017-02-01 00:00:00', offset='QS-FEB')]
+
+In  75: list(pd.date_range('2016-06-15', periods=3, freq='Q-FEB'))
+Out 75:
+[Timestamp('2016-08-31 00:00:00', offset='Q-FEB'),
+ Timestamp('2016-11-30 00:00:00', offset='Q-FEB'),
+ Timestamp('2017-02-28 00:00:00', offset='Q-FEB')]
+
+In  76: list(pd.date_range('2016-06-15', periods=3, freq='BQS-FEB'))
+Out 76:
+[Timestamp('2016-08-01 00:00:00', offset='BQS-FEB'),
+ Timestamp('2016-11-01 00:00:00', offset='BQS-FEB'),
+ Timestamp('2017-02-01 00:00:00', offset='BQS-FEB')]
+
+In  77: list(pd.date_range('2016-06-15', periods=3, freq='BQ-FEB'))
+Out 77:
+[Timestamp('2016-08-31 00:00:00', offset='BQ-FEB'),
+ Timestamp('2016-11-30 00:00:00', offset='BQ-FEB'),
+ Timestamp('2017-02-28 00:00:00', offset='BQ-FEB')]
+
+In  78: list(pd.date_range('2016-06-15', periods=3, freq='AS-JUL'))
+Out 78:
+[Timestamp('2016-07-01 00:00:00', offset='AS-JUL'),
+ Timestamp('2017-07-01 00:00:00', offset='AS-JUL'),
+ Timestamp('2018-07-01 00:00:00', offset='AS-JUL')]
+
+In  79: list(pd.date_range('2016-06-15', periods=3, freq='A-JUL'))
+Out 79:
+[Timestamp('2016-07-31 00:00:00', offset='A-JUL'),
+ Timestamp('2017-07-31 00:00:00', offset='A-JUL'),
+ Timestamp('2018-07-31 00:00:00', offset='A-JUL')]
+
+In  80: list(pd.date_range('2016-06-15', periods=3, freq='BAS-JUL'))
+Out 80:
+[Timestamp('2016-07-01 00:00:00', offset='BAS-JUL'),
+ Timestamp('2017-07-03 00:00:00', offset='BAS-JUL'),
+ Timestamp('2018-07-02 00:00:00', offset='BAS-JUL')]
+
+In  81: list(pd.date_range('2016-06-15', periods=3, freq='BA-JUL'))
+Out 81:
+[Timestamp('2016-07-29 00:00:00', offset='BA-JUL'),
+ Timestamp('2017-07-31 00:00:00', offset='BA-JUL'),
+ Timestamp('2018-07-31 00:00:00', offset='BA-JUL')]
+
+
+
+
+
+
+对时间序列的值做前移位和后移位
+
+In  38: ts = Series(range(1, 8), index=pd.date_range('1/1/2016', periods=7, freq='M'))
+
+In  39: ts
+Out 39:
+2016-01-31    1
+2016-02-29    2
+2016-03-31    3
+2016-04-30    4
+2016-05-31    5
+2016-06-30    6
+2016-07-31    7
+Freq: M, dtype: int64
+
+
+这样的移位方式，index 不改变，值移位了，而且值丟失了：
+
+In  40: ts.shift(1)
+Out 40:
+2016-01-31    NaN
+2016-02-29    1.0
+2016-03-31    2.0
+2016-04-30    3.0
+2016-05-31    4.0
+2016-06-30    5.0
+2016-07-31    6.0
+Freq: M, dtype: float64
+
+In  41: ts.shift(-1)
+Out 41:
+2016-01-31    2.0
+2016-02-29    3.0
+2016-03-31    4.0
+2016-04-30    5.0
+2016-05-31    6.0
+2016-06-30    7.0
+2016-07-31    NaN
+Freq: M, dtype: float64
+
+
+当提供了freq 参数时，移位的是index，值不变，不丟失，
+当periods 参数符号相同时，index 移位和值移位的方向相反：
+
+In  56: ts.shift(1, freq='M')
+Out 56:
+2016-02-29    1
+2016-03-31    2
+2016-04-30    3
+2016-05-31    4
+2016-06-30    5
+2016-07-31    6
+2016-08-31    7
+Freq: M, dtype: int64
+
+
+使用移位的方法计算时间序列中前后值的百分比变化：
+
+In  42: ts / ts.shift(1) - 1
+Out 42:
+2016-01-31         NaN
+2016-02-29    1.000000
+2016-03-31    0.500000
+2016-04-30    0.333333
+2016-05-31    0.250000
+2016-06-30    0.200000
+2016-07-31    0.166667
+Freq: M, dtype: float64
+
+
+
+
+
+给日期做偏移操作
+
+In  69: from pandas.tseries.offsets import Day, MonthEnd, MonthBegin
+
+In  70: from datetime import datetime
+
+In  71: now = datetime(2016, 6, 15)
+
+In  72: now + 3 * Day()
+Out 72: Timestamp('2016-06-18 00:00:00')
+
+In  73: now + MonthEnd()
+Out 73: Timestamp('2016-06-30 00:00:00')
+
+In  74: now + MonthEnd(2)
+Out 74: Timestamp('2016-07-31 00:00:00')
+
+In  75: offset = MonthEnd()
+
+
+进到下一个“月末”：
+
+In  76: offset.rollforward(now)
+Out 76: Timestamp('2016-06-30 00:00:00')
+
+
+退回上一个“月末”：
+
+In  77: offset.rollback(now)
+Out 77: Timestamp('2016-05-31 00:00:00')
+
+
+退回上一个“月首”：
+
+In  81: MonthBegin().rollback(now)
+Out 81: Timestamp('2016-06-01 00:00:00')
+
+
+
+利用对日期的偏移做分组操作
+
+In  82: ts = Series(np.random.randn(20),
+   ....: index=pd.date_range('1/1/2016', periods=20, freq='4d'))
+
+In  83: ts
+Out 83:
+2016-01-01   -1.532572
+2016-01-05   -0.800158
+2016-01-09   -0.879556
+2016-01-13   -0.495589
+2016-01-17    0.180392
+2016-01-21    0.840016
+2016-01-25    1.080198
+2016-01-29    0.510780
+2016-02-02    0.682343
+2016-02-06   -0.624899
+2016-02-10    1.776041
+2016-02-14   -0.273801
+2016-02-18    0.131721
+2016-02-22    0.412335
+2016-02-26    3.348118
+2016-03-01    1.027496
+2016-03-05    0.176529
+2016-03-09   -0.162839
+2016-03-13    0.027250
+2016-03-17    1.418132
+Freq: 4D, dtype: float64
+
+
+把所有的index 值都转换成对应的月末，然后做分组操作：
+
+In  84: ts.groupby(offset.rollforward).mean()
+Out 84:
+2016-01-31   -0.137061
+2016-02-29    0.778837
+2016-03-31    0.497314
+dtype: float64
+
+
+
+
+
+
+对Timestamp 和时间序列做时区本地化和时区转换
+
+必须先对时间本地化，然后才能对它做时区转换。
+
+
+In  119: t = Timestamp('2016-06-15')
+
+In  120: t
+Out 120: Timestamp('2016-06-15 00:00:00')
+
+In  121: t.tz
+
+In  122: t_utc = t.tz_localize('UTC')
+
+In  123: t_utc
+Out 123: Timestamp('2016-06-15 00:00:00+0000', tz='UTC')
+
+In  124: t_utc.tz_convert('Asia/Shanghai')
+Out 124: Timestamp('2016-06-15 08:00:00+0800', tz='Asia/Shanghai')
+
+In  125: t_utc.tz_convert('US/Eastern')
+Out 125: Timestamp('2016-06-14 20:00:00-0400', tz='US/Eastern')
+
+
+有时区信息的Timestamp object 内部存储着一个从1970-01-01
+起的UTC 时间戳的值，这个值在时区转换中保持不变：
+
+In  14: t_utc.value
+Out 14: 1465948800000000000
+
+In  16: t_utc.tz_convert('Asia/Shanghai').value
+Out 16: 1465948800000000000
+
+
+对时间序列做时区本地化和时区转换：
+
+In  130: ts = Series(np.random.randn(7),
+   .....: index=pd.date_range('6/15/2016 21:45', periods=7, freq='D'))
+
+In  131: ts
+Out 131:
+2016-06-15 21:45:00   -0.716044
+2016-06-16 21:45:00    0.684319
+2016-06-17 21:45:00   -0.346314
+2016-06-18 21:45:00    0.070990
+2016-06-19 21:45:00    1.142358
+2016-06-20 21:45:00   -1.608866
+2016-06-21 21:45:00    0.864550
+Freq: D, dtype: float64
+
+In  134: ts.index
+Out 134:
+DatetimeIndex(['2016-06-15 21:45:00', '2016-06-16 21:45:00',
+               '2016-06-17 21:45:00', '2016-06-18 21:45:00',
+               '2016-06-19 21:45:00', '2016-06-20 21:45:00',
+               '2016-06-21 21:45:00'],
+              dtype='datetime64[ns]', freq='D')
+
+In  135: ts.index.tz
+
+In  136: ts_utc = ts.tz_localize('UTC')
+
+In  137: ts_utc
+Out 137:
+2016-06-15 21:45:00+00:00   -0.716044
+2016-06-16 21:45:00+00:00    0.684319
+2016-06-17 21:45:00+00:00   -0.346314
+2016-06-18 21:45:00+00:00    0.070990
+2016-06-19 21:45:00+00:00    1.142358
+2016-06-20 21:45:00+00:00   -1.608866
+2016-06-21 21:45:00+00:00    0.864550
+Freq: D, dtype: float64
+
+In  139: ts_utc.index
+Out 139:
+DatetimeIndex(['2016-06-15 21:45:00+00:00', '2016-06-16 21:45:00+00:00',
+               '2016-06-17 21:45:00+00:00', '2016-06-18 21:45:00+00:00',
+               '2016-06-19 21:45:00+00:00', '2016-06-20 21:45:00+00:00',
+               '2016-06-21 21:45:00+00:00'],
+              dtype='datetime64[ns, UTC]', freq='D')
+
+In  140: ts_utc.tz_convert('Asia/Shanghai')
+Out 140:
+2016-06-16 05:45:00+08:00   -0.716044
+2016-06-17 05:45:00+08:00    0.684319
+2016-06-18 05:45:00+08:00   -0.346314
+2016-06-19 05:45:00+08:00    0.070990
+2016-06-20 05:45:00+08:00    1.142358
+2016-06-21 05:45:00+08:00   -1.608866
+2016-06-22 05:45:00+08:00    0.864550
+Freq: D, dtype: float64
+
+
+
+
+
+
+不同时区的时间值之间的运算
+
+因为有时区信息的Timestamp object 内部存储着一个从1970-01-01
+起的UTC 时间戳的值，这个值在时区转换中保持不变，所以不同
+时区的值做运算是直截了当的，不需要手工转换，其结果的时区为UTC。
+
+In  45: ts = Series(np.random.randn(3), index=pd.date_range(
+   ....: '1/1/2016 07:31', periods=3, freq='D', tz='UTC'))
+
+In  46: ts
+Out 46:
+2016-01-01 07:31:00+00:00   -0.201287
+2016-01-02 07:31:00+00:00   -1.023134
+2016-01-03 07:31:00+00:00   -0.127474
+Freq: D, dtype: float64
+
+In  47: ts.index
+Out 47:
+DatetimeIndex(['2016-01-01 07:31:00+00:00', '2016-01-02 07:31:00+00:00',
+               '2016-01-03 07:31:00+00:00'],
+              dtype='datetime64[ns, UTC]', freq='D')
+
+In  48: ts1 = ts.tz_convert('US/Eastern')
+
+In  59: ts1
+Out 59:
+2016-01-01 02:31:00-05:00   -0.201287
+2016-01-02 02:31:00-05:00   -1.023134
+2016-01-03 02:31:00-05:00   -0.127474
+Freq: D, dtype: float64
+
+In  52: ts2 = ts.tz_convert('Europe/Moscow')
+
+In  53: ts2
+Out 53:
+2016-01-01 10:31:00+03:00   -0.201287
+2016-01-02 10:31:00+03:00   -1.023134
+2016-01-03 10:31:00+03:00   -0.127474
+Freq: D, dtype: float64
+
+In  54: result = ts1 + ts2
+
+In  55: result
+Out 55:
+2016-01-01 07:31:00+00:00   -0.402575
+2016-01-02 07:31:00+00:00   -2.046267
+2016-01-03 07:31:00+00:00   -0.254949
+Freq: D, dtype: float64
+
+In  56: ts1.index
+Out 56:
+DatetimeIndex(['2016-01-01 02:31:00-05:00', '2016-01-02 02:31:00-05:00',
+               '2016-01-03 02:31:00-05:00'],
+              dtype='datetime64[ns, US/Eastern]', freq='D')
+
+In  57: ts2.index
+Out 57:
+DatetimeIndex(['2016-01-01 10:31:00+03:00', '2016-01-02 10:31:00+03:00',
+               '2016-01-03 10:31:00+03:00'],
+              dtype='datetime64[ns, Europe/Moscow]', freq='D')
+
+In  58: result.index
+Out 58:
+DatetimeIndex(['2016-01-01 07:31:00+00:00', '2016-01-02 07:31:00+00:00',
+               '2016-01-03 07:31:00+00:00'],
+              dtype='datetime64[ns, UTC]', freq='D')
+
+
+
+
+
+
+时段的含义
+
+pandas 的时段pd.Period 相当於一个指向一个时间段的游标 (cursor)
+
+In  60: p = pd.Period(2016, freq='A-DEC')
+
+In  61: p
+Out 61: Period('2016', 'A-DEC')
+
+
+时段加减一个数字，相当於加减这么多个与自己频率一样的时段：
+
+In  62: p + 5
+Out 62: Period('2021', 'A-DEC')
+
+In  63: p - 2
+Out 63: Period('2014', 'A-DEC')
+
+In  64: pd.Period('2019', freq='A-DEC') - p
+Out 64: 3
+
+
+可以创建时段范围：
+
+In  65: rng = pd.period_range('1/1/2016', '6/30/2016', freq='M')
+
+In  66: rng
+Out 66: PeriodIndex(['2016-01', '2016-02', '2016-03', '2016-04', '2016-05', '2016-06'], dtype='int64', freq='M')
+
+In  67:
+
+
+时段范围可以作为时间序列的index：
+
+In  67: Series(np.random.randn(6), index=rng)
+Out 67:
+2016-01    1.837807
+2016-02   -1.052181
+2016-03   -0.103057
+2016-04   -1.113816
+2016-05   -0.177264
+2016-06   -0.316458
+Freq: M, dtype: float64
+
+
+可以用pd.PeriodIndex 对一个字符串列表做批量转换：
+
+In  68: values = ['2016Q3', '2017Q2', '2018Q1']
+
+In  69: index = pd.PeriodIndex(values, freq='Q-DEC')
+
+In  70: index
+Out 70: PeriodIndex(['2016Q3', '2017Q2', '2018Q1'], dtype='int64', freq='Q-DEC')
+
+
+
+
+
+对时段做频率转换
+
+A-DEC 表示以一年为长度，以DEC 月为最后周期的最后一个月。
+
+In  1: p = pd.Period('2007', freq='A-DEC')
+
+In  2: p
+Out 2: Period('2007', 'A-DEC')
+
+In  3: p.asfreq('M', how='start')
+Out 3: Period('2007-01', 'M')
+
+In  4: p.asfreq('M', how='end')
+Out 4: Period('2007-12', 'M')
+
+In  5: p = pd.Period('2007', freq='A-JUN')
+
+In  6: p.asfreq('M', 'start')
+Out 6: Period('2006-07', 'M')
+
+In  7: p.asfreq('M', 'end')
+Out 7: Period('2007-06', 'M')
+
+
+对于一个以六月为最后一个月的周期来说，七月就属于下个周期了：
+
+In  8: pd.Period('2007-07', 'M').asfreq('A-JUN')
+Out 8: Period('2008', 'A-JUN')
+
+
+用时段范围来做序列的index，类似於DatetimeIndex：
+
+In  9: rng = pd.period_range('2006', '2009', freq='A-DEC')
+
+In  10: rng
+Out 10: PeriodIndex(['2006', '2007', '2008', '2009'], dtype='int64', freq='A-DEC')
+
+In  11: ts = Series(np.random.randn(len(rng)), index=rng)
+
+In  12: ts
+Out 12:
+2006   -1.035185
+2007    2.091443
+2008   -0.253292
+2009    0.205149
+Freq: A-DEC, dtype: float64
+
+In  13: ts.asfreq('M', how='start')
+Out 13:
+2006-01   -1.035185
+2007-01    2.091443
+2008-01   -0.253292
+2009-01    0.205149
+Freq: M, dtype: float64
+
+In  14: ts.asfreq('B', how='end')
+Out 14:
+2006-12-29   -1.035185
+2007-12-31    2.091443
+2008-12-31   -0.253292
+2009-12-31    0.205149
+Freq: B, dtype: float64
+
+
+确定时段的首和尾：
+
+In  4: p = pd.Period('2012Q4', freq='Q-JAN')
+
+In  5: p
+Out 5: Period('2012Q4', 'Q-JAN')
+
+
+季度的第一天，用 'D' 和 'start' 这两个参数：
+
+In  6: p.asfreq('D', 'start')
+Out 6: Period('2011-11-01', 'D')
+
+
+季度的最后一天，用 'D' 和 'end' 这两个参数：
+
+In  7: p.asfreq('D', 'end')
+Out 7: Period('2012-01-31', 'D')
+
+
+季度的第一个月，用 'M' 和 'start' 这两个参数：
+
+In  8: p.asfreq('M', 'start')
+Out 8: Period('2011-11', 'M')
+
+
+季度的最后一个月，用 'M' 和 'end' 这两个参数：
+
+In  9: p.asfreq('M', 'end')
+Out 9: Period('2012-01', 'M')
+
+
+根据时段的这个特点，可以非常方便地计算出诸如此类的时间来：
+
+季度的倒数第二个工作日的下午4点
+
+
+季度：
+
+In  10: p
+Out 10: Period('2012Q4', 'Q-JAN')
+
+
+倒数第一个工作日：
+
+In  11: p.asfreq('B', 'end')
+Out 11: Period('2012-01-31', 'B')
+
+
+倒数第二个工作日：
+
+In  12: p.asfreq('B', 'end') - 1
+Out 12: Period('2012-01-30', 'B')
+
+
+倒数第二个工作日的第一小时：
+
+In  16: (p.asfreq('B', 'end') - 1).asfreq('H', 'start')
+Out 16: Period('2012-01-30 00:00', 'H')
+
+
+倒数第二个工作日的下午4时：
+
+In  17: (p.asfreq('B', 'end') - 1).asfreq('H', 'start') + 16
+Out 17: Period('2012-01-30 16:00', 'H')
+
+
+创建季度周期序列：
+
+In  21: rng = pd.period_range('2011Q3', '2012Q4', freq='Q-JAN')
+
+In  22: ts = Series(np.arange(len(rng)), index=rng)
+
+In  23: ts
+Out 23:
+2011Q3    0
+2011Q4    1
+2012Q1    2
+2012Q2    3
+2012Q3    4
+2012Q4    5
+Freq: Q-JAN, dtype: int64
+
+In  25: ts.asfreq('M', how='start')
+Out 25:
+2010-08    0
+2010-11    1
+2011-02    2
+2011-05    3
+2011-08    4
+2011-11    5
+Freq: M, dtype: int64
+
+In  28: new_rng = (rng.asfreq('B', 'e') - 1).asfreq('T', 's') + 16 * 60
+
+In  29: new_rng
+Out 29:
+PeriodIndex(['2010-10-28 16:00', '2011-01-28 16:00', '2011-04-28 16:00',
+             '2011-07-28 16:00', '2011-10-28 16:00', '2012-01-30 16:00'],
+            dtype='int64', freq='T')
+
+In  32: ts
+Out 32:
+2010-10-28 16:00:00    0
+2011-01-28 16:00:00    1
+2011-04-28 16:00:00    2
+2011-07-28 16:00:00    3
+2011-10-28 16:00:00    4
+2012-01-30 16:00:00    5
+dtype: int64
+
+
+
+
+
+
+把时间戳转成时段
+
+In  57: rng = pd.date_range('1/1/2000', periods=3, freq='M')
+
+In  58: ts = Series(np.random.randn(3), index=rng)
+
+
+转换时，若不指定频率，则自动推定一个频率：
+
+In  59: pts = ts.to_period()
+
+In  60: ts
+Out 60:
+2000-01-31   -0.300174
+2000-02-29   -0.723624
+2000-03-31   -0.966269
+Freq: M, dtype: float64
+
+In  61: pts
+Out 61:
+2000-01   -0.300174
+2000-02   -0.723624
+2000-03   -0.966269
+Freq: M, dtype: float64
+
+
+明确指定所使用的频率：
+
+In  62: rng = pd.date_range('1/29/2000', periods=6, freq='D')
+
+In  63: ts2 = Series(np.random.randn(6), index=rng)
+
+In  65: ts2
+Out 65:
+2000-01-29   -0.265287
+2000-01-30    0.682242
+2000-01-31    2.402577
+2000-02-01   -0.511814
+2000-02-02   -0.964691
+2000-02-03   -0.564185
+Freq: D, dtype: float64
+
+In  64: ts2.to_period('M')
+Out 64:
+2000-01   -0.265287
+2000-01    0.682242
+2000-01    2.402577
+2000-02   -0.511814
+2000-02   -0.964691
+2000-02   -0.564185
+Freq: M, dtype: float64
+
+
+把时段转换成时间戳：
+
+In  68: pts
+Out 68:
+2000-01   -0.300174
+2000-02   -0.723624
+2000-03   -0.966269
+Freq: M, dtype: float64
+
+In  69: pts.to_timestamp(how='end')
+Out 69:
+2000-01-31   -0.300174
+2000-02-29   -0.723624
+2000-03-31   -0.966269
+Freq: M, dtype: float64
+
+
+
+
+
+
+从阵列生成PeriodIndex
+
+In  73: data = pd.read_csv('macrodata.csv')
+
+In  74:
+
+In  74: data.year
+Out 74:
+0      1959.0
+1      1959.0
+2      1959.0
+3      1959.0
+...
+199    2008.0
+200    2009.0
+201    2009.0
+202    2009.0
+Name: year, dtype: float64
+
+In  75: data.quarter
+Out 75:
+0      1.0
+1      2.0
+2      3.0
+3      4.0
+...
+199    4.0
+200    1.0
+201    2.0
+202    3.0
+Name: quarter, dtype: float64
+
+
+In  77: index = pd.PeriodIndex(year=data.year, quarter=data.quarter, freq='Q-DEC')
+
+In  78: index
+Out 78:
+PeriodIndex(['1959Q1', '1959Q2', '1959Q3', '1959Q4', '1960Q1', '1960Q2',
+             '1960Q3', '1960Q4', '1961Q1', '1961Q2',
+             ...
+             '2007Q2', '2007Q3', '2007Q4', '2008Q1', '2008Q2', '2008Q3',
+             '2008Q4', '2009Q1', '2009Q2', '2009Q3'],
+            dtype='int64', length=203, freq='Q-DEC')
+
+In  79: data.head()
+Out 79:
+     year  quarter   realgdp  realcons  realinv  realgovt  realdpi    cpi  \
+0  1959.0      1.0  2710.349    1707.4  286.898   470.045   1886.9  28.98
+1  1959.0      2.0  2778.801    1733.7  310.859   481.301   1919.7  29.15
+2  1959.0      3.0  2775.488    1751.8  289.226   491.260   1916.4  29.35
+3  1959.0      4.0  2785.204    1753.7  299.356   484.052   1931.3  29.37
+4  1960.0      1.0  2847.699    1770.5  331.722   462.199   1955.5  29.54
+
+      m1  tbilrate  unemp      pop  infl  realint
+0  139.7      2.82    5.8  177.146  0.00     0.00
+1  141.7      3.08    5.1  177.830  2.34     0.74
+2  140.5      3.82    5.3  178.657  2.74     1.09
+3  140.0      4.33    5.6  179.386  0.27     4.06
+4  139.6      3.50    5.2  180.007  2.31     1.19
+
+In  80: data.index = index
+
+In  81: data.head()
+Out 81:
+          year  quarter   realgdp  realcons  realinv  realgovt  realdpi  \
+1959Q1  1959.0      1.0  2710.349    1707.4  286.898   470.045   1886.9
+1959Q2  1959.0      2.0  2778.801    1733.7  310.859   481.301   1919.7
+1959Q3  1959.0      3.0  2775.488    1751.8  289.226   491.260   1916.4
+1959Q4  1959.0      4.0  2785.204    1753.7  299.356   484.052   1931.3
+1960Q1  1960.0      1.0  2847.699    1770.5  331.722   462.199   1955.5
+
+          cpi     m1  tbilrate  unemp      pop  infl  realint
+1959Q1  28.98  139.7      2.82    5.8  177.146  0.00     0.00
+1959Q2  29.15  141.7      3.08    5.1  177.830  2.34     0.74
+1959Q3  29.35  140.5      3.82    5.3  178.657  2.74     1.09
+1959Q4  29.37  140.0      4.33    5.6  179.386  0.27     4.06
+1960Q1  29.54  139.6      3.50    5.2  180.007  2.31     1.19
+
+
+
+
+
+
+使用resample 来做重采样及聚合操作
+
+resample 加上聚合操作，效果类似於groupby。比如，需要把时间序列
+里的数据按照5分钟的周期分组，计算每组的总和，除了可以手动生成
+用来做groupby 的index，然后groupby 再求和；还可以用resamle，
+resample 看起来更加高效。
+
+当使用resample 来向下重采样时，需要考虑两件事情：
+
+1. 关闭bin 的哪一边
+2. 用bin 的哪一边做标签
+
+
+In  76: index = pd.date_range('6/17/2016', periods=3600, freq='S')
+
+In  77: s = Series(np.random.randn(3600), index=index)
+
+In  78: s.resample('5min', closed='left', label='left').sum()
+Out 78:
+2016-06-17 00:00:00    -6.156117
+2016-06-17 00:05:00    -5.091965
+2016-06-17 00:10:00   -31.229171
+2016-06-17 00:15:00    -1.546331
+2016-06-17 00:20:00   -38.477507
+2016-06-17 00:25:00    18.149622
+2016-06-17 00:30:00   -12.272789
+2016-06-17 00:35:00    -3.953382
+2016-06-17 00:40:00    -4.917718
+2016-06-17 00:45:00    12.433463
+2016-06-17 00:50:00     1.403361
+2016-06-17 00:55:00    -7.690216
+Freq: 5T, dtype: float64
+
+In  79: g = s.resample('5min', closed='left', label='left')
+
+In  80: g.size()
+Out 80:
+2016-06-17 00:00:00    300
+2016-06-17 00:05:00    300
+2016-06-17 00:10:00    300
+2016-06-17 00:15:00    300
+2016-06-17 00:20:00    300
+2016-06-17 00:25:00    300
+2016-06-17 00:30:00    300
+2016-06-17 00:35:00    300
+2016-06-17 00:40:00    300
+2016-06-17 00:45:00    300
+2016-06-17 00:50:00    300
+2016-06-17 00:55:00    300
+Freq: 5T, dtype: int64
+
+
+closed='right' 使得00:00 至00:05 这个bin 的结束点00:05 包括在组00:00中，
+而开始点00:00 却在前一个组23:55 中，因为00:00 是23:55 的结束点：
+
+In  82: s.resample('5min', closed='right').size()
+Out 82:
+2016-06-16 23:55:00      1
+2016-06-17 00:00:00    300
+2016-06-17 00:05:00    300
+2016-06-17 00:10:00    300
+2016-06-17 00:15:00    300
+2016-06-17 00:20:00    300
+2016-06-17 00:25:00    300
+2016-06-17 00:30:00    300
+2016-06-17 00:35:00    300
+2016-06-17 00:40:00    300
+2016-06-17 00:45:00    300
+2016-06-17 00:50:00    300
+2016-06-17 00:55:00    299
+Freq: 5T, dtype: int64
+
+
+
+
+
+
+OHLC 聚合方法
+
+open:  the first of the bucket
+close: the last of the bucket
+high:  max value in the bucket
+low:   min value in the bucket
+
+In  113: s.resample('5min').ohlc()
+Out 113:
+                         open      high       low     close
+2016-06-17 00:00:00 -1.211765  3.016445 -2.658450 -0.807821
+2016-06-17 00:05:00  0.007942  2.763296 -3.468926  0.281534
+2016-06-17 00:10:00  0.880601  2.553664 -2.704543 -0.191837
+2016-06-17 00:15:00 -0.028814  3.484496 -3.698616 -0.852124
+2016-06-17 00:20:00  0.454720  3.205238 -2.726597  0.495489
+2016-06-17 00:25:00 -0.395332  3.007269 -2.683543 -2.282750
+2016-06-17 00:30:00  0.967110  3.418412 -2.605587  0.504826
+2016-06-17 00:35:00 -2.613124  2.488949 -3.568851  1.793711
+2016-06-17 00:40:00 -0.562908  3.354662 -2.992600  0.576396
+2016-06-17 00:45:00  1.166201  3.359611 -2.528351 -2.053729
+2016-06-17 00:50:00  1.192342  2.825946 -2.735595  0.344720
+2016-06-17 00:55:00 -1.741379  3.062359 -2.960259  0.343539
+
+
+
+
+
+
+
+使用groupby 来做重采样
+
+In  114: rng = pd.date_range('1/1/2000', periods=100, freq='D')
+
+In  115: ts = Series(np.arange(100), index=rng)
+
+In  116: ts.groupby(lambda x: x.month).mean()
+Out 116:
+1    15
+2    45
+3    75
+4    95
+dtype: int64
+
+In  117: ts.groupby(lambda x: x.weekday).mean()
+Out 117:
+0    47.5
+1    48.5
+2    49.5
+3    50.5
+4    51.5
+5    49.0
+6    50.0
+dtype: float64
+
+
+
+
+
+
+向上重采样，插值，同级重采样
+
+In  7: df = DataFrame(np.random.randn(2, 4),
+   ...: index=pd.date_range('1/1/2000', periods=2, freq='W-WED'),
+   ...: columns=['Colorado', 'Texas', 'New York', 'Ohio'])
+
+In  8: df
+Out 8:
+            Colorado     Texas  New York      Ohio
+2000-01-05 -0.253902 -1.178000  0.395244  1.055706
+2000-01-12  0.563783 -0.259253  1.339155  0.095250
+
+
+向上重采样，将会出现空值：
+
+In  30: df.resample('D').asfreq()
+Out 30:
+            Colorado     Texas  New York      Ohio
+2000-01-05 -0.253902 -1.178000  0.395244  1.055706
+2000-01-06       NaN       NaN       NaN       NaN
+2000-01-07       NaN       NaN       NaN       NaN
+2000-01-08       NaN       NaN       NaN       NaN
+2000-01-09       NaN       NaN       NaN       NaN
+2000-01-10       NaN       NaN       NaN       NaN
+2000-01-11       NaN       NaN       NaN       NaN
+2000-01-12  0.563783 -0.259253  1.339155  0.095250
+
+
+在空值的位置插值：
+
+In  31: df.resample('D').ffill()
+Out 31:
+            Colorado     Texas  New York      Ohio
+2000-01-05 -0.253902 -1.178000  0.395244  1.055706
+2000-01-06 -0.253902 -1.178000  0.395244  1.055706
+2000-01-07 -0.253902 -1.178000  0.395244  1.055706
+2000-01-08 -0.253902 -1.178000  0.395244  1.055706
+2000-01-09 -0.253902 -1.178000  0.395244  1.055706
+2000-01-10 -0.253902 -1.178000  0.395244  1.055706
+2000-01-11 -0.253902 -1.178000  0.395244  1.055706
+2000-01-12  0.563783 -0.259253  1.339155  0.095250
+
+
+可以限制插入的值的数量：
+
+In  32: df.resample('D').ffill(limit=2)
+Out 32:
+            Colorado     Texas  New York      Ohio
+2000-01-05 -0.253902 -1.178000  0.395244  1.055706
+2000-01-06 -0.253902 -1.178000  0.395244  1.055706
+2000-01-07 -0.253902 -1.178000  0.395244  1.055706
+2000-01-08       NaN       NaN       NaN       NaN
+2000-01-09       NaN       NaN       NaN       NaN
+2000-01-10       NaN       NaN       NaN       NaN
+2000-01-11       NaN       NaN       NaN       NaN
+2000-01-12  0.563783 -0.259253  1.339155  0.095250
+
+
+也可以按照平级的方式重采样，新的频率不必与旧的相同：
+
+In  33: df.resample('W-THU').ffill()
+Out 33:
+            Colorado     Texas  New York      Ohio
+2000-01-06 -0.253902 -1.178000  0.395244  1.055706
+2000-01-13  0.563783 -0.259253  1.339155  0.095250
+
+
+按照平级的方式重采样，不插值的话就有可能是空值：
+
+In  35: df.resample('W-THU').asfreq()
+Out 35:
+            Colorado  Texas  New York  Ohio
+2000-01-06       NaN    NaN       NaN   NaN
+2000-01-13       NaN    NaN       NaN   NaN
+
+
+
+
+
+
+
+用时段period 来做重采样
+
+In  37: df = DataFrame(np.random.randn(24, 4),
+   ....: index=pd.period_range('jan 2000', 'dec 2001', freq='M'),
+   ....: columns=['Colorado', 'Texas', 'New York', 'Ohio'])
+
+In  38: df
+Out 38:
+         Colorado     Texas  New York      Ohio
+2000-01  0.327498 -0.349477 -1.117064 -0.104172
+2000-02  1.508957 -0.357886  0.016741  0.616486
+2000-03  0.256999 -0.320339  0.234263 -1.361144
+2000-04 -1.547022 -1.143016 -0.827867 -0.058218
+2000-05 -1.194272 -0.292934  0.079925 -1.467597
+2000-06  0.462858  0.803492 -1.042120  0.935062
+2000-07 -0.506624  1.108607  0.612428 -0.113337
+2000-08  1.028142  0.126943  0.076780  0.527265
+2000-09  1.448005 -0.082943 -0.888858 -1.256704
+2000-10 -0.252638  0.219320  0.342096  0.340784
+2000-11  0.405636 -0.873492  0.938935  0.604065
+2000-12 -0.872316 -1.567075 -0.766870 -2.739958
+2001-01  0.608881 -0.866928  0.116082 -1.168728
+2001-02  0.437890 -0.418159  1.080788 -0.409469
+2001-03  0.362295  0.214350 -0.281372  0.446054
+2001-04  0.816202  0.580838 -0.383278  0.183955
+2001-05 -0.271844 -0.256168  1.309849 -1.758714
+2001-06  0.423134  0.688991 -0.119368 -0.825630
+2001-07  0.574228 -0.929955 -0.428272  0.333821
+2001-08 -1.155353 -1.515490  0.581723  0.407904
+2001-09  0.590397  0.098766  0.296514  0.518154
+2001-10 -0.508542 -1.737856  0.379313 -1.144814
+2001-11 -0.851198 -0.511219 -0.325211 -1.041660
+2001-12  0.416326  1.911224 -0.298198  0.632394
+
+
+向下重采样：
+
+In  39: annual_df = df.resample('A-DEC').mean(); annual_df
+Out 39:
+      Colorado     Texas  New York      Ohio
+2000  0.088769 -0.227400 -0.195134 -0.339789
+2001  0.120201 -0.228467  0.160714 -0.318894
+
+
+向上重采样，默认的convention 是时段的头部：
+
+In  55: annual_df.resample('Q-DEC').asfreq()
+Out 55:
+        Colorado     Texas  New York      Ohio
+2000Q1  0.088769 -0.227400 -0.195134 -0.339789
+2000Q2       NaN       NaN       NaN       NaN
+2000Q3       NaN       NaN       NaN       NaN
+2000Q4       NaN       NaN       NaN       NaN
+2001Q1  0.120201 -0.228467  0.160714 -0.318894
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4       NaN       NaN       NaN       NaN
+
+In  56: annual_df.resample('Q-DEC', convention='s').asfreq()
+Out 56:
+        Colorado     Texas  New York      Ohio
+2000Q1  0.088769 -0.227400 -0.195134 -0.339789
+2000Q2       NaN       NaN       NaN       NaN
+2000Q3       NaN       NaN       NaN       NaN
+2000Q4       NaN       NaN       NaN       NaN
+2001Q1  0.120201 -0.228467  0.160714 -0.318894
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4       NaN       NaN       NaN       NaN
+
+In  57: annual_df.resample('Q-DEC', convention='e').asfreq()
+Out 57:
+        Colorado     Texas  New York      Ohio
+2000Q4  0.088769 -0.227400 -0.195134 -0.339789
+2001Q1       NaN       NaN       NaN       NaN
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4  0.120201 -0.228467  0.160714 -0.318894
+
+
+用时段来做重采样时，不管是向上还是向下，都要求源频率和目标频率必须有重叠，否则就会有异常，季度转成年度时频率必须匹配，年度转成季度时不需要匹配。
+
+
+源频率是A-DEC，转成季度频率后，重叠的只有:
+1. Q-DEC
+2. Q-SEP
+3. Q-JUN
+4. Q-MAR
+
+In  68: annual_df.index
+Out 68: PeriodIndex(['2000', '2001'], dtype='int64', freq='A-DEC')
+
+In  69: annual_df.resample('Q-DEC').asfreq()
+Out 69:
+        Colorado     Texas  New York      Ohio
+2000Q1  0.088769 -0.227400 -0.195134 -0.339789
+2000Q2       NaN       NaN       NaN       NaN
+2000Q3       NaN       NaN       NaN       NaN
+2000Q4       NaN       NaN       NaN       NaN
+2001Q1  0.120201 -0.228467  0.160714 -0.318894
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4       NaN       NaN       NaN       NaN
+
+In  70: annual_df.resample('Q-SEP').asfreq()
+Out 70:
+        Colorado     Texas  New York      Ohio
+2000Q2  0.088769 -0.227400 -0.195134 -0.339789
+2000Q3       NaN       NaN       NaN       NaN
+2000Q4       NaN       NaN       NaN       NaN
+2001Q1       NaN       NaN       NaN       NaN
+2001Q2  0.120201 -0.228467  0.160714 -0.318894
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4       NaN       NaN       NaN       NaN
+2002Q1       NaN       NaN       NaN       NaN
+
+In  71: annual_df.resample('Q-JUN').asfreq()
+Out 71:
+        Colorado     Texas  New York      Ohio
+2000Q3  0.088769 -0.227400 -0.195134 -0.339789
+2000Q4       NaN       NaN       NaN       NaN
+2001Q1       NaN       NaN       NaN       NaN
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3  0.120201 -0.228467  0.160714 -0.318894
+2001Q4       NaN       NaN       NaN       NaN
+2002Q1       NaN       NaN       NaN       NaN
+2002Q2       NaN       NaN       NaN       NaN
+
+In  72: annual_df.resample('Q-MAR').asfreq()
+Out 72:
+        Colorado     Texas  New York      Ohio
+2000Q4  0.088769 -0.227400 -0.195134 -0.339789
+2001Q1       NaN       NaN       NaN       NaN
+2001Q2       NaN       NaN       NaN       NaN
+2001Q3       NaN       NaN       NaN       NaN
+2001Q4  0.120201 -0.228467  0.160714 -0.318894
+2002Q1       NaN       NaN       NaN       NaN
+2002Q2       NaN       NaN       NaN       NaN
+2002Q3       NaN       NaN       NaN       NaN
+
+In  73: annual_df.resample('Q-NOV').asfreq()
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+...
+...
+RuntimeError: maximum recursion depth exceeded while calling a Python object
+
+
+源频率是Q-MAR，转成年度频率后，重叠的只有:
+1. A-MAR
+2. A-JUN
+3. A-SEP
+4. A-DEC
+
+In  88: x.index
+Out 88: PeriodIndex(['2000Q4', '2001Q4'], dtype='int64', freq='Q-MAR')
+
+In  89: x.resample('A-MAR').mean()
+Out 89:
+      Colorado     Texas  New York      Ohio
+2000  0.088769 -0.227400 -0.195134 -0.339789
+2001  0.120201 -0.228467  0.160714 -0.318894
+
+In  90: x.resample('A-JUN').mean()
+Out 90:
+      Colorado     Texas  New York      Ohio
+2000  0.088769 -0.227400 -0.195134 -0.339789
+2001  0.120201 -0.228467  0.160714 -0.318894
+
+In  91: x.resample('A-SEP').mean()
+Out 91:
+      Colorado     Texas  New York      Ohio
+2000  0.088769 -0.227400 -0.195134 -0.339789
+2001  0.120201 -0.228467  0.160714 -0.318894
+
+In  92: x.resample('A-DEC').mean()
+Out 92:
+      Colorado     Texas  New York      Ohio
+2000  0.088769 -0.227400 -0.195134 -0.339789
+2001  0.120201 -0.228467  0.160714 -0.318894
+
+In  93: x.resample('A-APR').mean()
+---------------------------------------------------------------------------
+...
+...
+ValueError: Frequency <QuarterEnd: startingMonth=3> cannot be resampled to <YearEnd: month=4>
+
+
+
+
+
+
+用时间序列的数据来绘图
+
+绘制时间序列的数据，和通常的Series 数据方法相同，此外，可以用过滤条件
+方便地绘制时间序列中的某部分数据，而且可以通过鼠标对图做缩放操作。
+
+
+In  26: close_px_all = read_csv('stock_px.csv', parse_dates=True, index_col=0)
+
+In  27: close_px = close_px_all[['AAPL', 'MSFT', 'XOM']]
+
+
+数据中有些工作日是没有数据的，这里用'B' 来重采样并填充：
+
+In  28: close_px = close_px.resample('B').ffill()
+
+In  29: close_px.head()
+Out 29:
+            AAPL   MSFT    XOM
+2003-01-02  7.40  21.11  29.22
+2003-01-03  7.45  21.14  29.24
+2003-01-06  7.45  21.52  29.96
+2003-01-07  7.43  21.93  28.95
+2003-01-08  7.28  21.31  28.83
+
+
+绘出其中一个列：
+
+In  33: close_px['AAPL'].plot()
+Out 33: <matplotlib.axes._subplots.AxesSubplot at 0x7fc3e02bb650>
+
+
+绘出2009 年所有的列：
+
+In  36: close_px['2009'].plot()
+Out 36: <matplotlib.axes._subplots.AxesSubplot at 0x7fc3dadf32d0>
+
+
+把苹果公司的数据按照季度末重采样，然后绘图：
+
+In  39: appl_q = close_px['AAPL'].resample('Q-DEC').ffill()
+
+In  40: appl_q['2009'].plot()
+Out 40: <matplotlib.axes._subplots.AxesSubplot at 0x7fc3dbc85c10>

@@ -1,0 +1,209 @@
+GNU/Linux启动流程:
+    上电
+    启动主板内置程序(BIOS)  初始化基本硬件, 根据配置启动
+    按硬盘启动 -> 读取硬盘MBR(512字节)
+    启动MBR的启动程序(GRUB) -> 选择启动哪个操作系统的内核
+    启动vmlinuz(Kernel 操作系统的核心程序)
+    通过initrd.img提供临时文件系统来挂载实现Linux操作系统的根分区
+    读取/etc/fstab挂载分区
+    启动根分区里init程序 -> 操作系统初始动作
+    执行/etc/init目录下所有conf脚本
+        rcS.conf            起始脚本
+        rc-sysinit.conf     确定操作系统运行级别
+        rc.conf             开机自启的服务程序
+
+        rc.local            用户自定义开机启动脚本(图形界面未登录之前运行)
+
+    启动图形界面
+        /etc/X11
+
+    用户登录
+        执行/etc/profile及/etc/profile.d目录下所有脚本
+        执行用户家目录下.profile脚本
+        执行用户家目录下.bashrc脚本 (只要启动bash程序就会重新执行)
+
+-------------------------------------------------------------------------------
+Grub(bootloader程序)
+    核心功能: 启动内核并且给内核传参
+
+    CentOS6.7   Grub 0.97
+    Ubuntu      Grub 2.0
+    Windows     Grub4Dos
+
+Grub启动流程
+    BIOS平台
+        BIOS -> boot.img(MBR)
+             -> core.img(MBR)
+             -> 设置prefix root cmdpath三个环境变量
+             -> 加载normal.mod(依赖其它)
+             -> 执行normal $prefix/grub.cfg命令
+
+    UEFI平台
+        UEFI -> core.img[BOOTX64.EFI/BOOTX86.EFI]
+        其它三步与上面一样
+
+    以上步骤全部执行成功, GRUB2进入普通模式(菜单选择的界面)
+
+    grub.cfg找不到: 进入Grub Shell, 即Grub命令行
+        grub>
+        解决:
+            set root=(hd0,1)
+            linux /vmlinuz
+            initrd /initrd.img
+
+    加载normal.mod失败, Grub2进入救援模式
+        grub rescue>
+        解决:
+            设置grub工作路径
+            set prefix=(hd0,1)/grub
+            设置grub运行环境的根
+            set root=(hd0,1)
+            insmod normal
+            normal
+
+        如果还是启动不了, 只能进系统抢修模式下重新安装Grub2
+            grub-install /dev/sda
+
+    Grub程序当中解析硬盘分区标识(硬盘设备命名):
+        Grub2:
+            (hd0,1)         代表第一块硬盘的第一个分区
+            (hd0,msdos1)    代表第一块硬盘的第一个MBR分区
+            (hd0,gpt1)      代表第一块硬盘的第一个GPT分区
+            (hd0,1)/boot/grub.cfg
+                代表第一块硬盘的第一个分区里boot目录下grub.cfg文件
+
+            set root=(hd0,1)
+                将(hd0,1)映射/, 访问/即访问(hd0,1)
+                /boot/grub.cfg
+
+        Grub0.97:
+            (hd0,0) 代表第一块硬盘的第一个分区
+            (hd0,1) 代表第一块硬盘的第二个分区
+
+-------------------------------------------------------------------------------
+Grub2变量
+    root            根映射的环境变量
+    timeout         选择菜单停留时间(秒)
+    timeout_style   值为hidden没有选择菜单的界面直接启动默认操作系统
+    default         设置默认进入第几个操作系统
+
+Grub2命令
+    set         设置环境变量
+        set root='(hd0,1)'
+
+    linux       加载内核文件
+        linux /vmlinuz
+
+    initrd      加载临时文件系统文件
+        initrd /initrd.img
+
+    boot        启动加载的内核
+
+    menuentry   定义菜单项
+        格式: menuentry '菜单标题' { 菜单对应执行代码 }
+
+    chainloader 链式加载器
+        set root='(hd0,1)'
+        chainloader +1
+
+    loopback    加载ISO文件
+        set root='(hd0,1)'
+        loopback loop /centos.iso
+        set root='(loop)'
+
+        接下来访问的文件即是ISO文件里的内容
+
+    reboot      重启
+
+    halt        关机
+        halt --no-apm
+
+    password    Grub设置密码
+
+
+Grub配置
+    menuentry 'ubuntu_install' {
+        set root='(hd0,7)'
+        loopback loop /ubuntu.iso
+        set root='(loop)'
+        linux /casper/vmlinz boot=casper iso-scan/filename=/ubuntu.iso --
+        initrd /casper/initrd.lz
+    }
+
+    menuentry 'Window 7' {
+        set root='(hd0,2)'
+        chainloader +1
+    }
+
+CentOS Grub(0.97):
+    硬盘命名不一样
+    linux换成kernel
+    root命令来设置GRUB的根分区
+    menuentry换成title
+
+    title Ubuntu
+        root (hd0,0)
+        kernel /vmlinuz root=/dev/sda1
+        initrd /initrd.lz
+
+-------------------------------------------------------------------------------
+CentOS:
+    grub-install /dev/sda
+        grub0.97
+
+Ubuntu:
+    grub-install /dev/sda
+        grub2
+
+切换根系统:
+    挂载CentOS的根分区:
+        mount /dev/sda6 /mnt
+
+    绑定动态目录:
+        mount -o bind /dev/ /mnt/dev/
+        mount -o bind /proc/ /mnt/proc/
+        mount -o bind /sys/ /mnt/sys/
+        mount -o bind /tmp/ /mnt/tmp/
+
+        boot独立分区则:
+            mount -o bind /boot/ /mnt/boot/
+
+    切换根系统
+        chroot /mnt/centos
+
+-------------------------------------------------------------------------------
+CentOS Grub:
+
+default = 0
+timeout = 5
+password 123
+
+title CentOS
+    password 123
+    root (hd0,5)
+    kernel /boot/vmlinuz-2.6.32-696.el6.x86_64 root=/dev/sda6 quiet splash
+    initrd /boot/initramfs-2.6.32-696.el6.x86_64.img
+
+title Ubuntu
+    root (hd0,0)
+    kernel /boot/vmlinuz-4.4.0-116-generic root=/dev/sda1 quiet splash
+    initrd /boot/initrd.img-4.4.0-116-generic
+
+-------------------------------------------------------------------------------
+进入系统抢修模式
+    U盘 光盘 网络
+    使用一个临时的Linux操作系统来抢修当前系统
+
+    开机按F11弹出启动选项, 选择网络(PXE)启动
+
+    进入Linux Rescue Mode子菜单 选择哪种系统的修复
+
+    CentOS抢修模式:
+        选择NFS挂载安装镜像
+            3.3.3.1
+            /share/centos1
+
+    Ubuntu抢修模式:
+        3.3.3.1
+        ubuntu_install
+

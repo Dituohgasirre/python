@@ -1,0 +1,175 @@
+MatLab
+
+官方网站：
+
+    https://matplotlib.org
+
+官方文档：
+
+    https://matplotlib.org/contents.html
+    https://matplotlib.org/users/index.html
+    https://matplotlib.org/tutorials/index.html
+
+
+
+在IPython/notebook中绘图
+
+    模块导入约定 (numpy->np, matplotlib.pyplot->plt, matplotlib->mpl)
+    %pylab 命令
+    %matplotlib 命令
+    %matplotlib inline  <-- 可用于ipython qtconsole, 和jupyter notebook
+    交互式开关 (plt.ion/plt.ioff)
+
+
+与网页应用程序配合绘图
+
+    与Django结合
+
+
+matplotlib的特点
+
+    快速生成图像，图像格式多样且达到出版物质量要求
+    大多数情况下使用matplotlib的高层命令即可，但仍然可以使用底层的命令
+
+matplotlib的组成
+
+    matplotlib主要的部件是pyplot的函数API和matplotlib的面向对象API
+    在pyplot中，通过简单的函数在当前图像的当前坐标系做绘图操作
+    matplotlib是包的整体，pyplot是模块
+    pylab是用来方便地导入pyplot和numpy的模块，已不建议使用
+
+matplotlib图形的组成部分
+
+    matplotlib图形部件可分为：图(figure), 坐标系(axes)，坐标轴(axis)，元素(artist)
+    matplotlib的“图”(figure)是一切图形元素的载体，它有标题
+    matplotlib的“坐标系”(axes)就是“图”中用来绘画的区域，一个图可以有多个坐标系
+    matplotlib的“坐标系”可以设置标题(set_title)、X轴标签(set_xlabel)、Y轴标签(set_ylabel)
+    matplotlib的“坐标系”可以设置X轴的界限(set_xlim)、Y轴的界限(set_ylim)
+    matplotlib的“坐标轴”(axis)构成“坐标系”，坐标轴用于设置界限和生成刻度
+    matplotlib的“元素”(artist)基本上就是“图”上所有能看到的对象
+
+matplotlib接受的输入数据
+
+    matplotlib的绘图函数接受np.array类型的输入数据
+    非np.array类型的数据应尽量转换后再输入给绘图函数
+
+matplotlib的前端与后端
+
+    matplotlib的前端就是用户的绘图代码，后端就是生成绘制结果或文件的代码
+    matplotlib后端可分两类：UI后端（交互式），硬拷贝后端（非交互式）
+    配置matplotlib后端的方法：matplotlibrc, 环境变量，plt.use函数
+
+交互式绘图
+
+    创建图 (plt.figure)
+    创建坐标系 (plt.subplots, fig.add_subplot)
+    显示图 (plt.show)
+    重绘图 (plt.draw)
+    关闭图 (plt.close)
+    切换图 (plt.figure)
+    切换坐标系 (plt.axes)
+    清除当前图 (plt.clf, fig.clear)
+    清除当前坐标系 (plt.cla, ax.clear)
+    查询是否交互式 (plt.isinteractive)
+    切换交互式 (plt.ion, plt.ioff)
+
+操作图
+
+    创建图 (plt.figure)
+    改变分辨率 (fig.dpi)
+    改变背景色 (fig.set_facecolor)
+    保存图 (fig.savefig)
+    获取当前的图 (plt.gcf)
+    获取所有的图 (plt.get_fignums)
+    切换当前图 (plt.figure)
+    设置图的标题 (fig.suptitle)
+
+操作坐标系
+
+    添加坐标系 (plt.subplot, plt.subplots, fig.add_subplot, fig.add_axes)
+    从图中获取所有的坐标系 (fig.axes)
+    从图中删除坐标系 (fig.delaxes, ax.remove)
+    获取当前坐标系 (plt.gca)
+    设置当前的坐标系 (plt.axes)
+    设置坐标系的长宽比 (ax.set_aspect)
+    设置格子 (ax.grid)
+    设置坐标系的标题 (ax.set_title)
+
+操作坐标轴
+
+    获取刻度值 (ax.get_xticks, ax.get_yticks)
+    获取刻度标签 (ax.get_xticklabels, ax.get_yticklabels)
+    获取刻度线 (ax.get_xticklines, ax.get_yticklines)
+    设置刻度值 (ax.set_xticks, ax.set_yticks)
+    设置刻度标签 (ax.set_xticklabels, ax.set_yticklabels)
+    设置刻度的显示 (ax.xaxis.set_ticks_position)
+    设置刻度线 (line.set_XXX)
+    获取数据范围 (ax.get_xlim, ax.get_ylim)
+    设置数据范围 (ax.set_xlim, ax.set_ylim)
+    获取轴线 (ax.spines)
+    设置轴线 (spine.set_XX, visible, position, edgecolor, linestyle, linewidth)
+    设置坐标轴的标题 (ax.set_xlabel, ax.set_ylabel)
+
+操作线
+
+    绘一条线 (plt.plot, ax.plot)
+    设置线的颜色 (line.set_color)
+    设置线的标签 (line.set_label)
+    设置线的风格 (line.set_linestyle)
+    设置线的宽度 (line.set_linewidth)
+    设置线的标记 (line.set_marker)
+    从图中删除线 (line.remove, del ax.lines[N])
+
+操作点
+
+    绘一个点 (plt.scatter, ax.scatter)
+    设置点的颜色 (p.set_facecolor, p.set_edgecolor)
+    设置点边缘的风格 (p.set_linestyle)
+    设置点的大小 (p.set_sizes)
+    从图中删除点 (p.remove)
+
+图例
+
+    打出默认的图例
+    调整图例的位置
+    显示隐藏方框 (l.set_frame_on)
+
+获取图中的元素
+
+    ax.lines
+    ax.spines
+    ax.get_xaxis
+    ax.get_xgridlines
+    ax.get_xticklabels
+    ax.get_xticklines
+    ax.get_xticks
+
+常见图形
+
+    线图
+    散点图
+    柱型图 (比较变量)
+    直方图 (分布,distribution)
+    饼图
+    箱图
+    
+注解文字
+
+    简单注解 (plt.annotate)
+    调整箭头 (xy, arrowprops)
+    使用LaTex公式
+    文本字体调整 (fontsize, color)
+
+其它技巧
+
+    绘制水平线 (ax.axhline)
+    绘制垂直线 (ax.axvline)
+    填充颜色 (ax.fill_between)
+    绘制文字 (ax.text)
+    配置中文显示
+    负号的显示问题
+
+matplotlib的配置
+
+    matplotlib内置了一系列的默认设置，通过这些设置几乎可以定制所有的属性
+    获取配置文件位置 (mpl.matplotlib_fname())

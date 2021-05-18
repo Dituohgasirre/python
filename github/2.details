@@ -1,0 +1,107 @@
+Git是什么，能做什么
+
+Git是版本管理工具。什么是“版本管理”，revision management.
+
+cvs
+svn (分支)
+Mercurial
+git (分支，label)
+GitLab
+
+Linux kernel author (Linus)
+
+
+
+Git 的配置
+
+有三个配置层次
+
+    1. 系统级别 (system，/etc/gitconfig, 影响系统上所有用户)
+    2. 用户级别 (global，~/.gitconfig, 影响某个指定用户)
+    3. 项目级别 (影响某个git项目，在项目的目录下，$GIT_DIR/config)
+
+三个层次的优先级：项目 > 用户 > 系统
+
+
+范例配置文件
+
+$ cat ~/.gitconfig 
+[user]
+        name = Joshua Chen
+        email = iesugrace@gmail.com
+        signingkey = B3ECAC6A
+[alias]
+        last = log -1
+        pwd = branch -vv
+        st = status
+        ck = checkout
+        r = remote
+        b = branch
+        c = commit -v
+        a = add
+        l = log
+        cat = cat-file
+        d = diff
+        unstage = reset HEAD
+[merge]
+        tool = vimdiff
+[mergetool]
+        prompt = false
+[rerere]
+        enabled = true
+[core]
+        quotepath = off
+        editor = vi
+
+
+
+
+配置方式：
+
+1. 通过命令配置
+    注意：如果不使用 --global, --system 等参数，则默认修改的是项目下面的设定
+
+    git config core.quotepath off
+    git config user.name "Joshua Chen"
+    git config user.email "iesugrace@gmail"
+
+2. 通过编辑配置文件来配置
+
+    vi .git/config      <-- 配置某个项目专用的配置
+    vi ~/.gitconfig     <-- 配置某个用户全局使用
+    vi /etc/gitconfig   <-- 为系统上的所有用户配置
+
+
+
+
+Git的一般工作流程
+
+1. 创建项目（一次性操作）
+
+    git init name-of-the-project
+    
+2. 预备文件/编辑/复制，文件必须存放到git项目的目录下（不是.git目录，可以有子目录）
+
+    vi
+    cp
+    mv
+
+3. 添加需要用git来管理的文件
+
+    git add file-name1 file-name2
+    
+4. 把添加的文件提交到仓库中
+
+    git commit
+
+5. 查看提交记录
+
+    git log
+
+
+
+显示git的子命令存放路径
+
+# git --exec-path
+
+自行开发的git扩展命令可以存放到 --exec-path 所指定的目录中，命令方式为 git-<subcommandname>

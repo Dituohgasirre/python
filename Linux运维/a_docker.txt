@@ -1,0 +1,123 @@
+docker
+    轻量级虚拟化技术 容器虚拟化方案中佼佼者
+    目标: 制作一次，到处运行
+    使用Go语言编写的开源项目
+    kvm -> openstack
+
+    官方: www.docker.com
+
+安装
+    curl https://get.docker.com/ | sh
+
+    ubuntu:
+        wget https://download.docker.com/linux/ubuntu/dists/xenial/pool/stable/amd64/docker-ce_17.12.1~ce-0~ubuntu_amd64.deb
+
+        sudo apt-get remove docker docker-engine docker.io -y
+
+        apt install ./docker-ce_17.12.1~ce-0~ubuntu_amd64.deb -y
+
+-------------------------------------------------------------------------------
+镜像
+    类似于虚拟机的镜像概念, 面向docker引擎的只读模板(包含文件系统)
+    镜像是docker的基础
+
+    获取镜像
+        从网络上搭建的docker镜像服务器上拉取镜像(docker hub)
+
+        docker pull centos
+
+        docker pull centos:7
+
+    查看镜像
+        docker images
+
+        REPOSITORY TAG    IMAGE ID     CREATED      SIZE
+        busybox    latest f6e427c148a7 2 weeks ago  1.15MB
+
+        REPOSITORY      镜像名
+        TAG             镜像版本
+        IMAGE ID        镜像ID(对镜像操作时使用)
+        CREATED         镜像创建时间
+        SIZE            镜像大小
+
+
+    运行镜像(创建容器)
+        docker run -it 镜像名/镜像ID
+            -it      交互模式, 打开此容器的终端
+
+    删除镜像
+        docker rmi 镜像名/镜像ID
+
+    搜索镜像
+        docker search 搜索项
+
+    镜像导出
+        docker save -o 存储文件名.tar 要存储的镜像名:镜像标签
+
+    镜像导入
+        docker load --input 存储文件名.tar
+            或
+        docker load < 存储文件名.tar
+
+    创建镜像
+        docker commit -m "提交信息" -a "作者" 容器ID 镜像名称
+
+    上传镜像
+        docker tag 镜像名:标签名 DockerHub用户名/镜像名:标签名
+
+        docker push 用户名镜像名/镜像名
+
+            前提必须先登录: docker login
+
+-------------------------------------------------------------------------------
+容器
+    通过容器运行和隔离应用
+
+    新建容器
+        docker run -it [--name 容器名称] 镜像ID [容器运行参数]
+            --rm        退出容器自动删除
+            --name      指定容器名称
+            -i          保持标准输入
+            -t          分配tty终端
+
+    查看容器
+        docker ps -a
+
+    删除容器
+        docker rm 容器ID
+
+    启动容器
+        docker start 容器ID
+
+        docker start -a 容器ID
+            启动容器并且唤醒进入终端交互
+
+    关闭容器
+        docker stop 容器ID
+
+    重启容器
+        docker restart 容器ID
+
+    唤醒容器
+        docker attach 容器ID
+
+    守护进程运行(后台运行)
+        docker run -d 容器ID 运行的程序
+
+    执行容器
+        docker exec -it 容器ID [容器运行参数]
+            -i          交互(标准输入保持打开)
+            -t          tty终端(给容器分配tty终端)
+
+-------------------------------------------------------------------------------
+数据管理
+    新建容器添加数据共享
+        docker run -it -v 本机共享目录路径:映射容器目录路径 镜像名 [容器程序名]
+
+        docker run -it -v /kyo:/home ubuntu
+            将本机/kyo目录挂载到容器/home目录, 在容器中操作/home目录即操作本机/kyo目录
+
+网络管理
+    新建容器添加端口映射
+        docker run -itd -v /kyo:/home -p 22:22 ubuntu
+
