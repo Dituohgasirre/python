@@ -1,0 +1,303 @@
+一、创建一个项目，使用SQLite数据库，数据库文件存放到项目目录下的db目录中，数据库名字叫做db.bin。
+
+流程：
+    1. 创建project（假设叫做mysite)
+    2. 修改 mysite/settings.py
+    参考配置
+
+        DB_DIR = os.path.join(BASE_DIR, 'db')
+        os.makedirs(DB_DIR, mode=0o755, exist_ok=True)
+
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': os.path.join(DB_DIR, 'db.bin'),
+            }
+        }
+
+    3. 运行migrate命令，生成数据库
+
+        $ python manage.py migrate
+
+
+二、配置Django项目使用MySQL作为数据库
+
+1. 修改项目配置文件 settings.py
+参考配置：
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'db1',
+            'HOST': 'localhost',
+            'PORT': '',
+            'USER': 'db1',
+            'PASSWORD': 'db1',
+            'CHARSET': 'utf8',
+        },
+    }
+
+2. 创建数据库，并授权
+    mysql> create database db1;
+    Query OK, 1 row affected (0.00 sec)
+
+    mysql> grant all on db1.* to db1@localhost identified by 'db1';
+    Query OK, 0 rows affected (0.00 sec)
+
+3. 测试： python manage.py dbshell
+
+
+三、测试数据库设定中TIME_ZONE与配置文件顶层的USE_TZ之间的配合关系：
+1. 使用SQLite数据库
+2. 设置USE_TZ = True
+3. 在数据库配置中添加TIME_ZONE = 'Asia/Shanghai'
+4. 定义一个模型，创建一字段，使用models.DateTimeField 作为字段类型
+5. 在交互式环境中为模型添加一条记录，时间使用当前时间，
+   当前时间通过django.utils.timezone.now() 来获取
+6. 通过 python manage.py dbshell 打开SQLite的shell（需要sqlite3命令）
+   查询记录的时间信息，对比与本地时间是否一致
+7. 修改数据库设定，不使用TIME_ZONE设置；然后插入新的记录
+8. 重复第6步，对比记录的时间与本地时间是否一致
+
+
+四、创建指定时区的时间对象，并对时间做时区转换
+1. 用pytz.timezone 创建一个Asia/Chongqing 的时区
+2. 给一个没有时区信息的时间加上刚创建的时区信息
+3. 把加上时区信息的时间对象转换成东7区的时间
+
+参考命令
+    from datetime import datetime
+    import pytz
+    now = datetime.now()                    <-- 无时区信息
+    tz = pytz.timezone('Asia/Chongqing')    <-- 创建时区
+    aware_time = tz.localize(now)           <-- 加上本地时区信息
+    tz2 = pytz.timezone('UTC')              <-- 另外一个时区
+    tz2.normalize(aware_time)               <-- 时区转换
+    aware_time.astimezone(tz2)              <-- 时区转换，与上等价
+
+
+五、在项目设定文件中为项目加上两个数据库，一个叫default，使用SQLite，一个叫backup，使用MySQL
+1. 把模型应用到两个数据库中
+2. 分别对两个数据库做增删改查操作
+
+
+六、操练模型的创建、启用、应用等操作
+1. 创建一个名叫Contact的模型，有四个字段: name, gender, age, phone
+2. 把应用注册到项目中
+3. 为模型的变动创建migration
+4. 查看migration对应的SQL
+5. 把migration应用到数据库
+
+参考做法：
+
+    1. 创建项目，应用（名为app1)，注册应用到项目中
+    2. 创建模型
+        class Contact(models.Model):
+            name = models.CharField(max_length=64)
+            gender = models.IntegerField(default=1)
+            age = models.IntegerField(default=0)
+            phone = models.CharField(max_length=11)
+
+    3. 创建migration: python manage.py makemigrations app1
+    4. 查看SQL: python manage.py sqlmigrate app1 0001
+    5. 应用migration: python manage.py migrate app1
+
+
+
+七、创建一个名叫Book的模型，有这些字段：name, price, year, author，在交互式环境做以下操作：
+1. 创建10条Book记录
+2. 删除其中一条记录
+3. 修改其中一条记录的价格，并保存
+4. 用get方法获取一条记录
+5. 用filter方法获取一组记录
+
+
+八、承接练习七，按以下要求操练：
+1. 查询前面的5条记录
+2. 查询第3条到第7记录
+3. 查询第3条到第7记录，步长为2
+4. 对比上面三种查询方法的返回值的类型
+
+
+九、承接练习七，按以下要求操练：
+1. 对结果按照price排序，取价格最高的3本书
+2. 对结果先按照year 顺序排，再按照price反序排
+
+
+十、操练按记录的字段过滤查询结果
+承接练习七，使用以下所列的方法做查询操作：
+exact iexact contains icontains in gt gte lt lte startswith istartswith endswith iendswith range date year month day week week_day time hour minute second isnull regex iregex 
+
+
+十一、承接练习七，做下列操作：
+1. 求2017年的书的平均价格 (Avg)
+2. 求2017年的书的最大价格，最小价格 (Max, Min)
+3. 求50元以上的书的数量 (Count)
+
+
+十二、操练Q对象的使用
+1. and操作
+2. or操作
+3. not操作
+
+
+十三、承接练习七，对比通过模型来插入数据与通过原始SQL来插入大量数据的效率区别
+1. 生成包含1万条记录的文件
+2. 遍历包含1万条记录的文件，用模型的API把数据插入数据库中，计算总时间
+3. 遍历包含1万条记录的文件，用原始SQL把数据插入数据库中，计算总时间
+
+参考测试函数：
+
+In [23]: def add_api(n):
+    ...:     for i in range(n):
+    ...:         book = Book(name='Django', author='Guido', price=10, year=2018)
+    ...:         book.save()
+
+In [23]: def add_raw(n, conn):
+    ...:     cur = conn.cursor()
+    ...:     for i in range(n):
+    ...:         cur.execute('insert into app1_book (name, price, author, year) values("Django",
+    ...: 10, "Guido", 2018)')
+    ...:     conn.commit()
+    ...:     conn.close()
+
+In [23]: def add_raw2(n, conn):
+    ...:     cur = conn.cursor()
+    ...:     sql = 'insert into app1_book (name, price, author, year) values'
+    ...:     values = ','.join('("Django", 10, "Guido", 2018)' for i in range(n))
+    ...:     sql = sql + values
+    ...:     cur.execute(sql)
+    ...:     conn.commit()
+    ...:     conn.close()
+
+from django.db import connection
+%time add_api(200)
+%time add_raw(200, connection)
+%time add_raw2(200, connection)
+
+
+十四、承接练习七，给模型Book添加必要的函数，使得可以在交互式界面显示Book模型实例对象的具体信息
+
+
+十五、在ipython 中测试记录的id与pk
+
+1. 创建一个Django 项目和APP
+2. 创建两个Model，一个不指定主键，一个指定主键
+    模型定义参考：
+    class Task(models.Model):
+        name = models.CharField(max_length=128)
+
+    class Log(models.Model):
+        log_id = models.IntegerField(primary_key=True)
+        data = models.CharField(max_length=4096)
+
+3. 在ipython 里面创建记录，并查看pk 的值
+    from app.models import Task, Log
+    task = Task.objects.create(name='task1')
+    log = Task.objects.create(log_id=1, data='event1')
+    task.id
+    task.pk
+    log.id      <-- 会出错
+    log.log_id
+    log.pk
+
+
+十六、创建两个模型，一个名为Father, 一个名为Child，多个Child可以关联到一个Father，按以下要求操练：
+1. 创建两个Father实例f1, f2
+2. 创建4个Child实例c1, c2, c3, c4，分别以f1, f2为Father
+3. 通过f1获取其关联的所有Child实例
+4. 通过Child实例获取其关联的Father实例
+5. 通过Father.objects.filter方法获取c1, c2, c3 的Father
+6. 以Father的名字为条件，使用Child.objects.filter方法获取所有相关的Child实例
+7. 调整Child的设置，使得删除Father时不会连带删除关联的Child
+
+
+十七、创建两个模型，一个名为Tag, 一个名为Article，一个Article可以关联多个Tag，一个Tag可以关联多个Article，按以下要求操练：
+1. 创建两个Tag实例t1, t2
+2. 创建2个Article实例a1, a2；a1关联到t1和t2, a2也关联到t1和t2,
+3. 通过t1获取其关联的所有Article实例
+4. 通过a1实例获取其关联的Tag实例
+5. 获取a1, a2关联的所有Tag，并去重
+6. 获取t1, t2关联的所有Article，并去重
+7. 获取所有关联了名字以L开头的Tag的Article，并去重
+
+
+十八、创建两个模型，一个名为Private, 一个名为Public；一个Private可以关联一个Public，一个Public可以关联一个Private，按以下要求操练：
+1. 创建一个Private实例pri
+2. 创建一个Public实例pub，pub关联到pri
+3. 通过pri获取其关联的Public实例
+4. 通过pub获取其关联的Private实例
+5. 通过Private.objects.filter来获取与pub关联的Private实例
+6. 确保删除Private实例会删除相应的Public实例，反之亦然
+
+
+十九、创建一个模型，测试default 和null 参数的作用
+1. 创建字段gender，IntegerField类型，设置default=1
+2. 创建字段comment，CharField类型，设置null=True
+3. 插入记录，不提供gender，不提供comment
+4. 查看所插入的记录，观察gender和comment字段的值
+
+
+二十、创建一个模型，测试auto_now, auto_now_add 参数的作用
+1. 创建字段create_time，DateTimeField类型，设置auto_now_add=True
+2. 创建字段modify_time，DateTimeField类型，设置auto_now=True
+3. 创建一条记录
+4. 查看记录的create_time和modify_time
+5. 更新记录的内容，保存
+6. 再次查看记录的create_time和modify_time
+
+
+二十一、写一个命令行工具，利用Django 数据库来存储信息
+要求：
+
+    1. 通过vim来编辑文档
+    2. 文档的第一行作为标题
+    3. 文档的第二行之后应有一个空行
+    4. 空行之后的所有内容为文档的正文
+    5. 把文档标题，正文，当前时间作为记录的三个字段，存储在Django的数据库中
+
+
+二十二、通过Django的管理后台管理模型的数据
+承接练习七，在后台对数据做增删改查操作。
+
+
+二十三、承接练习七，按要求修改Book模型
+要求：
+    1. 添加一个pubtime的字段，字段类型是models.DateTimeField
+    2. makemigrations, migrate
+    3. 在交互式界面，修改原有记录的pubtime，给pubtime加上随机的天数
+    4. 在交互式界面用pubtime做查询操作
+
+参考代码：
+
+    # 修改模型
+    class Book(models.Model):
+        name = models.CharField(max_length=64)
+        year = models.IntegerField(default=0)
+        pubtime = models.DateTimeField(auto_now_add=True, null=True)
+        price = models.IntegerField(default=0)
+        author = models.CharField(max_length=11)
+
+    # 应用模型的变动到数据库
+    $ python manage.py makemigrations app1
+    $ python manage.py migrate app1
+
+    # 查询
+    Book.objects.filter(pubtime__day__lte=9)
+
+
+项目部分
+
+1. 创建两个数据模型：Question, Choice
+
+    Question的字段：
+        question_text 字段，存放问题的文本内容
+        pub_date 字段，存放发布日期
+
+    Choice的字段：
+        choice_text 字段，存放选项的文本内容
+        votes 字段，存放所得的投票总数
+        question 字段，用来关联到相应的Question记录
+
+2. 在交互式的界面，使用Question和Choice模型，添加若干条记录
+
+3. 将Question, Choice模型注册到管理后台，并通过管理后台添加更多记录

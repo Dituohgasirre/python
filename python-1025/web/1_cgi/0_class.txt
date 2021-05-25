@@ -1,0 +1,232 @@
+HTTP:
+    HTTP(超文本传输协议)基于TCP网络协议 (1989年3月)
+    HTML(超文本标记语言)
+    WWW(World Wide Web)  -> Web(网站) 全球广域网 万维网 基于HTTP协议建立的一种网络服务
+
+    W3C 万维网联盟, 定义标准 1994年创建 标识互联网的发展
+
+    1995年左右实现W3C标准的服务器和客户端:
+        服务器: Apache2.0 IIS
+        客户端(浏览器):
+            1995: Netscape Navigater1.0 和 Internet Explore1.0
+            2004: Mozilla Firefox
+
+    C/S     客户端/服务端
+    B/S     浏览器/服务端
+
+    Web通讯流程:
+        打开浏览器
+        输入网址(域名 -> URL)
+        域名解析服务器解析域名 返回IP地址
+        再去访问对应IP地址的服务器
+        服务器运行Web服务程序对应提供服务
+            根据URL查找对应路径的文件, 有可能将文件内容返回, 有可能解析文件再将解析结果返回
+        浏览器接收到返回内容进行解析显示
+
+
+Web服务器:
+    Python自带HTTP服务(只是文件共享)
+
+    Apache(HTTP服务器)
+        Web: LAMP = Linux + Apache + MySQL + PHP/Python/Perl
+
+        安装:
+            sudo apt install apache2 -y
+
+    Nginx
+        LNMP = Linux + Nginx + MySQL/MongoDB + PHP/Python/Perl
+
+    IIS   + Asp/Asp.net  + 微软
+
+    Tomcat  + Java
+
+-------------------------------------------------------------------------------
+URI和URL
+    URI     统一资源标识符
+    URL     统一资源定位符
+        URL是URI的子集, 更为具体的URI
+
+    URL格式:
+        http://user:passwd@www.baidu.com:80/dir/index.html?uid=1&name=Python#OOP
+            协议类型:       http://
+                            file://         当前文件系统
+                            ftp://
+                            ssh://
+
+            登录信息(认证): user:passwd
+            服务器地址: www.baidu.com
+            服务端端口: 80
+            带层次文件路径: /dir/index.html
+            查询字符串(文件的参数):  uid=1&name=Python
+            片段标识符: #OOP
+
+    Python操作URL模块: urllib.parse
+        urldecode       对URL进行解码
+        urlencode       对URL进行编码
+
+-------------------------------------------------------------------------------
+HTTP协议
+    HTTP协议用于浏览器和服务器之间通讯
+        浏览器发送资源请求给服务器, 服务器根据资源请求发送回应
+    HTTP协议是不保存状态, 导致每次请求都要重新连接
+
+    HTTP请求
+        请求行
+            格式: 请求方法 URL HTTP协议版本 CRLF(\r\n, 回车换行)
+                请求方法:
+                    GET         获取资源
+                    POST        请求服务器对URL资源附加新的数据
+                    PUT         请求服务器存储一个资源, 存储的资源由URL决定
+                    DELETE      请求服务器删除一个资源
+
+                    HEAD        请求获取URL资源响应消息报头
+                    TRACE       请求服务器回传收到请求信息, 用于测试或诊断
+                    CONNECT     请求用隧道协议连接代理
+                    OPTIONS     请求查询服务器性能或资源相关选项
+
+        消息报头
+            请求首部字段
+            通用首部字段
+            实体首部字段
+            其它
+
+        请求正文
+            请求时发送的实际数据, 一般用于POST和PUT
+
+
+    HTTP响应
+        状态行
+            格式: HTTP版本 响应状态代码 状态代码的文本描述
+                响应代码:
+                    1xx     提示信息, 请求接受, 继续处理
+                    2xx     成功 请求被成功接受并且处理
+                        200 OK      请求连接成功
+                    3xx     重定向
+                    4xx     客户端错误, 请求语法格式或请求无法实现
+                        404     请求资源不存在
+                        403     拒绝服务
+                    5xx     服务器错误
+                        500     服务器发生不可预期的错误
+        消息报头
+            响应首部字段
+            通用首部字段
+            实体首部字段
+            其它
+
+        响应正文
+
+
+HTTP首部
+    HTTP1.1首部
+        通用首部字段    请求和响应都可以使用的首部
+            Cache-Control       控制缓存的行为
+            Connection          连接的管理
+            Date                创建报文的日期时间
+            Pragma              报文指令
+            Trailer             报文末端的首部
+            Transfer-Encoding   指定报文主体的传输编码方式
+            Upgrade             升级为其它协议
+            Via                 代理服务嚣的相关信息
+            Warning             错误通知
+
+        请求首部字段    请求报文使用的首部，补充请求的附加内容
+            Accept              用户代理可处理的媒体媒体类型
+            Accept-Charset      优先的字符集
+            Accept-Encoding     优先的内容编码
+                gzip            使用GNU zip压缩程序
+                compress        Unix压缩程序
+                deflate         使用zlib及deflate压缩算法
+                identity        不执行压缩
+            Accept-Language     优先的语言(自然语言)
+            Authorization       Web认证信息
+            Expect              期待服务嚣的特定行为
+            Form                用户的电子邮箱地址
+           Host                请求资源所在服务嚣
+            If-Match            比较实体标记(ETag)
+            If-Modified-Since   比较资源更新时间
+            If-None-Match       比较实体标记(与If-Match相反)
+            If-Range            资源未更新时发送实体Byte的范围请求
+            If-Unmodified-Since 比较资源更新时间(与If-Modified-Since相反)
+            Max-Forwards        最大传输逐跳数
+            Proxy-Authorization 代理服务嚣要求客户端的认证信息
+            Range               实体的字节范围请求
+            Referer             对请求的URL的原始获取方
+            TE                  传输编码的优先级
+            User-Agent          HTTP客户端程序的信息
+
+        响应首部字段    响应报文使用的首部，补充响应的附加内容
+            Accept-Ranges       是否接受字节范围请求
+            Age                 推算资源创建经过的时间
+            ETag                资源的匹配信息
+            Location            令客户端重定向至指定URL
+            Proxy-Authenticate  代理服务嚣对客户端的认证信息
+            Retry-After         对再次发起请求的时机要求
+            Server              HTTP服务嚣的安装信息
+            Vary                代理服务嚣缓存的管理信息
+            WWW-Authenticate    服务嚣对客户端的认证信息
+
+        实体首部字段    请求和响应都可使用的首部，补充资源内容更新时间等信息
+            Allow               资源可支持的HTTP方法
+            Content-Encoding    实体主体适用的编码方式
+                gzip/compress/deflate/identity
+            Content-Language    实体主体的自然语言
+            Content-Length      实体主体的大小(单位:字节)
+            Content-Location    替代对应资源的URL
+            Content-MD5         实体主体的报文摘要
+            Content-Range       实体主体的位置范围
+            Content-Type        实体主体的媒体类型
+            Expires             实体主体过期的日期时间
+            Last-Modified       资源的最后修改时间时间
+
+    非正式首部字段归纳于RFC4229 HTTP Header Field Registations
+        Cookie              请求首部字段，客户端发送给服务嚣
+        Set-Cookie          响应首部字段，服务嚣发送给客户端
+            NAME=VALUE      Cookie的名称和值
+            expires         Cookie的有效期
+            path            限制指定Cookie的发送范围的文件目录
+            domain          指定域名做到结尾匹配一致
+            Secure          HTTPS安全连接时才发送
+            HttpOnly        使Javascript无法获取Cookie
+        Content-Disposition MIME协议的扩展，控制浏览嚣是否下载
+
+-------------------------------------------------------------------------------
+Python CGI编程
+    Apache默认站点配置 /etc/apache2/sites-available/000-default.conf
+        <VirtualHost *:80>
+            ServerAdmin iprintf@qq.com
+            DocumentRoot /kyo/              # 站点根目录(共享目录)
+            <Directory /kyo>
+                Options Indexes FollowSymLinks # 允许目录列表和软链接
+                Require all granted            #允许所有人访问
+            </Directory>
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log        #站点错误日志存储路径
+            CustomLog ${APACHE_LOG_DIR}/access.log combined #站点访问日志存储路径
+        </VirtualHost>
+
+        重启Apache服务: sudo service apache2 restart
+
+        测试: 打开浏览器输入本机IP地址 http://3.3.3.3
+
+CGI: 通用网关接口协议
+    规范Web服务器和Web应用程序之间的通信
+
+    配置Apache开启CGI功能: /etc/apache2/sites-available/000-default.conf
+        <Directory /kyo>
+            Options +ExecCGI            # 开启CGI功能
+            DirectoryIndex index.py     # 设置目录默认执行文件
+        </Directory>
+        AddHandler cgi-script .py       # 遇到.py文件使用CGI运行
+
+    开启Apache执行其它程序的权限: sudo a2enmod mpm_prefork cgi
+
+    配置Apache执行用户: /etc/apache2/envvars
+        export APACHE_RUN_USER=zl
+        export APACHE_RUN_GROUP=zl
+
+    重启Apache服务器: sudo service apache2 restart
+
+CGI的请求和响应:
+    CGI协议规定Web服务器将请求信息以环境变量的形式传入Web应用程序
+    CGI协议规定Web应用程序以标准输出形式来响应(以空行为界线, 上面为响应头部信息, 下面为响应正文信息)
+

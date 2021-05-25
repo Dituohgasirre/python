@@ -1,0 +1,68 @@
+# 了解客户端动态网页对爬虫的影响 (JavaScript)
+# 了解处理客户端动态网页的方法 (selenium+PhantomJS/Firefox, Splash)
+# 了解selenium的作用 (Firefox, Chrome, PhantomJS)
+# 能够安装selenium + Firefox/PhantomJS
+# 能够用selenium 来获取使用JS渲染的网页
+# 能够在selenium 中选择网页元素 (d.find_element_by_XXX)
+# 能够在selenium 中清除输入框中的文字 (e.clear)
+# 能够在selenium 的输入框中输入文字 (e.send_keys)
+# 能够在selenium 中点击按钮 (e.click)
+# 能够在selenium 中截屏 (d.get_screenshot_as_png())
+# 能够使用Firefox的“无头”模式 (os.environ['MOZ_HEADLESS'] = '1')
+
+# 能够安装scrapy (Python)
+# 能够创建scrapy项目
+# 了解scrapy项目的目录结构
+# 理解scrapy爬虫的组件及功能以及数据在各组件之间传输的流程
+# 能够写一个简单的蜘蛛爬取指定的网页，并存放结果 (scrapy.Spider, name, start_requests, parse)
+# 能够从命令行运行爬虫 (crawl, runspider)
+# 理解Spider类中常用属性的功能 (name, allowed_domain, start_urls, ...)
+# 能够在交互式环境中测试scrapy (shell, scrapy.shell.inspect_response)
+# 能够检查爬虫实际下载的网页内容 (fetch, view)
+
+# 能够使用scrapy默认的start_requests方法 (start_urls)
+# 掌握scrapy抽取网页数据的方法 (xpath, css, extract, extract_first, re)
+# 能够在spider中使用beautifulsoup来提取数据 (soup = BS4(response.text, 'lxml'))
+# 能够从命令行将抓取到的数据保存到文件中 (-o, -t)
+
+# 理解Item的作用
+# 能够使用Item来组织抓取到的数据
+# 能够使用Item Loader来简化Item数据的填充
+
+# 理解Item管道的工作原理 （依次处理）
+# 能够用Item管道来对Item的完整性做校验
+# 能够用Item管道来把Item存储到数据库中
+# 能够通过ImagesPipeline下载图片
+
+# 了解Request/Response的产生及相关的处理组件 (Spider, Downloader)
+# 了解Request的常用参数 (url, callback, meta, headers, cookies)
+# 能够通过request.meta给回调函数传递额外数据
+# 能够使用FormRequest来做登录操作
+# 能够使用FormRequest.from_response来做复杂登录
+# 了解Response的常用参数 (url, status, headers, body, request)
+
+=====================
+
+# 能够使用Spider中间件
+# 了解常用的Spider中间件的用法
+# 能够使用Downloader中间件
+# 了解常用的Downloader中间件的用法
+
+# 能够给爬虫传递参数 (-a name=value, getattr(self, name))
+# 能够从多个相关的网页获取一个item的信息 (votes, answers, views, title, url, tags)
+# 能够自动跟随并爬取网页中的超链接 (yield scrapy.Request, urljoin, follow)
+# 能够限制爬虫仅爬取指定网站的网页 (allowed_domains)
+# 能够使用telnet console来监控爬虫程序的运行 (查看engine状态，暂停/继续/关闭engine)
+# 能够暂停和继续爬虫的工作 (JOBDIR)
+
+# 能够设置下载延迟/自动流控
+# 能够修改User-Agent
+# 能够使用代理来下载网页
+# 能够通过Splash来解析JS页面
+# 能够通过PhantomJS/Firefox来下载网页 (selenium + PhantomJS/Firefox/Chrome)
+
+# 理解分布式爬虫的原理
+# 能够通过scrapy-redis架设一个简单的分布式爬虫
+
+# 能够通过scrapyd部署爬虫程序
+# 能够把爬虫程序部署到scrapycloud上 (https://scrapinghub.com/scrapy-cloud)

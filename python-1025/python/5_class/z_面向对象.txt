@@ -1,0 +1,566 @@
+面向对象概念
+    程序设计历史演化: 面向问题 -> 面向过程 -> 面向对象
+
+    OOA     面向对象分析
+    OOD     面向对象设计
+    OOP     面向对象语言(object-oriented programming)
+
+    对象
+        对象是现实世界中存在的事物(有形/无形)
+        对象的静态特征(外观、性质、属性等), 在Python中称之为变量(属性, 对数据的描述)
+        对象的动态特征: 功能、行为等, 在Python中称之为方法(完成对数据的操作)
+
+    类
+        将具有相同属性和相同行为的一组对象称为类(共同性质的事物的集合)
+        类是对象的抽象(模板), 对象是类的实例
+        在Python中, 类是一种抽象数据类型(类型)
+
+    面向对象的程序设计的四大特征:
+        抽象
+            数据抽象和过程抽象
+        封装
+            信息隐藏的过程(有选择的数据隐藏)
+            防止意外的数据破坏
+            更易于隔离和修复错误
+        继承
+            提高开发效率的重要手段
+            增强程序代码的可复用性
+            降低程序产生错误的可能性
+            为程序扩充提供了便利
+            一个类派生出子类，子类自动继承父类的属性和方法
+        多态
+            一个接口，多种方法
+            同名方法在不同类中具有不同的行为
+            同一个消息或同一种调用，在不同的场合或不同的情况下执行不同的行为
+            Python中提供成员覆盖实现多态
+            在程序运行时才确定行为
+
+    Python中的类和对象
+        凡物都可分类
+        凡物都是对象(object)
+        对象一定属于某个类
+        对象一定有属性
+        Python的面向对象核心为属性的搜索
+        class定义类对象  通过类对象可以创建类实例
+
+-------------------------------------------------------------------------------
+类的定义和实例
+    类的定义
+        class 类名:
+            pass
+
+    类的实例
+        实例名 = 类名()
+
+-------------------------------------------------------------------------------
+类的属性
+    类的属性定义方法一:
+        class 类名:
+            属性名 = 属性值
+            ...
+
+    类的属性定义方法二:
+        类名.属性名 = 属性值
+
+    类的属性访问:
+        实例名.属性名
+            通过实例名引用的是实例对象的属性
+            实例的属性依附于某个具体的实例，不同的实例，属性是互相独立的
+
+        类名.属性名
+            通过类名引用的是类的属性
+            类的属性与实例的属性不同，它可以给所有实例共享
+
+-------------------------------------------------------------------------------
+类的方法
+    类的常规方法与函数使用基本一样,除了第一个参数必须为self
+
+    self: 类实例对象
+        通过实例调用方法时，实例对象将被当作第一个参数自动传给方法
+        在方法中可以通过self来引用实例对象的属性
+
+    类的方法的定义:
+        class 类名:
+            def 方法名(self, 形参...):
+                pass
+
+            @staticmethod
+            def 静态方法名(形参...):
+                pass
+
+            @classmethod
+            def 类方法名(类对象, 形参...):
+                pass
+
+    类实例的方法调用:
+        绑定方法调用: 实例名.方法名(参数...)
+        非绑定方法调用: 类名.方法名(实例名, 参数...)
+
+    静态方法和类方法的调用:
+        类名.方法名(参数...)
+
+        静态方法和类方法的使用有利于把代码组织到一个类的定义里面
+        如果某个方法既不需要操作类对象, 也不需要操作实例对象, 可以将其定义成静态方法
+        如果某个方法需要操作类对象，而不是实例对象，可以将其定义成类方法
+        不需要类实例通过类对象调用的方法, 不同点在于类方法会将类对象作为第一个参数传入
+
+-------------------------------------------------------------------------------
+属性私有化
+    类中以两个下划线开头但不以两个下划线结尾的名字, 是类的私有成员
+    类的私有成员不允许在类外部通过类名或实例来访问
+        类名.__成员名
+        实例名.__成员名
+            以上两种访问会报错
+
+        类名.__成员名 = 值
+            这种赋值是不会报错
+            因为这种赋值是给类对象增加属性, 与类的实例无关
+
+    类的私有成员只允许在类中通过类名或self来访问
+        能过类名和通过实例名(self)来设置成员的值为不同的值
+
+-------------------------------------------------------------------------------
+对象信息获取
+    Python通过许多特殊命名的方法来实现特定的功能, 这些属性名的开头和结尾都有两个下划线
+
+    获取对象类型:
+        对象名.__class__属性保存类实例的类型
+        type函数就是在获取对象的__class__属性的值
+        可以通过types模块提供的类型做更为细致的判断, 比如说函数判断 生成器判断等
+
+    列出对象属性:
+        对象名.__dict__属性保存实例的属性字典(保存实例所有属性的字典)
+        dir函数会调用实例对象的__dir__方法, 列出对象能访问所有的属性列表
+
+    获取对象的文档信息:
+        对象名.__doc__属性保存对象的文档信息
+        函数也是对象, 函数的__doc__即是函数里开头三引号段内容
+        在ipython使用?获取帮助时显示的docstring字段内容即是对象的__doc__内容
+
+    获取对象占用内存大小:
+        对象名.__sizeof__()
+
+-------------------------------------------------------------------------------
+类的特殊方法
+    def __init__(self, ...):
+        类的构造函数, 对类的实例进行初始化的函数, 在类实例化时自动调用
+
+    def __del__(self):
+        类的析构函数, 对类的实例删除或回收时自动调用的函数
+        析构函数里出现异常是无法向上扩散, 从而无法被外部捕捉
+
+    def __len__(self):
+        当类实例作为参数传给len函数时自动触发
+        return 100
+
+    def __str__(self):
+        当类实例被print函数打印时自动调用
+        return "str"
+
+    def __repr__(self):
+        当类实例在某些交互环境中当字符串使用自动调用
+        当__str__没有实现打印时会使用__repr__方法的结果
+        当__repr__没有实现打印时不会使用__str__方法的结果
+        return "repr"
+
+    def __abs__(self):
+        当将对象传入abs函数时自动调用
+
+    def __int__(self):
+        当将对象传入int函数时自动调用
+
+    def __bool__(self):
+        当将对象传入bool函数时自动调用
+
+    def __float__(self):
+        当将对象传入float函数时自动调用
+
+    def __round__(self):
+        当将对象传入round函数时自动调用
+
+    def __bytes__(self):
+        当将对象传入bytes函数时自动调用
+
+    def __format__(self, format_spec):
+        当将对象传入format函数时自动调用
+
+    def __call__(self):
+        实现__call__方法使实例对象可被执行(对象实例(...))
+
+-------------------------------------------------------------------------------
+属性管理
+    在Python中对象的属性默认可以任意创建及访问, 不一定要在类定义时指定
+    Python提供了setattr getattr hasattr delattr四个函数来管理对象的属性
+    这四个函数实现原理只是封装对象的__dict__属性字典的操作
+
+    获取对象的属性: getattr(对象名, 属性名[, 默认值])
+        属性名为字符串, 获取对象对应的属性, 如果没有指定的属性会报错
+        第三个参数为没有属性时设置默认值, 这样获取属性就不会报错
+
+    新增或修改对象的属性: setattr(对象名, 属性名, 属性值)
+
+    判断对象的属性是否存在: hasattr(对象名, 属性名)
+
+    删除对象的属性: delattr(对象名, 属性名)
+
+    限制对象的属性:
+        由于Python的灵活性, 可以任意随时给对象绑定属性
+        但有时需要限制对象的成员, 则使用对象的__slots__属性指定对象的成员
+        例:
+            class A:
+                __slots__ = ('name', 'age')
+
+            A的实例对象只能绑定访问name和age属性成员
+            不能使用setattr和对象直接通过点属性来绑定新属性
+
+        授权(慎用 坑很深)
+            可以通过实现对象的__getattr__ __getattribute__ __delattr__ __setattr__方法来起到更严格的授权管理
+            以上四个方法都有可能造成死循环(因 self.属性名 造成), 解决方法:
+                使用父类同名访问
+                使用self.__dict__[属性]来访问或设置(__getattribute__不适用)
+
+            def __getattr__(self, name):
+                如果搜索属性名称失败时, 会自动调用__getattr__方法
+                如果允许访问(根据需要可返回任意值):
+                    不存在可创建再返回
+                    返回对象其它属性值: self.__dict__[其它属性]
+                    返回其它任意值
+
+            def __getattribute__(self, name):
+                如果搜索属性时(运行hasattr, getattr函数), 会自动调用__getattribute__方法
+                如果属性存在允许访问情况:
+                    返回object.__getattribute__(self, name)的结果
+                    不能通过self.__dict__[name]来获取, 因为访问__dict__也会触发此函数造成死循环
+                如果属性不存在:
+                    抛出AttributeError异常,否则影响hasattr的判断
+
+            def __delattr__(self, name):
+                如果删除属性时(运行delattr函数), 会自动调用__delattr__方法
+
+            def __setattr__(self, name, value):
+                如果设置属性时(运行setattr函数), 则会自动调用__setattr__方法
+
+            范例:
+                class C:
+                    allowed = ['name', 'age']
+
+                    def __setattr__(self, name, value):
+                        if name not in self.allowed:
+                            raise AttributeError(name + ' not allowed')
+                        self.__dict__[name] = value
+
+                    def __getattribute__(self, name):
+                        if name in self.allowed:
+                            return object.__getattribute__(self, name)
+                        raise AttributeError('%s 找不到' % name)
+
+                    def __getattr__(self, name):
+                        if name not in self.allowed:
+                            raise AttributeError(name + ' not allowed')
+                        if name not in self.__dict__:
+                            raise AttributeError(name + ' not exists')
+                        return self.__dict__[name]
+
+    使用__import__方法和hasattr getattr setattr delattr四个方法实现反射机制
+    反射机制案例: 实现Web框架的路由功能
+
+-------------------------------------------------------------------------------
+类的继承和多态
+    通过继承, 子类可以复用父类的代码(直接访问到父类的属性和方法)
+    子类实例时会自动调用父类构造函数, 也可通过super函数来手动调用
+        super().__init__(...)
+    当子类和父类属性或方法同名时要调用父类的属性或方法可使用super函数
+    通过继承, 子类也可以覆写父类的方法或属性来实现多态
+    Python支持多继承(从左向右,广度优先方法查找)
+
+    继承语法:
+        class 类名(继承的类名1, ...):
+            pass
+
+    判断对象继承关系:
+        isinstance(对象, 类型)
+            类型为类名, 判断对象是否为类的实例(父类也满足条件)
+
+        isinstance(对象, (类型1, 类型2))
+            判断对象与多个类型之间是否有实例或继承关系
+
+    object对象
+        object是所有类的基类, 使用class定义的类默认继承object
+        所有对象最终都会继承object对象
+
+-------------------------------------------------------------------------------
+运算符重载
+    操作符重载是Python多态的一种实现方式
+    通过操作符重载可以给指定类型的对象设定对某个操作符的响应
+    操作符重载可以使得实例看起来和内置类型一样
+    算术运算符重载:
+        +       __add__(self, o2)
+        -       __sub__(self, o2)
+        *       __mul__(self, o2)
+        /       __truediv__(self, o2)
+        //      __floordiv__(self, o2)
+        %       __mod__(self, o2)
+        divmod  __divmod__(self, o2)   返回除和取余两个值
+        **      __pow__(self, o2)
+        <<      __lshift__(self, o2)
+        >>      __rshift__(self, o2)
+        &       __and__(self, o2)
+        ^       __xor__(self, o2)
+        |       __or__(self, o2)
+        以上函数名前加r前缀代表运算符左值对象不支持算术运算,则查找右值对象的算术运算
+        以上函数名前加i前缀代表增量赋值运算符重载
+
+    比较运算符重载:
+        <       __lt__(self, o2)
+        <=      __le__(self, o2)
+        >       __gt__(self, o2)
+        >=      __ge__(self, o2)
+        ==      __eq__(self, o2)
+        !=      __ne__(self, o2)
+
+    一元运算符重载:
+        +       __pos__(self)
+        -       __neg__(self)
+        ~       __invert__(self)
+
+    分片索引重载:
+        [x]         __getitem__(self, index)
+        [x] = v     __setitem__(self, index, value)
+        del [x]     __delitem__(self, index)
+
+-------------------------------------------------------------------------------
+错误和异常处理
+    Python程序运行出错一般会有异常抛出
+    异常通常意味着程序出错，但并不总是这样
+    支持手动触发异常
+    异常可以被捕捉(capture)和处理
+    不被处理的异常最终会导致程序中止
+
+    异常的触发方式
+        程序运行出错时产生异常
+        手动产生异常(raise, assert)
+            手动产生ValueError异常, 不带异常信息
+                raise ValueError
+
+            手动产生ValueError异常自定义异常信息
+                raise ValueError('invalid number')
+
+            条件不满足产生无信息的断言异常
+                assert 123 in nums
+
+            条件不满足产生带信息的断言异常
+                assert 123 in nums, "number not found"
+
+    捕捉和处理异常
+        try:                                主代码块
+            data[index]
+            num = int(num)
+        except IndexError:                  产生IndexError异常处理代码块
+            print('out of range')
+        except (NameError,ValueError) as e: 产生NameError和ValueError异常处理代码块
+            print(e)
+        except:                             主代码块产生异常, 但以上异常处理没有此异常则执行的代码块
+            print('unknown error: ', sys.exc_info())
+        else:                               主代码块执行没有异常执行的代码块
+            print('no error occurred')
+        finally:                            不管是否异常都执行的代码块
+            print('always executed')
+
+    异常的种类
+        AttributeError      访问对象没有的属性
+        IOError             输入/输出错误, 如文件打不开等
+        ImportError         无法引入模块或包, 多半是模块路径或名称问题
+        IndentationError    没有缩进对齐的语法错误
+        IndexError          下标越界
+        KeyError            访问字典中没有的键名
+        KeyboardInterrupt   Ctrl + C 被按下
+        NameError           使用一个没有定义的变量
+        SyntaxError         语法错误, 非法代码
+        TypeError           传入对象类型不符合
+        UnBoundLocalError   访问没初始化的局部变量
+        ValueError          传入调用者不期望的值
+        AssertionError      断言异常
+        Exception           异常的基类
+
+    自定义异常
+        class MyException(Exception):
+            def __init__(self, msg):
+                self.message = msg
+
+            def __str__(self):
+                return self.message
+
+-------------------------------------------------------------------------------
+上下文管理
+    Python通过with/as语句做上下文管理
+    with/as可用于替代try..finally结构
+    某些Python内置工具支持上下文协议
+
+    with/as基本语法：
+        with expression [as variable]:
+            with-block
+
+    with/as执行流程:
+        调用expression对象的__enter__方法
+        执行with-block
+        调用expression对象的__exit__方法
+            如果with-block产生异常才会给__exit__传递异常信息
+            没有异常产生则给__exit__传递异常信息为None
+
+    上下文管理器示范代码:
+        class Trace:
+            def message(self, arg):
+                print('running', arg)
+            def __enter__(self):
+                print('before block')
+                return self
+            def __exit__(self, exc_type, exc_value, exc_tb):
+                if exc_type is None:
+                    print('exit normally')
+                else:
+                    print('exception raised:', str(exc_type))
+                    return False
+
+        with Trace() as t:
+            t.message("hello world")
+
+        exc_tb为traceback实例对象(栈底对象)
+            exc_tb.tb_frame     当前栈信息
+            exc_tb.tb_lineno    异常相关行
+            exc_tb.tb_lasti     相关指令在字节码中的位置
+            exc_tb.tb_next      下一层栈实例对象(从栈底开始到栈顶)
+
+-------------------------------------------------------------------------------
+迭代器
+    通过for..in语句遍历对象称之为迭代(Iteration)
+    可以被for..in语句遍历的对象为可迭代对象(Iterable)
+    可以被next函数调用并不断返回下一个值的对象称之为迭代器(Iterator)
+    所有Iterable均可以通过iter函数转化成Iterator
+
+    判断是否为可迭代对象
+        Python的Collections模块提供了迭代对象类型, 可以通过此类型来判断
+        isinstance(对象, Collections.Iterable)
+
+    判断是否为迭代器
+        isinstance(对象, Collections.Iterator)
+
+    迭代器的实现
+        只实现对象的__iter__方法为可迭代对象
+        实现对象的__iter__和__next__方法则为迭代器
+            __iter__方法的功能:
+                返回可迭代对象(迭代器返回self)
+
+            __next__方法功能:
+                返回下一个值, 如果没有下一值则抛出StopIteration异常
+
+        实现迭代器后不仅可以使用for..in语句遍历也可以手动调用iter和next来调用
+            iter函数调用时会自动调用对象的__iter__方法
+            next函数调用时会自动调用对象的__next__方法
+            手动调用的好处是实现懒加载, 就是什么时候需要使用什么时候调用(next)
+
+    迭代器的复制
+        o = copy.deepcopy(对象)
+
+-------------------------------------------------------------------------------
+生成器
+    生成器是特殊的迭代器, 生成器一定是迭代器
+    生成器不需要实现__iter__和__next__方法, 只需要使用yield关键字
+    只要在函数中使用yield关键字, 则此函数为生成器对象
+    生成器的好处:
+        简化迭代器代码
+        节省内存和CPU资源
+
+    生成器类型判断:
+        isinstance(对象, Collections.Generator)
+
+    生成器执行流程:
+        函数中使用了yield关键字,则变成生成器对象,执行流程会发生变化
+        当调用有yield关键字的函数时会返回生成器对象
+        使用next首次调用生成器对象时会执行生成器函数, 遇到第一个yield关键字返回函数
+        再次使用next调用生成器对象时也会执行生成器函数,
+        但这次会接着上一次yield返回位置后面继续执行, 再遇到yield返回函数,
+        以此类推, 直到最后没有遇到yield关键字就会抛出StopIteration异常
+        例:
+            def test():
+                print("111")
+                yield 1
+                print("222")
+                yield 2
+
+            o = test()
+            next(o)     #打印111, 返回1
+            next(o)     #打印222, 返回2
+            next(o)     #抛出StopIteration异常
+
+    生成器表达式: (x for x in range(10))
+        生成器与列表解析的区别只是把中括号换成小括号
+        生成器表达式是列表推倒式(列表解析)的生成器版本, 列表解析返回列表
+        生成器表达式返回的是生成器对象(Generator)
+
+    斐波拉契数列
+    杨辉三角形
+
+-------------------------------------------------------------------------------
+序列化
+    序列化是将Python数据类型转换成可以写入文件的字符串
+    反序列化是将序列化的字符串转换回原始数据类型
+    支持的数据类型:
+        布尔值、整数、浮点数、复数、字符串、字节、None
+        列表、元组、字典和集合
+        函数、类和对象
+
+    json模块    用于字符串和Python数据类型间进行转换
+        json.dumps(obj)           将数据类型转换成特有的JSON字符串
+        json.loads(data)          将JSON字符串转换成原始数据类型
+        json.dump(obj, file)      将数据类型转换成JSON字符串并且写入文件
+        json.load(file)           从文件中读取JSON并且转换回原始数据类型
+
+    pickle模块  用于Python特有的类型和Python的数据类型间进行转换
+        pickle.dumps(obj)           将数据类型转换成特有的字符串类型
+        pickle.loads(data)          将特有的字符串类型转换成原始数据类型
+        pickle.dump(obj, file)      将数据类型转换成特有字符串类型并且写入文件
+        pickle.load(file)           从文件中读取并且转换回原始数据类型
+
+    shelve模块  提供open方法创建数据存储文件, 返回的对象可以像字典一样存储数据
+        s = shelve.open(filename)       创建数据存储文件对象
+        s[key] = obj                    添加或更新数据
+        s[key]                          获取对象存储数据
+        s.close()                       关闭数据存储对象
+
+-------------------------------------------------------------------------------
+作业:
+    学校OA系统
+
+    学校    曾祥明
+        学校名称 校长 学校地址 课程列表 班级列表 教师列表
+
+        添加课程 添加班级 添加教师 遍历课程 遍历班级 遍历教师 学号获取
+
+        查询学校所属课程 班级 教师和学校信息
+
+    学生    张柱
+        学号 姓名 年龄 性别 联系电话 联系地址 所属班级 课程列表
+
+        选课操作 获取所属课程 查询所属学校 班级 教师 课程 成绩
+
+
+    教师    陈志
+        所属学校
+        查询所属学校 所属班级
+
+    班级    温利娜
+        所属学校 所属教师
+        查询所属学生 教师 学校和课程
+
+    课程    彭振健
+        所属学校
+        查询所属学生, 成绩
+
+    成绩    金士坤
+        所属课程　所属学生
+
+    面板    简玉龙
+        所属全部
+
+
+

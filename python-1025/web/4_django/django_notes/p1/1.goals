@@ -1,0 +1,14 @@
+# 能够通过pip安装Django (p1)
+# 能够确定Django的版本 (pip, python -m django --version)
+# 能够创建Django项目 (django-admin startproject)
+# 理解项目目录树中各节点的作用
+# 能够使用Django自带的web服务器并了解其特点及使用场合
+# 能够创建Django应用 (python manage.py startapp)
+# 能够在项目中注册应用 (project/settings.py, p2)
+# 能够编写view函数
+# 能够配置URL (app urls.py, project urls.py)
+# 能够写一个hello world程序并通过浏览器访问 (p3,p4)
+# 能够从url中抽取特定的值（非命名/命名），传给view函数 (p5,p6)
+# 能够给view函数传递额外的参数 (p7,p8)
+# 能够给url配置命名
+# 完成项目指定部分内容

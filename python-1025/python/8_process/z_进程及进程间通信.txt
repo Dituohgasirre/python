@@ -1,0 +1,719 @@
+系统信息获取
+    os.uname            获取当前平台信息
+    os.name             获取当前系统架构名称
+    os.sep              获取当前平台路径分隔符
+    os.linesep          获取当前平台行终止符
+    sys.version         获取当前Python解析器版本
+
+    用户及组信息
+        pwd模块     对应/etc/passwd文件
+            pwd.getpwall        获取所有用户信息
+            pwd.getpwnam        通过用户名获取用户信息
+            pwd.getpwuid        通过用户ID获取用户信息
+
+        grp模块     对应/etc/group文件
+            grp.getgrall        获取所有组信息
+            grp.getgrnam        通过组名获取组信息
+            grp.getgrgid        通过组ID获取组信息
+
+        spwd模块    对应/etc/shadow文件(必须root执行)
+            spwd.getspall       获取所有用户密码信息
+            spwd.getspnam       获取指定用户的密码信息
+
+        系统用户密码登录相关模块函数
+            getpass.getpass     关闭回显获取用户输入密码
+            crypt.crypt         加密密码
+            pexpect             对应expect, 处理自动交互
+
+        获取和设置用户权限
+            以下set函数必须是root执行身份才可以
+            对python源文件设置特权位没有用, 必须给python解析器设置才有用
+
+            os.getuid           获取当前登录用户ID
+            os.geteuid          获取当前执行权限用户ID
+            os.setuid           设置当前登录用户ID，会改变执行权限用户
+            os.seteuid          设置当前执行权限用户ID, 不会影响登录用户
+            os.getgid           获取当前登录组ID
+            os.getegid          获取当前执行权限组ID
+            os.setgid           设置当前登录组ID, 会改变执行权限组ID
+            os.setegid          设置当前执行权限组ID, 不会影响登录用户组
+            os.getlogin         获取当前登录用户名
+            os.getgroups        获取当前用户的所有组ID(附加组)
+            os.setgroups        将当前用户加入到其它组
+
+    环境变量
+        os.environ字典保存了环境变量， 通过字典操作方法操作环境变量
+
+-------------------------------------------------------------------------------
+进程概念
+    将可执行程序(文件)加载到内存中为进程
+    每个进程都独立内存空间, 多进程运行互不影响
+    每个进程都有一个唯一标识符(PID)
+    进程编程作用：
+        1. 运行其它程序
+        2. 多段代码同时执行
+
+-------------------------------------------------------------------------------
+GNU/Linux系统编程模块的使用
+    获取进程PID
+        os.getpid()     返回当前进程PID
+        os.getppid()    返回当前进程的父进程PID
+
+    创建进程函数
+        os.fork()
+            给子进程返回0, 给父进程返回子进程的PID
+            子进程会复制父进程进程空间
+
+    退出当前进程
+        os._exit(错误码)
+            错误码为0-255之间的数字
+
+    等待子进程
+        pid, status = os.wait()
+            此函数会阻塞程序等待子进程结束, 任意子进程结束都会结束等待返回
+            返回元组，第一个元素为PID,  第二个元素为子进程结束状态
+
+        pid, status = os.waitpid(pid, options)
+            等待指定子进程结束, 其它与wait一样
+
+        os.WIFEXITED(status)    判断子进程是否自行结束
+        os.WIFSIGNALED(status)  判断子进程是否被信号打断
+        os.WEXITSTATUS(status)  获取子进程结束返回错误码
+
+    执行其它程序(切换程序)
+        os.exec家族函数:
+            os.execl os.execlp os.execle os.execlpe
+            os.execv os.execvp os.execve os.execvpe
+                l   程序参数以函数可变参形式传入, 程序第一个参数为进程名
+                v   程序参数以列表或元组变量传入, 程序第一个参数为进程名
+                p   程序路径支持查找PATH环境变量(只需要写命令名)
+                e   支持传入自定义环境变量，默认是将本进程的环境变量传入
+
+        os.spawn家族函数
+            类似于os.exec家族函数, 区别于是调用windows程序
+
+        os.system(cmd)
+            封装fork、exec和wait函数，执行其它程序并且等待子进程返回
+                if os.fork() == 0:
+                    os.execlp('bash', 'bash', '-c', cmd)
+                os.wait()
+
+    进程组
+        进程组包含一个进程或多个进程， 方便统一管理进程
+        一般情况下父进程创建的子进程为同一进程组, 父进程为组长进程
+        进程组组长进程的PID为进程组ID，对进程组操作必须将PID前面加负号以区别
+
+        os.getpgrp()        获取当前进程组ID
+        os.setpgrp()        创建进程组, 当前进程为组长进程(组长进程不能执行)
+
+    会话
+        会话包含一个进程组或多个进程组, 每个会话中对应一个控制终端
+        使用控制终端的进程组为前台进程组，其它的为后台进程组
+        创建会话可以独立于原控制终端，不受原控制终端影响
+
+        os.getsid()         获取当前会话ID
+        os.setsid()         创建会话，进程组组长进程不能创建会话
+
+-------------------------------------------------------------------------------
+multiprocessing多进程模块的进程操作
+    multiprocessing模块提供了跨平台的多进程支持
+
+    创建进程对象
+        p = multiprocessing.Process(target=run, args=('test', ))
+            target      指定创建进程要执行的函数
+            args        指定进程执行函数的参数
+
+    创建进程属性
+        p.name                  进程名称
+        p.pid                   进程PID
+        p.exitcode              进程返回值(os._exit())
+
+    获取当前进程对象
+        p = multiprocessing.current_process()
+
+    创建进程操作
+        p.start()               执行子进程
+        p.join(超时时间)        等待子进程(没有返回值)
+        p.is_alive()            判断子进程是否在运行
+        p.terminate()           终止子进程
+
+    进程池
+        当需要创建大量的子进程工作，则需要使用进程池
+
+        创建进程池
+            p = multiprocessing.Pool(5)
+                创建5个进程的进程池，不传参数默认为CPU的核数(os.cpu_count())
+
+        进程池操作
+            异步从进程池中取出一个进程去执行函数
+                p.apply_async(执行函数, 执行函数的参数, 执行函数完成后回调, 错误回调)
+                    如果进程池的进程被用完会等待其它进程完成后再执行任务
+                        即进程池5个，但调用10次apply_async函数的场景
+
+                    执行函数中不能使用os._exit, 因为进程池会重复使用进程
+                    如果进程池进程退出也会重新创建进程，但会在join会阻塞
+
+            关闭进程池(不创建新的进程，但要等待现有进程退出)
+                p.close()
+
+            立即关闭进程池
+                p.terminate()
+
+            等待所有子进程退出(阻塞等待)
+                p.join()
+                    join函数之前必须调用close或terminate函数
+
+-------------------------------------------------------------------------------
+执行其它程序(subprocess模块)
+    用于生成子进程并且通过管道连接子进程的输入或输出，以及获取进程返回值
+    用于替代os.system、os.spawnl和os.execl等旧模块和函数
+    subprocess模块是支持跨平台
+    os.popen就是封装subprocess模块实现
+
+    subprocess.Popen        执行复杂的系统命令
+        args        字符串或列表/元组，默认第一个字段为执行程序名
+        bufsize     指定缓冲设置
+            0       无缓冲, 默认无缓冲
+            1       表示缓冲
+            -1      表示系统默认缓冲大小
+            其它    设置缓冲大小
+        stdin, stdout, stderr   分别表示程序的标准输入、标准输出和错误输出句柄
+        shell       默认值为False， 表示使用shell来执行程序
+        cwd         指定子进程的工作目录, 默认为父进程的工作目录
+        env         指定子进程的环境变量, 默认为父进程的环境变量
+
+        例: 执行ls -l命令获取子进程信息
+            o = subprocess.Popen(['ls', '-l'], stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 cwd='/data', shell=True)
+                subprocess.PIPE
+                    将标准输入、标准输出或错误输出连接到管道
+
+                subprocess.STDOUT
+                    将错误输出和标准输出连接到一个句柄
+
+            将hello写入到子进程的标准输入
+                o.stdin.write('hello')
+
+            读取子进程的标准输出
+                out = o.stdout.read()
+
+            读取子进程的错误输出
+                out = o.stderr.read()
+
+            获取子进程的返回值
+                o.returncode
+
+            获取子进程PID
+                o.pid
+
+            对子进程的输入/输出封装操作
+                o.communicate('input')
+                    将参数写入子进程标准输入，返回标准输出和错误输出的元组
+
+            关闭标准输入文件描述符
+                o.stdin.close()
+
+            关闭标准输出文件描述符
+                o.stdout.close()
+
+            关闭错误输出文件描述符
+                o.stderr.close()
+
+            查看子进程的状态
+                o.poll()
+
+            终止子进程
+                o.kill()
+                o.terminate()
+
+            给子进程发信号
+                o.send_signal(信号源)
+
+            等待子进程
+                o.wait(设置等待时间)
+
+    subprocess模块的常用方法:
+        status = subprocess.call(['ls', '-l'])
+            执行ls -l命令并且返回命令的进程返回值, 命令执行失败不抛异常
+
+        status = subprocess.check_call(['ls', '-l'])
+            执行ls -l命令并且返回命令的进程返回值, 命令执行失败会抛异常
+
+        out = subprocess.check_output(['ls', '-l'])
+            执行ls -l命令并且返回命令的标准输出, 命令执行失败会抛异常
+
+        out = subprocess.getoutput('ls -l')
+            执行ls -l命令并且返回命令的输出，命令失败也会返回错误输出字符串
+
+-------------------------------------------------------------------------------
+进程间通讯之信号(signal)
+    进程间通讯方法之一, 模拟硬件中断机制，异步通知
+    signal模块封装了信号操作
+
+    信号产生
+        操作系统因状态自动产生
+        手动使用kill命令发信号
+        编程使用os.kill函数或其它函数发信号
+
+    信号源(signal.Signals)
+        通过kill命令-l选项列出所有信号源(kill -l)
+        实际使用信号源为1到31, 每个信号源都有特殊意义, 10和12为自定义信号源
+
+        signal.Signals枚举类封装了信号源, 可以遍历列出支持的信号源:
+            for x in signal.Signals:
+                print(x, x.value)
+
+    信号操作(signal.Handlers)
+        默认操作    signal.SIG_DFL
+            不做任何操作    17 18 23 28
+            放到后台停止    19 20 21 22
+            结束本进程      1-16 24-27 29-31
+
+        忽略操作    signal.SIG_IGN
+        自定义操作  自行实现信号处理函数
+
+    信号捕捉(signal.signal)
+        signal.signal(信号源，信号操作)
+            信号源: signal.Signals对象
+            信号操作: signal.Handlers对象
+            返回值: 上一次绑定信号源的操作对象(signal.Handlers)
+
+            1. 同一个信号能不能注册多次 以最后一次为准
+            2. signal返回上一次注册函数对象signal.Handlers
+            3. 执行信号处理函数时会忽略此信号, 但会记录此信号是否来过
+            4. 执行信号处理函数不会忽略其它信号
+            5. 子进程复制父进程信号捕捉情况
+            6. 子进程执行exec家庭函数后，父进程自定义信号捕捉不会继承, SIG_IGN和SIG_DFL会继承
+
+    等待信号
+        signal.pause()
+            只是阻塞等待任意信号, 只要产生信号就取消阻塞
+            信号产生继续执行信号处理
+
+        signal.sigwait(sigset)
+            阻塞等待多个任意信号，返回产生的信号源(signal.Signals)
+            信号产生不会执行信号处理, 没有等待信号产生会执行信号处理操作
+
+        signal.sigwaitinfo(sigset)
+            与sigwait功能类型，只是返回值为信号详细信息
+
+        signal.sigtimedwait(sigset, timeout)
+            在sigwaitinfo基础上增加设置等待时间
+
+    发送信号
+        os.kill(PID, 信号源)
+            PID == -1   给所有进程发信号
+            PID == 0    给本进程组发信号
+            PID > 0     给对应PID进程发信号
+            PID < -1    给对应PID进程组发信号
+
+        os.killpg(PID, 信号源)
+            给进程组发信号, PID不需要写负号表示进程组ID
+
+    定义器
+        signal.alarm(秒数)
+            设置定时时间， 时间到了会产生SIGALRM信号
+
+        设置周期定时器:
+            signal.setitimer(signal.ITIMER_REAL, 首次定时秒数, 周期定时秒数)
+        获取周期定时器还剩余时间:
+            signal.getitimer(signal.ITIMER_REAL)
+
+-------------------------------------------------------------------------------
+进程间通讯之管道(multiprocessing.Pipe os.mkfifo os.pipe)
+    管道文件    只是存在文件系统的一个结点，对应不是硬盘空间，而对应内核一段空间
+    管道命令  |  使用管道进程间通讯方法实现管道命令
+
+    进程间方法 -> 管道
+        使用管道文件(I/O接口)实现进程间数据通讯
+        半双工通讯模式
+        读写端必须同时存在 否则会阻塞
+        一个进程对管道进行写操作，就不能再作读操作(否则会把自己写的东西读出来)
+        管道对应环形队列
+        管道内没有数据对其读操作会阻塞等待
+        当管道的读端全关闭再去写会产生信号SIGPIPE
+
+        有名管道  --> 管道文件 os.mkfifo
+
+        匿名管道  --> 没有实际对应的文件，封装并且映射好关系来访问
+            os.pipe     创建匿名管道，返回两个文件描述符(读和写)
+                        fd[0]为读端, fd[1]为写端
+
+            popen       执行外部程序并且返回文件流，可以指定文件流为读或写
+                        对文件流读即读外部程序执行结果
+                        对文件流写即给外部程序写入标准输入
+                        只能单向，要么写要么读
+
+    列出mplayer所有控制命令:
+        mplayer -input cmdlist (控制命令必须以换行结束)
+
+        mplayer 视频文件 -quiet -slave -input file=./kyo (./kyo 为管道文件)
+
+    multiprocessing.Pipe模块
+        multiprocessing.Pipe是对管道的封装
+
+        创建管道
+            p1, p2 = multiprocessing.Pipe(duplex=True)
+                返回两个multiprocessing.connection.Connection对象
+                默认管道是双向单通，即两个对象都是可读可写的
+                参数duplex设置为False, 则第一个对象为读，第二个对象为写
+
+        读取管道
+            p1.recv()
+            p1.recv_bytes(maxlength=None)
+
+        写入管道
+            p2.send(obj)
+            p2.send_bytes(buf, offset=0, size=None)
+
+        关闭管道
+            p1.close()
+            p2.close()
+
+-------------------------------------------------------------------------------
+进程间通讯之消息队列(multiprocessing.Queue, SimpleQueue, JoinableQueue)
+    使用multiprocessing.queues.Queue就必须传入Context对象, 需要自行判断环境
+    而multiprocessing.Queue封装了这些操作，做了很多兼容性工作, 建议使用
+
+    创建队列
+        q = multiprocessing.Queue(maxsize=0)
+            创建用于进程间通讯的队列, maxsize指定队列最大元素个数，默认无限制
+
+    队列的基本操作
+        q.empty()           判断队列是否为空队
+        q.full()            判断队列是否为满队
+        q.qsize()           返回队列当前元素个数
+        q.close()           关闭队列
+
+    出队数据
+        q.get([block=True, timeout=None])
+            block       控制出队时空队是否阻塞等待, 默认为阻塞等待
+            timeout     控制阻塞等待最长时间, 默认为无限制
+
+        q.get_nowait()
+            调用函数的结果: q.get(False)
+
+    入队数据
+        q.put(obj, [block=True, timeout=None])
+            obj         入队数据
+            block       控制入队时满队是否阻塞等待, 默认为阻塞等待
+            timeout     控制阻塞等待最长时间, 默认为无限制
+
+    SimpleQueue
+        Queue的简化版, 只有empty get和put方法
+        不能指定大小，所以不需要full qsize等方法
+        使用get方法时，空队会阻塞程序
+
+    JoinableQueue
+        Queue的强化版，增加task_done和join方法
+        task_done在每次get完成后调用, 当队列为空队时join才退出阻塞
+
+-------------------------------------------------------------------------------
+进程间通讯之共享内存(multiprocessing.Value Array)
+    管道和队列都是互相数据通信, 必须有发送和接受操作
+    共享内存是多进程间共享一段内存，直接访问
+    Python共享内存模块是进程/线程安全的
+
+    类型码字符:
+        c   char        u   wchar
+        b   byte        B   unsigned byte
+        h   short       H   unsigned short
+        i   int         I   unsigned int
+        l   long        L   unsigned long
+        f   float       d   double
+
+    创建一个元素的共享内存
+        v = multiprocessing.Value(类型码字符, 初始值)
+
+    访问Value的元素值
+        v.value
+
+    修改Value的元素值
+        v.value = 新值
+
+    创建多个元素的共享内存
+        a = multiprocessing.Array(类型码字符, 元素个数)
+
+    访问Array元素值
+        a[索引]
+
+    修改Array元素值
+        a[索引] = 新值
+
+-------------------------------------------------------------------------------
+进程间通讯之同步锁(multiprocessing.Semaphore Lock)
+    系统中的锁是君子协议锁，大家必须都遵守规则才能保护数据
+    即任何进程在需要保护数据写操作位置就加锁，操作完成后就解锁
+
+    创建锁对象
+        s = multiprocessing.Lock()          创建一把锁
+        s = multiprocessing.Semaphore()     支持多把锁
+
+    加锁
+        s.acquire([blocking=True, timeout=None])
+            blocking        控制加锁失败是否阻塞
+            timeout         控制加锁失败阻塞时间
+
+    解锁
+        s.release()
+
+-------------------------------------------------------------------------------
+服务进程管理(multiprocessing.Manager)
+    在多进程程序中，任何操作都是分散的, 为了统一操作及管理, Python提供了multiprocessing.Manager类
+    一个Manager对象对应一个服务进程, 推荐在多进程程序中只创建一个Manager对象
+    multiprocessing.Manager提供了list dict Lock RLock Semaphore Queue Value和Array等
+    在进程池中共享数据必须使用Manager对象来共享，否则共享失败
+    除了创建操作不一样, 其它都为对应原操作方法
+
+    创建服务进程管理对象
+        m = multiprocessing.Manager()
+
+    创建进程间共享数据字典对象
+        d = m.dict()
+
+    创建进程间共享数据列表对象
+        l = m.list(range(10))
+
+    创建进程间数据通讯队列对象
+        q = m.Queue()
+
+-------------------------------------------------------------------------------
+线程概念
+    线程编程主要实现多任务, 对应多任务中的逻辑线
+    线程是最小的执行单元, 进程里至少由一个线程组成
+
+    线程与进程的区别:
+        线程独立栈， 进程独立内存空间
+        创建线程只需要创建栈即可，创建进程则需要复制整个虚拟内存空间
+        也因此进程之间通讯必须使用系统提供的进程间通讯方法
+        而线程间通讯只需要直接访问内存即可
+
+    线程与进程的关系:
+        线程依赖进程空间，没有进程就没有线程
+        进程结束线程也会随着结束
+
+    线程与进程的选择:
+        线程的执行效率高，适合于I/O密集型任务
+        进程的执行稳定性高, 适合于计算密集型任务
+
+    全局解释器锁(GIL Global interpreter lock)
+        Python的线程是真正的线程, 但在解释器运行时, 有个GIL锁,
+        Python中的任何线程必须先获取GIL锁, 执行一定量(100)条的字节码就自动释放锁
+        即GIL锁给所有线程都上锁，使所有线程交替运行，并未达到真正意义的并行处理
+        GIL是历史遗留, 如果想发挥CPU多核优势, 建议使用C扩展实现或使用多进程
+
+-------------------------------------------------------------------------------
+threading线程模块的使用
+    Python通过两个模块来实现多线程: _thread 和 threading
+    threading是对_thread模块进行了封装, 一般建议使用threading模块
+    可以继承threading.Thread类重写run方法来实现线程的使用
+
+    创建线程
+        t = threading.Thread(target=run, args=('Run', ))
+
+    运行线程
+        t.start()
+
+    等待子线程退出
+        t.join()
+
+    设置子线程为守护线程
+        t.setDaemon()
+            守护线程: 主线程执行完成后, 守护线程不论执行完成是否都停止
+            前台线程: 主线程执行完成后，会等待前台线程执行完成才停止
+
+    获取线程信息
+        t.name          获取或设置线程名称
+        t.ident         获取线程标识符
+        t.is_alive()    判断线程是否正在运行
+        t.isDaemon()    判断线程是否为守护线程
+
+    获取当前线程对象
+        threading.current_thread()
+        threading.currentThread()
+
+    获取当前正在运行线程的列表
+        threading.enumerate()
+
+    获取当前正在运行线程的数量
+        threading.aliveCount()
+        threading.alive_count()
+
+    定时器
+        定时器封装线程, 即与线程操作一致
+
+        创建定时器对象
+            t = threading.Timer(定时时间, 定时回调, 回调的参数)
+
+        开始执行定时器
+            t.start()
+
+        关闭定时器
+            t.cancel()
+
+-------------------------------------------------------------------------------
+线程锁(threading.Lock RLock Semaphore Event Condition)
+    由于线程共用一个进程空间, 所有变量为线程共享的，线程抢占资源情况就非常严重
+    Python提供了线程锁来保证资源抢占, 即同一时间只允许一个线程操作
+
+    互斥锁      threading.Lock
+        多个线程同用一把互斥锁, 多线程修改共享数据时都加锁
+        一个线程获取到锁，其它线程就不能再获取锁, 只能等待解锁才能再上锁
+        当线程操作完成后一定要解锁, 否则会出现死锁
+
+        创建互斥锁
+            l = threading.Lock()
+
+        加锁
+            l.acquire([blocking=True, timeout=-1])
+                blocking    加锁失败是否阻塞
+                timeout     加锁失败阻塞时间
+
+        解锁
+            l.release()
+
+    ---------------------------------------------------------------------------
+    可重入锁      threading.RLock
+        同线程中acquire不会阻塞程序, 可以重复加锁, 不同线程与互斥锁一样
+        acquire和release的调用次数必须一致匹配, 否则造成死锁
+        可重入锁允许调用另一个使用该锁的方法, 多为处理递归调用(递归锁)
+
+        创建可重入锁
+            l = threading.RLock()
+
+        加锁
+            l.acquire([blocking=True])
+
+        解锁
+            l.release()
+
+    ---------------------------------------------------------------------------
+    信号量      threading.Semaphore
+        信号量管理内置一个计数器, acquire(加锁)-1, release(解锁)+1
+        当计数器为0时加锁就会阻塞, 直到解锁让计数器不为0才取消阻塞
+        信号量控制允许同时开几个线程并发(控制线程并发数)
+        BoundedSemaphore和Semaphore的区别:
+            BoundedSemaphore在调用release时会检查计数是否超过初始值, 超过则抛出异常
+
+        例1:
+            3个座位, 那最多允许3个人同时用餐, 其它人则需要等待
+
+        例2:
+            服务器只允许2个客户端同时连接, 其它人则等待
+
+        创建信号量
+            s = threading.Semaphore(3)
+                指定允许多个线程数量同时更改数据
+
+        加锁
+            l.acquire([blocking=True, timeout=-1])
+                blocking    加锁失败是否阻塞
+                timeout     加锁失败阻塞时间
+
+        解锁
+            l.release()
+
+    ---------------------------------------------------------------------------
+    同步条件    threading.Event
+        事件管理一个标识变量, 设置True或False, 如果为False则阻塞
+        一个线程发送事件, 其它线程则等待此事件
+        主要用于主线程控制其它线程的执行
+
+        创建事件
+            e = threading.Event()
+
+        等待事件
+            e.wait([timeout=None])
+                阻塞直到Event对象内部标识设置为True或超时
+
+        发送事件(设置标识变量为True)
+            e.set()
+
+        清除事件(设置标识变量为False)
+            e.clear()
+
+        判断是否发送事件(判断事件标识是否为True)
+            e.is_set()
+            e.isSet()
+
+    ---------------------------------------------------------------------------
+    条件变量    threading.Condition
+        条件变量是针对复杂的线程同步提供的支持
+        条件变量封装了Lock/RLock, 在此基础上提供了wait/notify方法
+        条件变量主要使用流程:
+            线程先加锁, 再判断一些条件
+            条件不满足才wait等待
+            条件满足进行处理改变条件再通过notify通知其它线程
+            其它线程wait状态接到通知会重新判断条件, 不断重复这一过程
+
+        加锁
+            cond.acquire()
+
+        解锁
+            cond.release()
+
+        创建条件变量
+            cond = threading.Condition(lock=None)
+                lock        指定使用Lock锁还是RLock锁, 默认为RLock锁
+
+        等待条件变量通知
+            cond.wait(timeout=None)
+                timeout    指定等待多长时间, 默认一直等待
+
+        通知一个条件变量线程
+            cond.notify(n=1)
+                n       可以指定通知多少个条件变量线程
+
+            通知所有条件变量线程
+                cond.notifyAll()
+                cond.notify_all()
+
+-------------------------------------------------------------------------------
+线程数据通讯方法(queue队列包)
+    列表是不安全的数据结构, 如果两个线程同时对列表删除操作会报错
+    Python提供queue包来解决线程通讯问题
+
+    queue包中有四种队列:
+        先进先出        queue.Queue(maxsize)
+        先进后出        queue.LifoQueue(maxsize)
+        优先级模式      queue.PriorityQueue(maxsize)
+            优先级队列入队必须传入列表，第一个元素为优先级, 优先级越低先出队
+        双向队列        queue.deque()
+
+    队列的基本操作
+        q.empty()           判断队列是否为空队
+        q.full()            判断队列是否为满队
+        q.qsize()           返回队列当前元素个数
+        q.close()           关闭队列
+        q.join()            等待队列为空, 与task_done配合使用
+        q.task_done()       出队就发送信号, 空队时join就会取消阻塞
+
+    出队数据
+        q.get([block=True, timeout=None])
+            block       控制出队时空队是否阻塞等待, 默认为阻塞等待
+            timeout     控制阻塞等待最长时间, 默认为无限制
+            如果为优先级队列，则返回列表[优先级, 数据]
+
+        q.get_nowait()
+            调用函数的结果: q.get(False)
+
+    入队数据
+        q.put(obj, [block=True, timeout=None])
+            obj         入队数据
+                如果是优先级队列，则必须是列表, 第一个元素为数字代表优先级
+            block       控制入队时满队是否阻塞等待, 默认为阻塞等待
+            timeout     控制阻塞等待最长时间, 默认为无限制
+
+    双向队列的常用操作方法
+        q.append            向队列最右端添加数据
+        q.appendLeft        向列表最左端添加数据
+        q.pop               从队列最右端取值
+        q.popLeft           从队列最左端取值
+-------------------------------------------------------------------------------
+作业
+    创建10个进程分段处理1000到6000之间的回文数个数
+
+    实现简单shell程序
+

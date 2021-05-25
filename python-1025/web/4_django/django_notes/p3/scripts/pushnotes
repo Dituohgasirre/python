@@ -1,0 +1,37 @@
+#!/home/joshua/.pyenv/versions/miniconda3/bin/python3
+
+import pexpect
+import os
+import sys
+
+# dir是git仓库的本地目录的路径
+dir = "/home/joshua/git-works/zelin-python-20171025"
+
+# 在这里写上登录git服务器的用户名和密码
+user = "username"
+passwd = "password"
+
+os.chdir(dir)
+
+# 这里写入需要执行的git操作
+git_cmd = ['push', 'origin', 'master']
+
+# 这是git命令的路径
+git_executable = '/usr/bin/git'
+
+child = pexpect.spawn(git_executable, git_cmd)
+child.logfile = open('/tmp/pushnote_log', 'wb')
+
+try:
+    child.expect("Username for 'https://gitee.com':")
+    child.sendline(user)
+    child.expect("Password for 'https://iesugrace@gitee.com':")
+    child.sendline(passwd)
+    child.expect(pexpect.EOF)
+    child.logfile.close()
+except pexpect.EOF:
+    print("finished")
+except pexpect.TIMEOUT:
+    print("timeout, failed")
+else:
+    print("finished")

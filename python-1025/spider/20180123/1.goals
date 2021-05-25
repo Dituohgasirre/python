@@ -1,0 +1,50 @@
+能够安装requests库
+能够用requests库下载html网页 (requests.get)
+能够用requests库下载json网页 (r.json())
+能够用requests库下载二进制文件 (stream=True)
+能够用requests库post数据到服务器 (data)
+能够用requests库上传文件到服务器 (files)
+
+了解XPath表达式的特点 （类似文件系统路径）
+了解XPath的路径表达式的书写方式
+了解XPath的常见节点 （元素，属性，文本）
+了解原子值的意义 （没有父节点，没有子节点）
+理解父节点和子节点的关系
+理解节点与其兄弟节点的关系
+理解祖先节点和后代节点的关系
+能够通过lxml.etree创建树形数据结构 (parse, fromstring, HTML, XML)
+能够按名字选取节点 (p, a, head)
+能够按绝对路径选取节点
+能够选取文档中所有的名字叫做a的节点 (//a)
+能够选取当前节点下面的节点 (./*, *)
+能够选取父节点 (..)
+能够选取所有的祖先节点 (ancestor::*)
+能够选取所有的后代节点 (.//*, descendant::*)
+能够选取网页中所有的超链接 (//a)
+能够选取网页中前面10个超链接 (//a[position()<=10])
+能够选取网页中最后一个超链接 (//a[last()])
+能够按照超链接的文本选取超链接
+能够选取所有元素节点 (*)
+能够选取所有属性节点 (@*)
+能够同时选取多个路径 (|)
+了解XPath常见操作符的用法
+能够通过浏览器调试工具的配合查找网页中节点的XPath表达式
+
+能够安装BeautifulSoup
+能够按名字获取BeautifulSoup中的标签 (soup.p, soup.find_all('p'))
+能够获取BeautifulSoup中标签的名字 (soup.name)
+能够获取BeautifulSoup中标签的所有属性 (soup.attrs)
+能够获取BeautifulSoup中标签的某个属性 (soup['name'])
+能够获取BeautifulSoup中标签的文本 (soup.string)
+能够遍历BeautifulSoup中标签子节点/后代节点 (soup.children, soup.descendants)
+能够获取BeautifulSoup中标签的所有文本 (soup.strings, soup.stripped_strings)
+能够获取BeautifulSoup中标签的父节点 (soup.parent, soup.parents)
+能够按照标签名字搜索节点 (名字，正则, find_all）
+能够同时搜索多个标签名字 (在列表中的名字或正则)
+能够通过比对函数来在搜索是做匹配操作 (pass 'tag' as the only argument)
+能够按照标签中的属性搜索
+能够按照标签中的class属性搜索 (use class_)
+能够在按照标签中的属性搜索时处理不能做关键字的属性名 (attrs keyword)
+能够按照标签的文本搜索 (text keyword)
+能够限制搜索的结果数 (limit keyword)
+能够只搜索直接的子节点 (recursive keyword)

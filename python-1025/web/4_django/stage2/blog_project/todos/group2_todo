@@ -1,0 +1,49 @@
+1. 登录完毕后，应显示登出链接
+2. 仍需实现分类搜索功能
+3. 仍需填充侧边栏内容：最近文章，最热文章，最热标签，归档，等等
+4. 登录动能只影响对后台数据的管理，访客是不需要登录的，发表评论也是不需要登录的，但是需要审核
+    class Comment(models.Model):
+        content = models.CharField(max_length=16384)
+        blog = models.ForeignKey('Blog')
+        to = models.ForeignKey('Comment', null=True, blank=True)
+        approved = models.BooleanField(defaults=False)
+5. 仍需使用瀑布流的方法翻页
+6. 仍需在登录页面使用验证码 
+7. 主页面通过链接 (a标签) 的方式跳转到详情页面，不要使用js跳转，文章列表也上点击图标，标题，“继续阅读”等元素时应该跳转到文章的详情页
+8. 网站尽可能使用一致的风格
+9. 文章详情页应显示已有的评论信息，及评论表单，不应显示“留言”表单，“留言”表单应在独立的页面实现
+
+源码剖析
+=========================
+1. 应有登出url
+2. 应增加一个search的url，用于按照分类，tag，日期，关键字等条件搜索
+    范例url:
+
+        url('^search/(?P<type>[a-z]+)/(?P<condition>[^/]+)/', views.search, name='search')
+        可能的类型：tag, category, date, keyword
+
+    范例view:
+
+        # http://example.com/blog/search/keyword/python/
+
+        def search(request, type, condition):
+            if type == 'keyword':
+                c = Q(title__contains=condition) | Q(content__contains=condition)
+                blogs = Blog.objects.filter(c)
+                context = {'blogs': blogs}
+                return render(request, 'blog/search.html', context=context)
+3. 文章应有发布时间，发布时间不等同创建时间，发布时间为将来的文章不应出现在前台的任何地方，只应出现在后台。
+4. 评论应有供审核的字段，默认为False；应有与所回复的评论之间的关系字段 (to字段)，to字段为空表示这个评论是直接评论文章，并不是对任何评论的回复。
+5. index view 没有记录时不应该出错，所以不能用get_list_or_404，而且index页面只需要显示第一页内容，后续内容通过瀑布流的方式添加
+6. 获取文章相关的评论可以使用这样的操作方法：
+    comments = bbs_post.comments_set.all()
+7. 处理访客的评论表单请求应放在独立的一个view中，文章详情页只显示文章内容，不应处理post请求。
+8. 一个客户端在5分钟之内最多只能提交1次评论
+
+    def handle_comment(request):
+        last_comment_time = request.session['last_comment']
+        now = int(time.time())
+        if now - last_comment_time <= 300:
+            return HttpResponse('you comment to often')
+
+        request.session['last_comment'] = 1516344212

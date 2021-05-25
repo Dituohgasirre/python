@@ -1,0 +1,143 @@
+Django的测试用例可以存放在名字以test开头的模块中，通常存放在应用的tests.py文件中。
+
+范例代码：
+
+from datetime import timedelta
+
+from django.utils import timezone
+from django.test import TestCase
+
+from .models import Question
+
+
+class QuestionModelTests(TestCase):
+
+    def test_was_published_recently_with_future_question(self):
+        """
+        was_published_recently() returns False for questions whose pub_date
+        is in the future.
+        """
+        time = timezone.now() + timedelta(days=30)
+        future_question = Question(pub_date=time)
+        self.assertIs(future_question.was_published_recently(), False)
+
+
+
+
+运行测试用例
+
+有多种方法可以运行测试用例：
+
+./manage.py test polls
+./manage.py test polls.tests
+./manage.py test polls.tests.QuestionModelTest
+./manage.py test polls.tests.QuestionModelTests.test_something
+
+
+
+
+测试应用的view函数
+
+Django提供了一个测试用的网页客户端，可以用来在view层面模拟用户与网站的交互操作。
+
+
+在交互式的环境中用django.test.Client来测试
+
+1. 导入对象
+
+from django.test.utils import setup_test_environment
+from django.test import Client
+
+2. 初始化测试环境和客户端实例
+setup_test_environment()
+client = Client()
+
+3. 请求网页，检查结果
+r = client.get('/')
+r.status_code           <-- 请求的返回码
+r.content               <-- 返回的网页内容
+
+from django.urls import reverse
+url = reverse('polls:index')
+r = client.get(url)
+r.status_code
+r.content
+r.context['latest_questions']   <-- 传给模板引擎的context中的内容
+
+
+
+用TestCase来测试view的行为
+
+用TestCase测试view时不需要django.test.Client，因为TestCase已经包含一个了。
+
+范例代码：
+
+def create_question(question_text, days):
+    time = timezone.now() + datetime.timedelta(days=days)
+    return Question.objects.create(question_text=question_text, pub_date=time)
+
+
+class QuestionIndexViewTests(TestCase):
+    def test_no_questions(self):
+        """当不存在任何问题时，应有适当的信息显示出来"""
+        r = self.client.get(reverse('polls:index'))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "No polls are available.")
+        self.assertQuerysetEqual(r.context['latest_questions'], [])
+
+    def test_past_question(self):
+        """pub_date为过去时间的问题显示在index页面"""
+        create_question(question_text="Past question.", days=-30)
+        r = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            r.context['latest_questions'],
+            ['<Question: Past question.>']
+        )
+
+    def test_future_question(self):
+        """发布时间为将来时间的问题不显示在index页面上"""
+        create_question(question_text="Future question.", days=30)
+        r = self.client.get(reverse('polls:index'))
+        self.assertContains(r, "No polls are available.")
+        self.assertQuerysetEqual(r.context['latest_questions'], [])
+
+    def test_future_question_and_past_question(self):
+        """时间为将来和过去的两个问题同时存在，仅仅显示过去的问题"""
+        create_question(question_text="Past question.", days=-30)
+        create_question(question_text="Future question.", days=30)
+        r = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            r.context['latest_questions'],
+            ['<Question: Past question.>']
+        )
+
+    def test_two_past_questions(self):
+        """index页面可以显示多个问题"""
+        create_question(question_text="Past question 1.", days=-30)
+        create_question(question_text="Past question 2.", days=-5)
+        r = self.client.get(reverse('polls:index'))
+        self.assertQuerysetEqual(
+            r.context['latest_questions'],
+            ['<Question: Past question 2.>', '<Question: Past question 1.>']
+        )
+
+
+使用TestCase来测试时，测试用的数据库在运行每一个测试方法之前都会被重置，因此前面的测试不会影响后面的测试。
+
+
+更多范例代码：
+
+class QuestionDetailViewTests(TestCase):
+    def test_future_question(self):
+        """发布时间为将来的问题，访问其detail页面将返回404"""
+        future_question = create_question(question_text='Future question.', days=5)
+        url = reverse('polls:detail', args=(future_question.id,))
+        r = self.client.get(url)
+        self.assertEqual(r.status_code, 404)
+
+    def test_past_question(self):
+        """发布时间为过去的问题，访问其detail页面将得到问题的文本"""
+        past_question = create_question(question_text='Past Question.', days=-5)
+        url = reverse('polls:detail', args=(past_question.id,))
+        r = self.client.get(url)
+        self.assertContains(r, past_question.question_text)

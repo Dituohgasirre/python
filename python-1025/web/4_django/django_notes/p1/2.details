@@ -1,0 +1,197 @@
+通过pip安装Django
+
+安装最新版：
+
+$ pip install Django
+Collecting Django
+  Using cached Django-1.11.5-py2.py3-none-any.whl
+Collecting pytz (from Django)
+  Using cached pytz-2017.2-py2.py3-none-any.whl
+Installing collected packages: pytz, Django
+Successfully installed Django-1.11.5 pytz-2017.2
+
+安装指定版本：
+
+$ pip install Django==1.10
+Collecting Django==1.10
+  Using cached Django-1.10-py2.py3-none-any.whl
+Installing collected packages: Django
+  Found existing installation: Django 1.11.5
+    Uninstalling Django-1.11.5:
+      Successfully uninstalled Django-1.11.5
+Successfully installed Django-1.10
+
+
+也可以到官方网站下载源码安装：
+
+wget https://www.djangoproject.com/download/
+
+
+
+
+
+创建Django项目
+
+通过命令django-admin 可以创建Django项目，范例命令：
+
+    django-admin startproject mysite
+
+此命令将在当前目录创建一个名叫mysite的目录，并在此目录中创建一个Django项目。新建好的Django空项目的目录结构如下：
+
+$ tree mysite
+mysite                  <-- 此目录只做容器用，可随意改名
+├── manage.py           <-- 管理脚本
+└── mysite              <-- 项目的“包”目录，不可随意改名
+    ├── __init__.py     <-- 项目包的默认模块文件
+    ├── settings.py     <-- 项目的配置文件
+    ├── urls.py         <-- 项目的主url配置文件
+    └── wsgi.py         <-- WSGI服务的入口
+
+注意：
+
+1. 项目的名字不应和Python或Django内置名字冲突，比如说不可以用"django", "test", "os" 等名字。
+2. Django项目与PHP等项目不同，不应把项目文件放在网站文档目录。
+
+
+
+
+
+创建Django应用
+
+Django的项目(project)和应用(app)的联系和区别：
+
+1. app提供某种使用功能，比如说博客，图库
+2. project是一个网站，包含了一系列的配置和app
+3. 一个project可以包含多个app，一个app属于多个project
+
+一个Django的app可以存放在Python path中的任何位置，不一定要放在project目录，但是为了方便，一般是把app放在project目录中。
+
+
+通过运行项目的管理脚本可以创建应用 (app)，范例
+
+    python manage.py startapp hello
+
+创建了一个app之后，原先的空项目的目录结构就变成了以下的样子：
+
+$ tree mysite/
+mysite/
+├── hello               <-- app的包的目录
+│   ├── admin.py        <-- 用于把模型注册到管理后台
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── migrations      <-- 存放从模型到数据库的中间数据
+│   │   └── __init__.py
+│   ├── models.py       <-- 模型的定义
+│   ├── tests.py        <-- 测试代码
+│   └── views.py        <-- 视图代码
+├── manage.py
+└── mysite
+    ├── __init__.py
+    ├── settings.py
+    ├── urls.py
+    └── wsgi.py
+
+多了一个名叫hello的目录，"hello"目录就是hello程序的包的目录。
+
+
+
+在项目中注册应用
+
+新创建的app与项目之间并没有什么联系，需要把app注册到项目中。
+
+方法：修改项目的配置文件settings.py 模块，以上面的例子为例，把hello注册到mysite项目中，就在settings.py 中把INSTALL_APPS 变量的值改为类似以下的样子：
+
+INSTALLED_APPS = [
+    'hello',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    ...
+]
+
+
+
+Django自带的web服务器
+
+Django 自带了一个测试web服务器，此服务器仅可用于开发测试用途，不应用于生产环境，生产环境中应该使用apache+mod_wsgi，或者nginx+uwsgi这样的组合。
+
+Django的测试服务器可以自动重新加载发生了变动的文件，也可提供对对静态文件的支持。当关闭settings.py 配置文件中的DEBUG 选项后，Django就不再提供静态文件服务，而且要明确地在 ALLOWED_HOSTS 中指明服务器的IP或域名。
+
+运行测试服务器
+
+python manage.py runserver
+python manage.py runserver 8000
+python manage.py runserver 192.168.1.1:8000
+python manage.py runserver 0:8000
+
+
+
+
+为网页请求写视图代码
+
+视图 (view) 是响应客户端请求的核心代码，用来处理客户端的请求，和回应客户端，是MVC模型中的控制器 (Controller)。
+
+View 的第一个参数必须是request，这个request对象包含了客户端请求的各种信息，比如说客户端提交的表单信息，请求所使用的方法，路径信息等。
+
+除了第一个参数之外，view还可以接收额外的参数，这些额外的参数可以来自url，也可以来自URL配置中的额外参数。
+
+View 代码运行的结果必须是以下两个中的一种：
+
+    1. 回复一个HttpResponse或它的子类对象，或者StreamingHttpResponse或其子类对象
+    2. 或者抛出一个异常
+
+
+
+
+配置url为客户端请求设置响应代码
+
+URL配置决定了Django程序用来响应客户端请求的view（通常是函数）。Django的URL可以分级处理，灵活性很好。项目里的urls.py 模块中常用于放置总的URL调度配置，把具体的URL转发到某个应用的URL配置中，做进一步的处理。
+
+一个简单的例子
+
+    urlpatterns = [
+        url(r'^greeting/', include('greeting.urls')),
+        url(r'^say/', say),
+    ]
+
+当访问的网址以 greeting/ 开头时，由名叫greeting的包里的urls模块来做进一步处理。以 greeting/ 开头的网址的范例有：
+
+    http://localhost:8000/greeting/
+    http://localhost:8000/greeting/morning/
+    http://localhost:8000/greeting/Alice/morning
+    http://localhost:8000/greeting/Bob/morning
+
+当访问的网址以 say/ 开头时，调用名叫say 的一个可执行对象（通常是一个函数），say负责处理客户端请求并回应客户端。
+
+
+什么时候使用include？
+
+当要在一个url配置文件中包含另外的url配置时，就要用include，admin.site.urls是一个特例，它不使用include，不过它的返回值和include是类似的。
+
+
+url函数的参数详解
+
+url函数的原型： url(regex, view, kwargs=None, name=None)
+
+参数regex
+
+这是一个正则表达式，Django匹配url的时候，在urlpatterns列表中从上到下依次用其中的正则表达式和请求中的url做匹配，直到配置为止。
+
+Django做正则表达式匹配时，不匹配GET和POST参数，也就是说下面两个url中：
+    https://www.example.com/myapp/
+    https://www.example.com/myapp/?page=3
+Django只匹配字符串 "myapp/"
+
+
+参数view
+
+当Django找到一个匹配的url时，就是调用对应的view函数，并把一个HttpRequest对象作为第一个参数传过去，一并传过去的参数还有正则表达式匹配过程中抽取出来的值，如果正则表达式使用简单的抽取，则这些值通过位置参数的形式传递，如果使用的是命名的抽取，则通过关键字的形式传递。
+
+
+参数kwargs
+
+这是将要传给view函数的额外参数，这个值是一个字典，它的优先级比url匹配中所抽取出来的值更高，也即它会覆盖从url中抽取出来的同名的参数。
+
+
+参数name
+
+通过这个参数，可以给url命名，通过这个名字，可以在Django项目中没有歧义地引用相应url的配置，常常在模板文件中使用。这个功能非常强大，它可以使得修改url配置变得非常简单。

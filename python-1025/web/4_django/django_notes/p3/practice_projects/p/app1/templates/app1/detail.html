@@ -1,0 +1,20 @@
+<html>
+<head>
+<title>Detail of {{ contact.name }}</title>
+</head>
+<body>
+
+{% if current_time %}
+<h1>{{ current_time }}</h1>
+{% else %}
+<h1>No time provided</h1>
+{% endif %}
+
+<table>
+  <tr><td>name:</td><td>{{ contact.name }}</td></tr>
+  <tr><td>gender:</td><td>{{ contact.gender }}</td></tr>
+  <tr><td>age:</td><td>{{ contact.age }}</td></tr>
+  <tr><td>phone:</td><td>{{ contact.phone }}</td></tr>
+</table>
+</body>
+</html>
