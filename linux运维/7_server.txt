@@ -1,0 +1,317 @@
+nfs -> linux之间共享
+    安装:
+        ubuntu:
+            apt install nfs-kernel-server nfs-common -y
+
+        centos:
+            yum  install nfs-utils -y
+
+    操作服务
+        查看状态
+            ubuntu:
+                service nfs-kernel-server status
+
+            centos:
+                service nfs status
+
+        开服务
+            service nfs-kernel-server start
+
+        关服务
+            service nfs-kernel-server stop
+
+        重启服务
+            service nfs-kernel-server restart
+
+    配置(/etc/exports)
+        格式: 共享目录绝对路径 共享权限(共享选项)
+              一行为一条共享配置
+
+        例:
+            给所有人只读共享/kyo目录
+                /kyo *(ro)
+
+            给所有人可读可写共享/kyo目录
+                /kyo *(rw)
+
+            给3.3.3.1可读可写共享/kyo目录
+                /kyo 3.3.3.1/255.255.255.0(rw)
+                    或
+                /kyo 3.3.3.1/24(rw)
+
+            给3.3.3.0网段可读可写共享/kyo目录
+                /kyo 3.3.3.0/255.255.255.0(rw)
+                    或
+                /kyo 3.3.3.0/24(rw)
+
+        修改配置后需要重启服务或重新加载配置
+            service nfs-kernel-server reload
+                或
+            service nfs-kernel-server restart
+
+    客户端访问
+        查看NFS服务共享情况
+            showmount -e 3.3.3.3
+
+        挂载共享目录
+            mount -t nfs 3.3.3.3:/kyo /mnt
+                或
+            mount 3.3.3.3:/kyo /mnt
+
+-------------------------------------------------------------------------------
+samba -> linux与windows之间共享
+    安装
+        apt install  samba -y
+        yum install  samba -y
+
+    配置(/etc/samba/smb.conf)
+        全局配置
+            workgroup = WORKGROUP       定义工作组
+            passdb backend = tdbsam     密码使用本地.tdb文件存储
+
+        [共享名]
+            comment = "Python课程共享目录"
+            #共享路径
+            path = /kyo
+            #指匿名用户使用-L时是否可见
+            browseable = yes
+            #是否可写
+            writable = yes
+            #是否允许匿名用户访问
+            guest ok = yes
+            #是否可读
+            read only = yes
+            #创建文件的默认权限
+            create mask = 0444
+            #允许哪些用户或组可写
+            write list = kyo,tom,@sudo
+            #允许哪些用户或组来访问
+            valid users = kyo,tom,@sudo
+            #允许哪些主机能访问
+            hosts allow = 3.3.3.3
+            #拒绝所有人访问
+            hosts deny = ALL
+            #拒绝3.3.3.0网段,但允许3.3.3.178访问
+            hosts deny = 3.3.3.  EXCEPT 3.3.3.178
+            #允许3.3.3.0网段,但拒绝3.3.3.178访问
+            hosts allow = 3.3.3.  EXCEPT 3.3.3.178
+
+        配置完成后重启smb服务:
+            ubuntu:
+                service smbd restart
+
+            centos:
+                service smb restart
+
+    设置smb用户
+        将kyo用户将入到smb服务用户列表中
+            smbpasswd -a kyo
+
+        smb用户列表中删除用户
+            smbpasswd -x kyo
+
+        禁用smb用户
+            smbpasswd -d kyo
+
+        启用smb用户
+            smbpasswd -e kyo
+
+        查看smb用户
+            pdbedit -L
+
+    客户端验证samba服务
+        安装samba客户端
+            apt install smbclient -y
+
+        列表samba服务器的共享情况
+            smbclient -L //3.3.3.3 -U kyo
+
+        进入smb交互模式
+            smbclient //3.3.3.3 -U kyo
+                ?   得到smb交互模式下帮助信息
+
+        安装cifs文件系统模式(支持mount挂载访问)
+            sudo apt install cifs-utils -y
+
+            mount -t cifs //3.3.3.3/kyo /mnt -o username=kyo,password=123
+                访问/mnt目录即访问samba共享目录
+
+        windows:
+            win + r 打开运行输入: \\3.3.3.3/kyo
+
+-------------------------------------------------------------------------------
+ftp
+    安装
+        yum install vsftpd -y
+
+    配置(/etc/vsftpd.conf)
+        匿名配置
+        本地用户配置
+            设置本地用户只允许在家目录活动
+
+-------------------------------------------------------------------------------
+ssh
+    用于远程管理主机的服务
+    sshd        服务程序
+    ssh         客户端程序
+
+    安装:
+        yum install openssh-server -y
+        apt install openssh-server -y
+
+    使用root用户远程服务器:
+        ssh root@3.3.3.3
+            输入远程服务器root用户密码即可登录
+
+    使用sshd服务进行远程拷贝
+        scp -r /kyo/ops root@3.3.3.178:/root/
+            输入密码进行复制
+
+        scp -r root@3.3.3.178:/root/opt ./opt
+            输入密码进行复制
+
+    远程执行命令(不交互)
+        ssh root@3.3.3.3 "远程要执行的命令"
+            输入密码执行完成即结束
+
+    使用证书登录(不需要密码)
+        使用证书(公钥/私钥)
+            ssh-keygen
+                交互指定证书生成位置, 默认位置~/.ssh/id_rsa
+
+        scp ~/.ssh/id.rsa.pub root@3.3.3.178:/root/.ssh/authorized_keys
+
+        ssh root@3.3.3.178 -i ~/.ssh/id_rsa
+            此时远程登录不需要密码
+
+    sshd安全配置(/etc/ssh/sshd.conf)
+        更换sshd服务端口号(默认端口号: 22)
+            Port 1765
+
+        不允许root用户登录
+            PermitRootLogin no
+
+        不允许密码登录
+            PasswordAuthentication no
+
+        只允许证书登录
+            PubkeyAuthentication yes
+
+    简化ssh登录选项
+        vim ~/.ssh/config
+        Host 178
+            Hostname 3.3.3.178
+            User root
+            PubKeyAuthentication yes
+            IdentityFile ~/178.key
+
+-------------------------------------------------------------------------------
+时间任务(定时器)
+    at      设置时间去执行任务, 任务是一次性
+
+    启动atd服务
+        service atd start
+
+    at 执行时间
+    > 时间到了要执行的命令
+    > 结束按ctrl + d
+
+    例:
+        at 10:20
+        > echo "at_$(date +%s)" >> /tmp/test.atfile
+
+    查看at任务列表
+        at -l
+
+    查看at任务详情
+        at -c 3
+
+    删除at任务
+        at -d 3
+
+    指定时间运行脚本
+        at -f test.sh 10:35 030818
+
+        从当前时间加1分钟执行test.sh
+            at -f test.sh now +1 minutes
+
+        从当前时间加1天执行test.sh
+            at -f test.sh now +1 days
+
+    /etc/at.deny    记录拒绝执行at的用户, 一行一个用户, 如果/etc/at.allow不存在才生效
+    /etc/at.allow   记录允许执行at的用户
+
+-------------------------------------------------------------------------------
+crontab         周期执行任务
+    查看此服务状态
+        ubuntu:
+            service cron status
+
+        centos:
+            service crond status
+
+    crontab周期任务设置条件格式
+        第一个字段: 分钟(0-59)
+        第二个字段: 小时(0-24)
+        第三个字段: 日(1-28/29/30/31)
+        第四个字段: 月(1-12)
+        第五个字段: 星期(0-7 0和7代表星期天)
+        第六个字段: 执行命令
+
+        时间格式:
+            *       每分钟, 每小时, 每天, 每月, 每周
+            ,       分隔时间
+            -       时间段
+            */n     每隔n个单位
+
+        每个小时的前30分钟每分钟执行
+            1-30 * * * *
+
+        每个小时的29和58分钟执行
+            29,58 * * * *
+
+        每个2分钟执行
+            */2  * * * *
+
+        每个月15号每隔3小时每隔5分钟执行
+            */5  */3 15 * *
+
+        每个月15号每隔3小时每隔5分钟执行或者星期天
+            */5 */3 15 * 7
+
+        每天的1, 3, 7, 8, 13 21点的05分执行
+            5 1,3,7,8,13,21 * * *
+
+        每月的5号到20号的4点到13点的15分执行
+            15 4-13 5-20 * *
+
+        每个星期三的每两小时
+            * */2 * * 3
+
+        每年的5到8月的星期三和星期天的4点01分执行
+            1 4 * 5-8 3,7
+
+
+    添加周期执行任务
+        crontab -e
+            * 21 * * * init 0
+
+    查看任务
+        crontab -l
+
+    删除所有任务
+        crontab -r
+
+    全局配置文件
+        /etc/crontab
+
+        /etc/cron.daily         每天都会执行此目录下的脚本
+
+        /etc/cron.hourly        每小时都会执行此目录下的脚本
+
+        /etc/cron.monthly       每月都会执行此目录下的脚本
+
+        /etc/cron.weekly        每星期都会执行此目录下的脚本
+
+    选择终端默认编辑器:
+        export EDITOR=vim

@@ -1,3 +1,0 @@
-[scrapy]
-settings = stackoverflow_top_questions.settings
-

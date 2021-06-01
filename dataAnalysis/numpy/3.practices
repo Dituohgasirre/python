@@ -1,0 +1,331 @@
+1. 创建一个形状为 (3,4,5) 的数组，数据类型是64位的小数，然后输出阵列的以下属性
+
+    维数                                  a.arange(60).reshape(3,4,5)   a.ndim
+    形状                                   a.shape
+    元素总数                               a.size
+    元素的数据类型                        a.dtype
+    每个元素所佔用的内存大小                a.itemsize
+    所有元素所佔用的内存大小                 a.nbytes
+
+
+2. 尝试把嵌套的python列表转换成numpy阵列，然后把numpy阵列转换成python列表         a=[1,2,3]   a=np.array(a)  a=list(a)
+ 
+
+3. 按以下要求操练
+    1. 创建一个形状为 (3,3)的阵列，值全为1             np.ones((3,3))
+    2. 创建一个形状为 (3,3)的阵列，值全为0             np.zeros((3,3))
+    3. 创建一个形状为 (3,3)的阵列，不初始化值          np.empty((3,3))
+    4. 给定一个阵列a如下                              a=np.arange(12).reshape(3,4)
+        array([[ 0,  1,  2,  3],
+               [ 4,  5,  6,  7],
+               [ 8,  9, 10, 11]])                    np.full_like(a,101)
+        创建一个形状相同，数据类型为8位无符号整型的阵列，元素值全为101
+
+
+4. 创建一个阵列，包含N 个小数，最小值是0, 最大值是1, 相邻元素之间的差是0.1
+                                                      np.arange(0,1,0.1)
+
+5. 创建一个阵列，包含-π 到 +π 之间的1000个小数，最大值是 +π
+                                                      np.linspace(-np.pi,np.pi,1000)
+
+6. 按以下要求创建阵列
+    1. 把元素全部为整数的嵌套的Python列表转换成numpy阵列
+    2. 创建一个形状为(2,3)，全部元素的值都为0的阵列 (np.zeros)      np.zeros((2,3))
+    3. 创建一个形状为(2,3)，全部元素的值都为1的阵列 (np.ones)       np.ones((2,3))
+    4. 创建一个形状为(2,3)，全部元素的值都为0.1的阵列 (np.full)     np.full((2,3),1)
+    5. 创建一个形状为(2,3)的阵列，不初始化阵列的值 (np.empty)        np.empty((2,3))
+    6. 创建一个形状与已有阵列相同的阵列，并把值初始化为0 (np.zeros_like)   np.zeros_like(a)
+    7. 创建一个形状与已有阵列相同的阵列，并把值初始化为1 (np.ones_like)    np.ones_like(a)
+    8. 创建一个形状与已有阵列相同的阵列，并把值初始化为0.1 (np.full_like)  np.full_like(a,0.1)
+    9. 创建一个形状与已有阵列相同的阵列，不对值做初始化 (np.empty_like)   np.empty_like(a)
+    10. 创建一个一维阵列，值是0到1之间的小数，间隔是0.1 (np.arange)    np.arange(0,1,0.1)
+    11. 创建一个一维阵列，值是0到1之间的小数，元素总数是20个 (np.linspace)  np.linspace(0,1,20)
+    12. 创建一个一维阵列，值是0到1之间的小数，元素总数是20个，不包含结束点的值 (endpoint=False)  np.linspace(0,1,20,endpoint=False)
+    13. 创建一个形状为(3,3,3)的阵列，用随机数填充，随机数是[0, 1) 范围的均匀分布 (np.random.rand)   np.random.rand(3,3,3)
+    14. 创建一个形状为(3,3,3)的阵列，用随机数填充，随机数符合均值为0方差为1的常态分布 (np.random.randn)  np.random.randn(3,3,3)
+
+
+7. 按以下要求操作
+    1. 创建一个形状为(2,2,2,2,2,2,2,2,2,2)的包含10个轴的阵列，值为从0开始递增的整数  a=np.arange(1024).reshape(2,2,2,2,2,2,2,2,2,2)
+    2. 在交互式界面打印阵列内容，做以下观察：
+        1. 最后一个轴的打印方向
+                了解打印阵列时最后一个轴的打印方向 (从左到右)
+                了解打印阵列时除了最后一个轴的其它轴的打印方向 (从上到下)
+                了解打印阵列时空行的使用规律 (从倒数第三个轴开始递增一个空行)
+        2. 其它轴的打印方向
+        3. 空行的使用规律
+    3. 创建一个包含1万个整数的一维阵列  np.arange(10000)
+    4. 在交互式界面打印阵列内容，观察是否能够打印出全部的元素        
+    5. 设定打印选项(np.set_printoptions)中的threshold值为1万，观察是否能够打印出全部的元素         np.set_printoptions(threshold=10000)
+    6. 设定打印选项(np.set_printoptions)中的threshold值为9999，观察是否能够打印出全部的元素
+    7. 设定打印选项(np.set_printoptions)中的threshold值为np.nan，观察是否能够打印出全部的元素      np.set_printoptions(threshold=np.nan)
+    8. 创建一个包含21个整数形状为(3,7)的阵列                                    
+    9. 设定打印选项(np.set_printoptions)中的threshold值为21，观察是否能够打印出全部的元素        np.set_printoptions.(threshold=21)
+    10. 设定打印选项(np.set_printoptions)中的threshold值为20，观察是否能够打印出全部的元素
+
+
+8. 按以下要求操作
+    1. 用以下命令创建一个形状为(4,4,4)的阵列
+        a = np.random.randint(0,10,(4,4,4))
+    2. 执行阵列a的sum方法，不加任何参数，观察输出                                                     a.sum()
+    3. 执行阵列a的sum方法三次，分别加上参数axis=0, axis=1, axis=2，观察输出，尝试理解numpy的内部操作   第一维首个加  第二维首个加  ...
+    4. 按照同样的方式操练阵列a的max, min, mean这三个方法                                              略
+
+
+9. 按以下要求操练
+    1. 创建一个形状为(3,3,3)的阵列，用随机数填充                             a=np.random.randint(10),reshape(3,3,3)
+    2. 获取阵列坐标(2,2)位置的值                                      a[2][2]
+    3. 获取阵列第一维的第二个元素                                     a[1]
+    4. 获取阵列第二维的第二个元素                                     a[:,1,1]
+    5. 获取阵列第一维的第二个元素中的第二个元素                        a[1][1]
+    6. 获取阵列最高维的最后一个元素                                   a[2][2][2]
+    7. 用for循环迭代阵列的第一维元素，打印出每个元素                   for i in a:  print(i)
+    8. 用for循环迭代打印出阵列的每一个元素                             for i in a:  for j in i:  for k in j:   print(k)
+
+
+10. 按以下要求操练
+    1. 创建阵列a，形状为(2,3,4)，内容为连续的整数                                    a=np.arange(24).reshape(2,3,4)
+    2. 从阵列a生成一个一维阵列                      				   np.ravel(a)
+    3. 从阵列a生成一个形状为(4,6)的阵列                                              np.array(a).reshape(4,6)
+    4. 从阵列a生成一个新阵列，轴的数量是3, 轴0轴1的长度分别是2和6,轴2让numpy自动检测   np.array(a).reshape(2,6,-1)
+    5. 从阵列a生成一个形状为(4,7)的阵列，观察出错信息                                 np.array(a).reshape(4,7)
+    6. 从阵列a生成一个形状为(4,5)的阵列，使用np.resize函数                           np.resize(a,(4,5)) ,不足就省略，超过就循环
+    7. 对比a.shape和a.T.shape，观察规律                                             a.shape >>(2,3,4)   a.T.shape >>(4,3,2)  对称
+    8. 手动对一个二维阵列做转置操作
+        1. 创建一个二维阵列: a = np.arange(6).reshape(2,3)                         抄
+        2. 创建另外一个阵列，形状是a颠倒形状: b = np.zeros(a.shape[::-1])           抄
+        3. 用阵列a的值赋值给阵列b                                                  抄
+            b[0] = a[:,0]
+            b[1] = a[:,1]
+            b[2] = a[:,2]
+        4. 验证阵列b的值与a.T 完全相等: np.all(b == a.T)                            抄
+
+
+11. 按以下要求操练
+    1. 创建两个阵列:                                                              对着抄
+        a = np.arange(6).reshape(2,3)   
+        b = np.arange(1,7).reshape(2,3)
+    2. 运行以下命令，查看输出，尝试理解numpy的内部操作：
+        np.vstack([a,b])                                                        (4,3)形状，第一轴相加
+        np.hstack([a,b])                                                        (2,6)形状，第二轴相加
+    3. 再创建两个阵列:
+        a = np.arange(24).reshape(2,3,4)
+        b = np.arange(1,25).reshape(2,3,4)
+    4. 运行以下命令，查看输出，尝试理解numpy的内部操作：
+        np.vstack([a,b])                                                      第一维相加，变成（4,3,4）
+        np.hstack([a,b])                                                      第二维相加，变成（2,6,4）
+        np.dstack([a,b])                                                      第三维相加，变成（2,3,6）
+    5. 用np.concatenate重复效果等同于上一步的操作
+        np.concatenate([a,b], axis=0)   # vstack                              concatenate是连接的意思，axis=0是第一维的意思
+        np.concatenate([a,b], axis=1)   # hstack
+        np.concatenate([a,b], axis=2)   # dstack
+    6. 运行以下命令，比较其输出与上一步的区别                                    增加了一维
+        np.stack([a,b], axis=0)                                               （2,2,3,4）原第一维相加
+        np.stack([a,b], axis=1)                                               （2,2,3,4）原第二维相加
+        np.stack([a,b], axis=2)                                               （2,3,2,4）原第三维相加
+
+12. 按以下要求操练                                                             ×××不会----------------------------------------
+    1. 创建阵列: a = np.arange(64).reshape(8,8)                                 抄
+    2. 把阵列按0轴平均分为四份: np.split(a, 4)                                   分割成4个阵列的阵列
+    3. 把阵列按1轴平均分为四份: np.split(a, 4, axis=1)
+    4. 把阵列按0轴平均分为三份，看错误信息
+    5. 把阵列按0轴的3和5两个索引点分为三份: np.split(a, [3,5])
+    6. 把阵列按0轴近似平均地分为三份: np.array_split(a, 3)
+    7. 创建一个(2,2,2)的阵列，填充连续整数
+        1. a = np.arange(8).reshape(2,2,2)
+        2. 运行以下命令，观察输出
+            np.vsplit(a, 2)
+            np.hsplit(a, 2)
+            np.dsplit(a, 2)
+
+
+13. 按以下要求操练
+    1. 创建一个一维阵列: a = np.arange(12)
+    2. 把阵列a 改变形状生成一个二维阵列: b = a.reshape((3,4))
+    3. 查看阵列a和b的标记，观察其中的 OWNDATA 的值                ---------查看标记。
+        a.flags                                                 ----True
+        b.flags                                                 ----False
+    4. 运行以下命令并观察输出
+        b.base is a                                             ---True
+        a.base is None                                          ---True
+    5. 从阵列a创建一个浅副本，并运行相关测试命令，观察输出
+        c = a.view()
+        c.flags                                                 ---OWNDATA:False
+        c.base is b.base is a                                   ---True
+    6. 从阵列b创建一个深副本，并运行相关测试命令，观察输出
+        d = b.copy()
+        d.flags                                                ---True
+        d.base is None                                         ---True
+    7. 运行以下命令查看a,b,c,d四个阵列的数据的内存地址           ----------前3个内存地址一样，最后一个地址不一样11
+        a.__array_interface__['data'][0]
+        b.__array_interface__['data'][0]
+        c.__array_interface__['data'][0]
+        d.__array_interface__['data'][0]
+    8. 共享相同数据的不同阵列，其形状互相独立，运行以下命令，观察输出
+        b.base is c.base is a                                  ---True
+        a.shape                                                ---(12,)
+        b.shape                                                ---(3,4)
+        c.shape                                                ---(12,)
+    9. 对阵列做切片将生成视图，运行以下命令，观察输出
+        a.flags.owndata                                        ---True
+        a[:].flags.owndata                                     ---False
+    10. a,b,c共享相同的数据，d有独立的数据，修改阵列c的某个值，观察阵列a,b,c,d的值的变化
+        c[-1] = 9999                                           ---a,b,c都变了9999,唯独d没有变化
+        a
+        b
+        c
+        d
+    11. ravel视情况生成深副本或浅副本，flatten总是生成深副本，运行以下命令，观察输出
+        d.flags.c_contiguous                                  ---True
+        d.ravel(order='C').flags.owndata                      ---False
+        d.ravel(order='F').flags.owndata                      ---True
+        d.flatten(order='C').flags.owndata                    ---True
+        d.flatten(order='F').flags.owndata                    ---True
+
+
+14. 按以下要求操练
+    1. 创建两个阵列
+        a = np.arange(3)
+        b = np.arange(4)
+    2. 执行以下操作，观察输出
+        a + b                         ---报错
+        a[:,None].shape               ---（3,1）
+        b[:,None].shape               ---（4,1）
+        b[None,:].shape               ---（1,4）
+------------------------------------------------
+a[:,None] + b
+array([[0, 1, 2, 3],
+       [1, 2, 3, 4],
+       [2, 3, 4, 5]])
+
+a[:,None]  
+array([[0],
+       [1],
+       [2]])
+b
+array([0, 1, 2, 3])
+-------------------------------------------------
+a + b[:,None]
+array([[0, 1, 2],
+       [1, 2, 3],
+       [2, 3, 4],
+       [3, 4, 5]])
+-------------------------------------------------
+a[:,None] + b[None,:]
+array([[0, 1, 2, 3],
+       [1, 2, 3, 4],
+       [2, 3, 4, 5]])
+-----------------------------------------------
+a + 1 == a + np.full_like(a, 1)
+array([ True,  True,  True])
+-------------------------------------------------
+
+15. 按以下要求操练
+    1. 创建阵列:
+        a = np.arange(10,0,-1)
+        b = np.arange(48).reshape(3,4,4)
+    2. 阵列索引生成的是深副本: a[[0,1,2]].flags.owndata
+    3. 结果阵列的数据类型来自原阵列: a[[0,1,2]].dtype == a.dtype
+    4. 结果阵列的形状是索引阵列的形状串接上未指明的剩余的轴的形状:
+        a[[0,1,2]].shape == (3,)
+        idx = np.array([[0,1],[2,1]])
+        b.shape, b[idx].shape                    --------这里变成（2，2，4，4），idx是一个元素，只对0轴做操作,idx的shape是（2,2）
+    5. 运行以下命令，观察输出
+        a[[0,1,101]]
+    6. 多个阵列对应位置的值组合成索引，运行以下命令，观察输出
+        b[[0,1],[0,1],[0,1]]                                    -------------b[0,0,0]  b[1,1,1] 
+        b[[0,1],[0,1]]                                          -------------b[0][0]   b[1,1]
+    7. 当阵列后面有数字时，数字将被广播成与前面的阵列相同的形状
+        b[[0,1],2]                                              b[0][2]   b[1][2]
+    8. 当两个阵列形状不同时，也尝试广播，无法广播时将出错
+        b[[0,1],[[1,2],[2,3]]]      <-- (2,)与(2,2)正常广播        ---------->b[0][1]  b[0][2]     b[1][2]  b[1][3]
+        b[[0,1,2],[[1,2],[2,3]]]    <-- (3,)与(2,2)无法兼容广播，出错
+    9. 索引阵列/切片前面的数据用于按轴的顺序选出指定的数据，供后面的切片/索引阵列索引
+        b[0,1,[1,3]]                                             -----------b[0,1,1]  b[0,1,3]
+        b[0,1,::2]                                               -----------b[0,1,0]  b[0,1,2]
+    10. 切片与右边的数字广播时，切片被转成一维阵列，然后再广播
+        b[::2,0]                                                 -------------b[0,0]  b[2,0]
+    11. 切片与切片/阵列广播时，所有切片被转成一维阵列，然后左边的转成(X,1)的形状，右边的转成(1,X)的形状，然后广播
+        b[:2,:3]                                                -------表示0轴的前两个，1轴的前3个
+        b[:2,[0,2]]                                             --------表示0轴的前两个，1轴的第一个和第3个
+        b[[0,2],:2]                                            ---------表示0轴的第一个和第三个，1轴的前两个
+    12. 用能够被转换成阵列的其它数据类型，作用等同于np.array
+        a[np.array([0,1,2])]                                   ----------这两个的意思是一样的
+        a[[0,1,2]]
+    13. 但是python的tuple是直接作为索引的，不会被转换成ndarray
+        b[(0,1,2)]      # 等价于 b[0,1,2]                       ----------等价于b[0,1,2]
+        b[np.array((0,1,2))]                                  -----------等价于b[[0,1,2]],查看0轴前3个
+    14. 用bool阵列来索引
+        idx = a > 5         # 创建bool阵列                      ---------返回True 或者 False
+        idx.shape, a.shape  # 形状相同
+        a[idx]                                               ------------返回大于5的数组
+        b[np.array([True, False, False])]   # 手动创建bool阵列  --------返回0轴的第一个
+        idx = np.full(b.shape[:2], False, dtype=bool)       ------------返回b.shape[:2]=(3,4),就是false的3行4列
+        idx.shape, b.shape      # bool阵列形状与b阵列头部相同   -------（3,4）   （3,4,4）
+        idx[:,0] = True                                        --------1轴的第1个变成True
+        b[idx]                                                ---------这里只显示为True的1轴的第1个
+    15. 对索引结果赋值，用来赋值的值与索引结果的形状必须相同或者兼容广播
+        b[[0,2],[0,1]]                                        ---------b[0,0]   b[2,1]
+        b[[0,2],[0,1]].shape                                    -------(2,4)
+        b[[0,2],[0,1]] = 0                      # 正常广播
+        b[[0,2],[0,1]] = [1,2,3,4]              # 正常广播
+        b[[0,2],[0,1]] = [[1,2,3,4],[2,3,4,4]]  # 匹配，不需广播
+        b[[0,2],[0,1]] = [1,2]                  # 不能广播，出错     ------因为赋值的形状不一样！！！
+
+
+16. 按以下要求操练
+    1. 创建结构化阵列的数据类型
+        dt = np.dtype([('shape', np.float64, 3),('weight', np.float64, 1)])
+    2. 创建结构化阵列
+        n = 100
+        info = np.zeros(n, dtype=dt)
+    3. 获取结构化阵列的记录和列
+        info[0]
+        info[1]
+        info[:2]
+        info['shape']
+        info['weight']
+    4. 修改结构化阵列的数据
+        info['shape'] = np.random.randint(1,10,(n,3))
+        info['weight'] = np.random.randint(50,100,n)
+        info[0]['shape'] = 1,2,3
+        info[0]['weight'] = 30
+
+
+17. 按要求计算
+    1. 计算抛3个骰子所得点数之和的可能值
+    2. 用numpy计算，不用python的循环
+    3. 取出出现频率最高的4种和
+
+    n = np.arange(1,7)
+    sums = n[:,None,None] + n[None,:,None] + n[None,None,:]
+    counts, bins = np.histogram(sums.flat, np.arange(3,19))
+    bins[counts.argsort()[::-1][:4]]
+
+    # vals, counts = np.unique(sums, return_counts=True)
+    # vals[(-counts).argsort()[:4]]
+
+
+18. 操練numpy的IO操作
+    1. 保存一個陣列數據到.npy文件中
+        np.save('/tmp/arr', a)
+    2. 保存多個陣列數據到.npz文件中
+        np.savez('/tmp/arr', a=a, b=b)
+    3. 從.npy, npz文件中加載陣列
+        a = np.load('/tmp/arr.npy')
+        f = np.load('/tmp/arr.npz')
+        f['a']
+        f['b']
+    4. 導出陣列到csv文件中
+        np.savetxt('/tmp/aa', a, delimiter=',')
+    5. 從csv文件導入陣列
+        np.genfromtxt('/tmp/aa', delimiter=',')
+    6. 導入包含了數字和文本的文件
+        np.genfromtxt('/tmp/aa', delimiter=',', dtype='object')
+
+
+
+
+
+
+

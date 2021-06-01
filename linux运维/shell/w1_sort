@@ -1,0 +1,15 @@
+#!/bin/bash
+
+while read line ; do
+    line=${line#http://}
+    echo ${line%/*}
+done <<< "http://www.baidu.com/index.html
+http://www.baidu.com/1.html
+http://post.baidu.com/index.html
+http://mp3.baidu.com/index.html
+http://www.baidu.com/3.html
+http://post.baidu.com/2.html" | sort | uniq -c | sort -n -r
+
+# 3 www.baidu.com
+# 2 post.baidu.com
+# 1 mp3.baidu.com

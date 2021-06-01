@@ -1,0 +1,140 @@
+网络配置
+    ifconfig            查看本机启动的网卡信息
+        enp2s0          网卡设备名
+            e开头的网卡设备名为有线网卡
+            w开头的网卡设备名为无线网卡
+
+    mii-tool            查看有线网卡是否连通
+        sudo mii-tool enp2s0
+            显示link ok代表网线连通, 显示no link代表网线没有连通
+
+    重启网络服务
+        ubuntu:
+            sudo service networking restart
+
+        centos:
+            service network restart
+                或
+            /etc/init.d/network restart
+
+    检测网络连接是否连通
+        ping 目标IP地址
+            一直会ping, 按ctrl + c结束
+
+        ping -c 3 目标IP地址
+            ping三次目标
+
+
+    网卡的IP地址
+        自动获取    dhcp
+            sudo dhclient enp2s0
+                如果获取过,再次获取无效
+                如果想要再次获取, 重启网络再获取
+
+        手动设置    static
+            临时设置
+                ifconfig enp2s0 3.3.3.36 netmask 255.255.255.0
+                    或
+                ifconfig enp2s0 3.3.3.36/24
+
+            永久设置(修改配置文件, 修改后必须重启网络)
+                Ubuntu(/etc/network/interfaces):
+                    auto enp2s0
+                    iface enp2s0 inet dhcp
+
+                    auto enp2s0:0
+                    iface enp2s0:0 inet static
+                    address 3.3.3.3
+                    netmask 255.255.255.0
+
+                CentOS(/etc/sysconfig/network-scripts/ifcfg-eth0)
+                    DEVICE=eth0
+                    ONBOOT=yes
+                    BOOTPROTO=dhcp
+
+                    /etc/sysconfig/network-scripts/ifcfg-eth0:0
+                        DEVICE=eth0:0
+                        ONBOOT=yes
+                        BOOTPROTO=static
+                        IPADDR=3.3.3.3
+                        NETMASK=255.255.255.0
+                        GATEWAY=3.3.3.1
+
+
+    网关路由
+        ping外网IP不通的情况查看网关设置是否正确
+            ping 8.8.8.8 (ping谷歌的DNS服务器)
+
+        查看当前路由表, 是否本网的网关地址
+            route -n
+
+        添加默认网关:
+            sudo route add default gw 192.168.7.1
+
+        删除默认网关:
+            sudo route del default gw 192.168.7.1
+
+    DNS解析
+        ping不通域名
+            ping baidu.com
+
+        DNS解析服务器配置文件
+            /etc/resolv.conf (临时生效)
+                nameserver 202.96.134.133
+                nameserver 202.96.128.68
+                nameserver 223.5.5.5
+
+            永久生效DNS配置
+                vim /etc/resolvconf/resolv.conf.d/base
+                    nameserver 223.5.5.5
+
+                立即更新配置
+                    sudo resolvconf -u
+
+        host文件(本地DNS解析)
+            /etc/hosts
+                IP地址 域名
+
+-------------------------------------------------------------------------------
+网络工具
+    route               路由表设定和查看
+        路由表的添加
+            sudo route add -net 3.3.3.0 netmask 255.255.255.0 dev enp2s0
+
+        路由表的删除
+            sudo route del -net 3.3.3.0 netmask 255.255.255.0
+
+    netstat             显示网络连接情况
+        -r              路由表
+        -n              不把IP转换成域名
+        -ie             网卡信息
+        -a              所有连接信息
+        -t              查看TCP的连接信息
+        -l              查看监听状态信息
+        -p              显示程序路径
+
+    tcpdump             抓包工具
+        tcpdump arp     捕捉arp协议的数据包
+        tcpdump tcp     捕捉tcp协议的数据包
+        tcpdump udp     捕捉udp协议的数据包
+        tcpdump tcp port 22     捕捉tcp协议端口号为22的数据包
+        tcpdump tcp src port 22 捕捉tcp协议源端口号为22的数据包
+        tcpdump tcp port 80 -vv -w /tmp/tcp.cap 捕捉tcp协议端口号为80的数据并且写入文件
+
+    nc                  tcp测试命令
+        创建TCP服务器
+            nc -l 本机IP地址 端口号
+
+        创建TCP客户端
+            nc TCP服务器IP 服务器端口号
+
+        nc测试TCP连接情况, nc可以接受和发送数据
+        利用nc读取标准输入发送, 接受数据输出到标准输出, 实现聊天 文件传输..
+
+    wget                下载工具(支持很多协议)
+        wget http://3.3.3.3/share/1.mp4 -O ~/123.mp4
+            -q      安静模式
+            -O      接受重命名
+
+    curl                http命令行客户端
+

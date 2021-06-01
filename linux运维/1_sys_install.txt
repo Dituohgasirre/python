@@ -1,0 +1,124 @@
+计算机: 硬件 + 软件
+
+操作系统(UNIX) -> 软件
+    核心程序: 内核(给其它应用程序提供服务的程序) -> Linux 驱动
+        进程管理(CPU) 内存管理(内存) 文件系统(硬盘 NTFS FAT32 EXT4) 网络(TCP/IP协议栈)
+
+    Shell程序   人机交互
+        图形SHELL   Windows/X-Window
+        文本SHELL   cmd/bash
+
+    外围程序(其它应用程序)
+
+    标准库/第三方库(动态库/静态库)
+
+-------------------------------------------------------------------------------
+UNIX  1970年左右  操作系统始祖 (C语言的诞生为了UNIX的移植)
+    SYS V
+    BSD -> FreeBSD
+
+GNU(GNU's Not Unix) 开源组织 目标: 实现类似UNIX操作系统
+
+1991年Linux 社区开源发布
+
+GNU/Linux -> 红帽 -> 服务端操作系统
+
+LFS
+
+发行版本
+    RedHat -> CentOS    -> rpm -> yum
+    Ubuntu              -> deb -> apt
+
+-------------------------------------------------------------------------------
+双系统
+    ubuntu16.04
+    centOS6.9
+
+在ubuntu16.04基础上安装CentOS6.9:
+    查看磁盘信息
+        sudo fdisk -l
+
+    修改硬盘分区
+        sudo fdisk /dev/sda
+            进入fdisk命令行
+                删除第六个分区:
+                    d
+                        6
+
+                新建centos根分区
+                    n
+                        回车
+                        +20G
+
+                新建数据分区
+                    n
+                        回车
+                        +20G
+
+                更换数据分区的文件系统格式
+                    t
+                        7
+                        b
+
+                查看分区表确认分区信息
+                    p
+
+                保存分区信息
+                    w
+
+        刷新磁盘文件
+            sudo partprobe
+
+        格式化数据分区
+            sudo mkfs.vfat /dev/sda7
+
+        挂载数据分区
+            sudo mount /dev/sda7 /mnt/
+
+        复制镜像文件复制到/mnt目录
+            cp CentOS-6.9-x86_64-bin-DVD1.iso /mnt
+
+    挂载centos6.9镜像文件
+        sudo mount -o loop CentOS-6.9-x86_64-bin-DVD1.iso /opt
+
+    提取安装系统的内核文件及临时文件系统文件
+        cp /opt/isolinux/vmlinuz /mnt/
+        cp /opt/isolinux/initrd.img /mnt/
+        cp /opt/images /mnt/ -rf
+
+
+    修改Grub菜单配置
+        sudo vim /boot/grub/grub.cfg
+
+        set timeout_style=show
+        set timeout=10
+
+        menuentry "CentOS_Install" {
+            set root='(hd0,7)'
+            linux /vmlinuz
+            initrd /initrd.img
+        }
+
+    重启电脑进入Grub菜单选择CentOS_Install
+
+
+CentOS6.9硬盘安装Mint系统:
+    新建sda8分区(20G)
+
+    下载Mint系统镜像:
+        wget http://3.3.3.1/iso/linuxmint-18.1-kde-64bit.iso -O /mint.iso
+
+    提取安装文件:
+        mount -o loop /mint.iso /mnt
+        cp /mnt/casper/{vmlinuz,initrd.lz} /
+
+    修改/boot/grub/grub.conf
+        title Mint_Install
+            root (hd0,5)
+            kernel /vmlinuz boot=casper iso-scan/filename=/mint.iso --
+            initrd /initrd.lz
+
+    重启选择Mint_Install
+        进入系统后打开终端必须先输入: sudo umount -l /isodevice
+        再点击安装程序
+
