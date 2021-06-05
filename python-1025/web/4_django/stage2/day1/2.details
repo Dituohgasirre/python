@@ -1,0 +1,255 @@
+pythonanywhere.com 是一个提供运行Python网页程序服务的网站，支持付费和免费的服务。
+
+
+注册pythonanywhere免费账户
+
+pythonanywhere提供受限的免费服务，注册一个账户即可使用，注册地址 https://www.pythonanywhere.com/registration/register/beginner/
+
+
+认识pythonanywhere的网页操作界面
+
+pythonanywhere的网页页面有这些部分：终端，文件，Web，定时任务，数据库；我们将会用频繁用到终端、文件、Web和数据库这些部分的功能。
+
+
+
+
+设置运行python所需的虚拟环境
+
+pythonanywhere网页程序运行在python虚拟环境中，因此首先需要设置虚拟环境。
+
+1. 创建命令：
+
+    mkvirtualenv --python=python3.6 dir
+
+2. 启用/停用环境
+
+    启用环境： workon dir
+    停用环境： deactivate
+
+3. 安装django及相关模块
+
+    pip install django==1.11
+    pip install mysqlclient
+
+
+
+设置web应用程序
+
+1. 预备项目的数据
+
+接下来需要把项目的文件上传到pythonanywhere服务器上。有几种方法可以做到，一个方法是把项目放到github上，然后在pythonanywhere的bash 终端上用git来clone；另外一个是使用pythonanywhere的文件功能把本地的项目数据上传到pythonanywhere服务器。
+
+    在本地打包项目文件的参考命令：
+
+    把 /mysite 目录打包成一个压缩包：
+
+        tar czf /tmp/mysite.tar.gz /mysite
+
+    在服务端解压tar包的命令
+
+        tar xf mysite.tar.gz
+
+2. 设置数据库
+
+在pythonanywhere的数据库页面可以设置数据库。免费用户可以使用MySQL数据库，付费用户可以使用Postgres数据库。数据库的名字前面会自动加上用户的名称和美元符号。数据库创建好后，数据库页面上会提示连接数据库所需的地址，用户名就是登录pythonanywhere网站所使用的用户名，密码是初始化数据库时所设置的密码。
+
+3. 把项目的migrations同步到数据库中
+
+    python manage.py migrate
+
+4. 配置Web应用程序
+
+切换到网页的Web标签，点击"Add a new web app"，照着指示往前，选择"manual configuration"，注意所选的python版本必须和前面创建虚拟环境时一致。创建完毕后到子域名 https://<username>.pythonanywhere.com/ 即可看到一个hello world的页面，表示网页程序创建成功。
+
+配置网页程序使用前面所创建的虚拟环境。在Web标签页面往下滚动，找到Virtualenv的段落，输入虚拟环境的目录。pythonanywhere网页会自动检测目录是不是有效的虚拟环境。
+
+在Code段落，点击"WSGI configuration file" 右边的文件路径开始编辑WSGI的入口文件，在该文件中注释原有的配置，打开Django的配置，并根据实际的目录路径做配置。
+
+在Static files段落，点击 'Enter URL'，输入 '/static/'，再点击 'Enter path'，输入项目的静态文件的总目录，在此例中是 /home/joshuachen2018/mysite/static。如有需要，可以做以下改动： 
+
+    修改 mysite/settings.py，添加以下配置:
+        STATIC_ROOT = '/home/joshuachen2018/mysite/static/'
+    
+    进入项目目录，执行以下命令： 
+        cd /home/joshuachen2018/mysite
+        python manage.py collectstatic
+
+
+5. 在Web标签页面最上面，点击按钮重载Web应用程序，即可访问Django项目的应用程序。
+
+
+
+
+
+使用通用的view来简化代码
+
+做Django开发过程中，有一些处理任务具有很大的相似性，比如说列出Question模型的所有数据，或者显示id为1的模型记录的详细信息，等等。Django提供了一些具有通用性的view，使得完成这些处理任务，不需要不断地写重复的代码。
+
+假设有以下模型：
+
+# models.py
+from django.db import models
+
+class Publisher(models.Model):
+    name = models.CharField(max_length=30)
+    address = models.CharField(max_length=50)
+    city = models.CharField(max_length=60)
+    state_province = models.CharField(max_length=30)
+    country = models.CharField(max_length=50)
+    website = models.URLField()
+
+    class Meta:
+        ordering = ["-name"]
+
+    def __str__(self):
+        return self.name
+
+class Author(models.Model):
+    salutation = models.CharField(max_length=10)
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    headshot = models.ImageField(upload_to='author_headshots')
+
+    def __str__(self):
+        return self.name
+
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    authors = models.ManyToManyField('Author')
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE)
+    publication_date = models.DateField()
+
+
+需要列出所有Publisher的信息，则可以定义这样的view：
+
+from django.views.generic import ListView
+from books.models import Publisher
+
+class PublisherList(ListView):
+    model = Publisher
+
+
+最后，建立URL到View的映射：
+
+from django.conf.urls import url
+from books.views import PublisherList
+
+urlpatterns = [
+    url(r'^publishers/$', PublisherList.as_view()),
+]
+
+这里的PublisherList是一个类对象，调用它的as_view方法生成一个实例对象，这个view实例就包含了处理 r'^publishers/$' 请求的代码。
+
+
+以上就是使用通用view所需的所有Python代码，此外仍然需要创建模板文件。这里，可以通过给View类增加一个名叫 template_name 的属性，用来指定模板文件的路径，如果不指定，按照这个例子中的名字，将会使用 books/publisher_list.html，这里的book 是应用的名字，publisher是模型名字的小写，list表示ListView.
+
+books/publisher_list.html 的范例：
+
+    {% extends "base.html" %}
+
+    {% block content %}
+        <h2>Publishers</h2>
+        <ul>
+            {% for publisher in object_list %}
+                <li>{{ publisher.name }}</li>
+            {% endfor %}
+        </ul>
+    {% endblock %}
+
+默认情况下，通过context传给模板的数据的名字叫做 object_list。
+
+
+
+ListView的定制
+
+1. 指定模板
+    class QuestionList(ListView):
+        model = Question
+        template_name = 'polls/index.html'
+
+2. 指定查询模型数据的方法
+    class QuestionList(ListView):
+        queryset = Question.objects.all()
+
+    # 更具弹性的方法，可以使用从url中获得的参数，self.args是位置参数，self.kwargs是关键字参数
+    class PublisherList(ListView):
+        def get_queryset(self):
+            publisher = get_object_or_404(Publisher, name=self.args[0])
+            return Book.objects.filter(publisher=publisher)
+
+3. 指定context中数据的名称
+    class QuestionList(ListView):
+        model = Question
+        context_object_name = 'latest_questions'
+
+4. 指定生成context对象的方法
+    def get_context_data(self, **kwargs):
+        context = ListView.get_context_data(self, **kwargs)
+        context['additional'] = 'some data'
+        return context
+
+
+
+DetailView的使用
+
+View的范例代码：
+
+from django.views.generic.detail import DetailView
+
+from polls.models import Question
+
+class QuestionDetail(DetailView):
+    model = Question
+    template_name = 'polls/detail.html'
+    context_object_name = 'q'
+
+
+
+
+表单使用的一般流程：
+
+1. 用户向服务器发出请求(GET)
+2. 服务器收到客户端请求后，判断请求的方法 (GET)，然后回复一个包含了表单的页面
+3. 用户填写了表单，点击提交按钮，向服务器发送数据(POST)
+4. 服务器收到了用户发来的数据，判断请求的方法 (POST)，开始处理，处理完毕后转向另外一个页面；
+   如果处理过程中有错误发生，服务器就回复包含了表单的页面，并提供旧的数据和错误信息，
+   让用户可以重新提交表单
+
+
+
+
+
+表单验证
+
+
+Django的表单自带了不同类型的表单项，有EmailField, IntegerField, CharField, FloatField等，适应不同场景的使用。Django表单不同的表单项内置特定的验证逻辑，可以在使用用户所提交的表单数据之前做有效性验证。
+
+除了使用表单项本身的校验代码做一些常规的基本的校验之外，还可以根据需要定制校验代码。
+
+
+设置表单项的属性值：
+
+    常用的定制属性：
+        required
+        widget
+        label
+        initial
+        error_messages
+        validators
+
+自定义校验方法
+
+def port_validator(value):
+    raise ValidationError('invalid value')
+
+
+
+
+
+Django对一个表单的验证分为几个步骤，各个步骤都可以做定制：
+
+1. Field的 to_python() 方法被执行，表单中的数据被按照定义做类型转换，转换失败就抛出ValidationError异常。
+2. Field的validate() 方法被执行，此方法接受上一步生成的值，但不返回任何值，也不修改传给它的值，这个方法可以抛出ValidationError异常。
+3. Field的run_validators()运行field的所有validator，并收集错误信息。这个方法不需要覆盖和定制。
+4. Field的clean方法运行to_python(), validate(), 和run_validators，它会返回处理后的数据，就是cleaned_data。
+5. Form的clean_<fieldname>()方法。

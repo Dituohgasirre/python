@@ -1,0 +1,268 @@
+静态文件管理
+    Django项目当中极有可能会使用到非python文件, 例图像, JS, CSS和字体等文件(静态文件)
+    Django提供了django.contrib.staticfiles应用(包)来管理静态文件
+
+加入staticfiles应用(默认已经加好了):
+    INSTALLED_APPS配置当中加入django.contrib.staticfiles项
+
+静态文件命名空间:
+    静态文件命名空间与模板类似
+    应用的静态文件必须存放在app_name/static/app_name/目录下
+    例: 应用名称: poll
+        静态文件: logo.png
+        必须将logo.png放到poll/static/poll/目录下, 这样staticfiles才能找到此文件
+
+设置静态文件URL前缀:
+    STATIC_URL = '/static/'
+
+静态文件的访问:
+    模板中如果需要访问静态文件
+        加载staticfiles应用的static标记
+        {% load static %}
+
+        使用static标记组成静态文件的路径
+        <img src="{% static "poll/logo.png" %}">
+
+        static标记会组合静态文件的连接路径为 STATIC_URL + 'poll/logo.png'
+        最终解析的网页显示路径为: /static/poll/logo.png
+
+        但实际对应的文件路径会按一定规则进行查找:
+            因为命名空间问题, 所以查找的是"poll/logo.png"
+            首先查找应用目录下的static目录(poll/static)
+            如果没有则会到STATICFILES_DIRS配置列表中的目录里查找
+
+设置静态文件查找目录列表
+    STATICFILES_DIRS = {
+        os.path.join(BASE_DIR, 'static'),
+        '/var/www/',
+        '/to/',
+    }
+
+    例如查找"logo.png (命名空间为poll)" 的查找顺序:
+        应用目录/static/poll/logo.png
+        项目根目录的static/poll/logo.png
+        /var/www/poll/logo.png
+        /to/poll/logo.png
+
+
+部署静态文件
+    由于项目中不只是一个应用, 而应用的静态文件一般都放在应用的static目录里
+    为了项目统一管理静态文件, 需要将所有应用的静态文件集中在一起进行管理
+    方便配合apache和nginx等代理使用
+
+    配置项目统一管理静态文件目录:
+        STATIC_ROOT = 'static/'
+
+    收集所有应用的静态文件
+        python3 manage.py collectstatic
+            会将所有应用的静态文件复制到STATIC_ROOT目录里
+
+
+
+
+
+打包应用程序
+
+1. 在项目之外创建一个目录，假设名字为django-polls
+2. 把应用目录复制到django-polls下
+3. 创建文件 django-polls/README.rst，填入类似以下的内容
+
+    =====
+    Polls
+    =====
+
+    Polls is a simple Django app to conduct Web-based polls. For each
+    question, visitors can choose between a fixed number of answers.
+
+    Detailed documentation is in the "docs" directory.
+
+    Quick start
+    -----------
+
+    1. Add "polls" to your INSTALLED_APPS setting like this::
+
+        INSTALLED_APPS = [
+            ...
+            'polls',
+        ]
+
+    2. Include the polls URLconf in your project urls.py like this::
+
+        path('polls/', include('polls.urls')),
+
+    3. Run `python manage.py migrate` to create the polls models.
+
+    4. Start the development server and visit http://127.0.0.1:8000/admin/
+       to create a poll (you'll need the Admin app enabled).
+
+    5. Visit http://127.0.0.1:8000/polls/ to participate in the poll.
+
+4. 创建文件 django-polls/LICENSE，填入授权信息
+
+5. 创建文件 django-polls/setup.py 文件
+
+    import os
+    from setuptools import find_packages, setup
+
+    with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+        README = readme.read()
+
+    # allow setup.py to be run from any path
+    os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+    setup(
+        name='django-polls',
+        version='0.1',
+        packages=find_packages(),
+        include_package_data=True,
+        license='BSD License',  # example license
+        description='A simple Django app to conduct Web-based polls.',
+        long_description=README,
+        url='https://www.example.com/',
+        author='Your Name',
+        author_email='yourname@example.com',
+        classifiers=[
+            'Environment :: Web Environment',
+            'Framework :: Django',
+            'Framework :: Django :: X.Y',  # replace "X.Y" as appropriate
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: BSD License',  # example license
+            'Operating System :: OS Independent',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Topic :: Internet :: WWW/HTTP',
+            'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        ],
+    )
+
+    # License的可用列表 https://pypi.python.org/pypi?%3Aaction=list_classifiers
+
+6. 创建文件 django-polls/MANIFEST.in 以包含模块和包之外的文件
+
+    include LICENSE
+    include README.rst
+    recursive-include polls/static *
+    recursive-include polls/templates *
+
+7. 开始打包，在django-polls 目录下，运行以下命令：
+
+        python setup.py sdist
+
+
+
+
+用pip来安装打好的包
+
+    pip install --user django-polls/dist/django-polls-0.1.tar.gz
+
+
+
+
+
+如何将Django项目部署到Apache
+
+django项目路径: /mysite
+
+Apache配置mod_wsgi(ubuntu):
+
+    安装Apache: sudo apt install apache2 -y
+    安装mod_wsgi: sudo apt install libapache2-mod-wsgi-py3 -y
+
+    在/etc/apache2/sites-enabled下创建wsgi配置文件(wsgi.conf)
+        <VirtualHost *:80>
+            #设置虚拟主机名称
+            ServerName mysite.com
+
+            #设置虚拟主机管理员邮箱
+            ServerAdmin kyo@admin.com
+
+            #设置robots.txt和favicon.ico的请求对应文件路径
+            Alias /robots.txt /mysite/static/robots.txt
+            Alias /favicon.ico /mysite/static/favicon.ico
+
+            #设置media和static目录请求对应路径并且设置访问权限
+            Alias /media/ /mysite/media/
+            <Directory /mysite/media>
+                Require all granted
+            </Directory>
+
+            Alias /static/ /mysite/static/
+            <Directory /mysite/static>
+                Require all granted
+            </Directory>
+
+            #设置mod-wsgi工作模式为守护进程模式
+            #python-home    设置python库路径,推荐使用virtualenv设置的环境路径
+            #python-path    设置项目根目录
+            WSGIDaemonProcess mysite.com python-home=/venv python-path=/mysite
+            WSGIProcessGroup mysite.com
+
+            #设置虚拟主机根目录对应执行的wsgi入口文件
+            WSGIScriptAlias / /mysite/mysite/wsgi.py process-group=mysite.com
+
+            #设置虚拟主机目录访问权限, 只允许wsgi.py被访问
+            <Directory /mysite/mysite>
+                <Files wsgi.py>
+                Require all granted
+                </Files>
+            </Directory>
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+        </VirtualHost>
+
+django的virtualenv环境设置:
+    安装virtualenv工具: sudo pip3 install virtualenv
+
+    在根目录下运行: virtualenv venv -p /usr/bin/python3
+    运行virtualenv环境: source /venv/bin/activate
+    安装django环境:
+        pip install django==1.11
+        pip install mysqlclient
+
+
+设置django项目静态资源:
+
+在django项目目录下创建static静态资源目录, 将js/css/image/font资源放入此目录才能被正常访问
+
+将django后台静态资源导入到项目中:
+
+方法一: 将django后台静态资源复制到项目静态资源目录中
+    cp -r /venv/lib/python3.5/site-packages/django/contrib/admin/static/admin /mysite/static/
+
+方法二: 创建软链接链接到后面资源目录(前提apache2开启FollowSymLinks选项)
+    ln -s
+    /venv/lib/python3.5/site-packages/django/contrib/admin/static/admin /mysite/static/admin
+
+方法三：使用collectstatic命令
+    1. 修改项目的配置文件，加上以下配置:
+        STATIC_ROOT = '/mysite/static/'
+
+    2. 在项目的目录下 (/mysite) 运行以下命令：
+
+        python manage.py collectstatic
+
+
+
+如何让别的主机访问自己的mysite
+
+1. 确保服务器和客户机都能够联网，或者说两者能够互相ping通
+2. 服务器的apache配置文件中，要指明监听本机的外网口
+
+    vi /etc/apache2/ports.conf
+
+        Listen 0.0.0.0:80
+
+    还要确保虚拟主机的权限配置已经授权所有人访问，正确的授权配置类似这样
+
+        Require all granted
+
+3. 如果防火墙正在其作用，则还需要设置防火墙，开放指定的端口。
+    以TCP 80 为例，可以用这样的命令开启防火墙端口
+
+        iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+
+4. 因为这是实验环境，并没有完整的DNS解释的支撑，所以客户端仍需通过/etc/hosts文件设置主机名到ip地址的映射关系。假设服务器ip是192.168.1.1 ，则在客户机上的 /etc/hosts 后面添加这一行
+
+        192.168.1.1 mysite.com

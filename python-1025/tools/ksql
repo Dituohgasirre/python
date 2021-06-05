@@ -1,0 +1,51 @@
+#!/bin/bash
+
+runfile=/tmp/kyo_ide.sql
+default_passwd=123123
+
+run() {
+    test -z "$1" && file="$runfile" || file="$1"
+    # echo $file
+
+    local config host user passwd port dbname
+
+    re='\ *kyo\ *mysql\ *ide\ *config\ *'
+    config=$(sed -n -r -e "/\/\*$re/I, /$re\*\//Ip" $file | grep '@')
+
+    host=$(sed -n -r -e 's/^.*@host\ *(.*)\ *.*$/\1/Ip' <<< "$config")
+    passwd=$(sed -n -r -e 's/^.*@password\ *(.*)\ *.*$/\1/Ip' <<< "$config")
+    user=$(sed -n -r -e 's/^.*@user\ *(.*)\ *.*$/\1/Ip' <<< "$config")
+    port=$(sed -n -r -e 's/^.*@port\ *(.*)\ *.*$/\1/Ip' <<< "$config")
+    dbname=$(sed -n -r -e 's/^.*@database\ *(.*)\ *.*$/\1/Ip' <<< "$config")
+
+    test -z "$host" && host=localhost
+    test -z "$user" && user=root
+    test -z "$passwd" && passwd=$default_passwd
+    test -z "$port" && port=3306
+
+    # echo "mysql "-h$host" "-p$passwd" "-u$user" "-P$port" -t "$dbname" < $file"
+
+    mysql -h"$host" -p"$passwd" -u"$user" -P"$port" "$dbname" -t < $file
+}
+
+open() {
+    cat > $runfile << EOF
+-- Kyo MySQL IDE
+
+/* Kyo MySQL IDE Config
+    @Host localhost
+    @User root
+    @Password $default_passwd
+    @Port 3306
+    @DataBase student_sys
+KYO MySQL IDE Config */
+
+SET @@CHARACTER_SET_SERVER = utf8;
+SET @@COLLATION_SERVER = utf8_general_ci;
+
+EOF
+    vim $runfile "+call KyoMySQLCmdView()"
+}
+
+${1-open} $2
+

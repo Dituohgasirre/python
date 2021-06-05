@@ -1,0 +1,19 @@
+# 理解视图的角色和作用 （模型，模板，URL）
+# 掌握view的书写要点 (第一个参数，抛出异常，返回HttpResponse)
+# 了解Django提供的常用HttpResponse类 (django.http.HttpResponseXX)
+# 能够给HttpResponse设置任意的返回码 (status=404, p1)
+# 能够在view中返回404错误 (抛出Http404异常, HttpResponseNotFound, p2)
+# 能够自定义四种常见的错误响应view (400, 403, 404, 500, p3)
+# 能够基于http请求中的方法限制对view的访问 (django.views.decorators.http.requireXXX)
+# 能够在视图中获取模型的数据
+# 能够在获取不到数据时手动抛出404异常 (model.DoesNotExist, Http404, p4)
+# 能够使用快捷方法抛出404异常 (get_object_or_404, multiple records, p5)
+# 掌握get_list_or_404函数的用法 (p6,p7)
+
+# 了解模板的路径设计技巧 (templates/<appname>/filename)
+# 能够在view中使用模板来渲染数据 (render, context)
+# 能够在模板中获取变量的值 ({{ ... }})
+# 能够在模板中获取对象的属性 ({{ a.b }})
+# 能够在模板中使用判断和循环语句 (p8)
+# 能够移除模板中硬编码的url ({% url 'url_name' arg %})
+# 能够给url配置启用名字空间 (app_name, template, p11)

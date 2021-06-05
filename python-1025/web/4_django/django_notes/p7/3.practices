@@ -1,0 +1,70 @@
+一、修改polls程序的外观
+    1. 创建静态文件存放目录 polls/static/polls
+    2. 创建一个css文件style.css，存放在polls/static/polls中，设置链接文本为绿色
+    3. 在index页面中引用文件style.css
+
+
+二、把应用polls打包成可安装的包
+
+
+
+三、把polls项目发布到apache2 + mod_wsgi
+
+注意事项：装好虚拟环境后，所有的后续操作都要用root用户在虚拟环境中执行，如果还没有完成的时候中途退出，后续继续操作之前，必须先切换成root用，并进入虚拟环境，命令范例：
+
+    1. sudo -i
+    2. source /venv/bin/activate
+
+
+1. 配置使用国内的pip源，使安装过程更流畅
+为root用户和当前用户在其家目录下创建文件 ~/.pip/pip.conf
+
+[global]
+index-url=http://pypi.douban.com/simple
+trusted-host = pypi.douban.com
+
+2. 安装apache + mod_wsgi，并做相应的配置
+
+3. 配置虚拟环境
+    1. 切换成root用户
+        sudo -i
+    2. 安装virtualenv工具: pip3 install virtualenv
+    3. 运行命令: virtualenv /venv -p /usr/bin/python3
+    4. 启用虚拟环境: source /venv/bin/activate
+    5. 安装django环境:
+        pip install django==1.11
+        apt install libmysqlclient-dev      # 这是安装mysqlclient所需的以来包
+        pip install mysqlclient
+
+4. 把Django项目复制到某个地方，这里使用 /mysite 这个路径
+
+    cp -r ~/mysite /
+
+5. 配置项目的静态文件
+
+    1. 修改项目的配置文件，加上以下配置:
+        STATIC_ROOT = '/mysite/static/'
+    2. 在项目的目录下 (/mysite) 运行以下命令：
+        python manage.py collectstatic
+
+6. 配置项目的数据库，同步项目数据到数据库
+    cd /mysite
+    vi mysite/settings.py      <-- 配数据库
+    python manage.py migrate
+
+7. 按照apache的配置文件中的虚拟主机里的ServerName来配置 /etc/hosts 文件
+    假设apache有这样的配置：
+
+        ServerName mysite.com
+
+    就在 /etc/hosts 后面添加这一行
+
+        127.0.0.1 mysite.com
+
+8. 重启apache服务器
+
+    service apache2 restart
+
+9. 进入网站
+
+   http://mysite.com/polls/

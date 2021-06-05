@@ -1,0 +1,669 @@
+# The format of this file is documented in the dhcpd.leases(5) manual page.
+# This lease file was written by isc-dhcp-4.1.1-P1
+
+lease 192.168.71.101 {
+  starts 2 2014/07/01 05:07:39;
+  ends 3 2014/10/08 05:07:39;
+  tstp 3 2014/10/08 05:07:39;
+  cltt 2 2014/07/01 05:07:39;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:ad:c3:ab;
+}
+lease 192.168.71.128 {
+  starts 2 2014/07/01 05:48:11;
+  ends 3 2014/10/08 05:48:11;
+  tstp 3 2014/10/08 05:48:11;
+  cltt 2 2014/07/01 05:48:11;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:ad:c3:ab;
+}
+lease 192.168.71.132 {
+  starts 0 2014/07/13 08:15:51;
+  ends 1 2014/10/20 08:15:51;
+  tstp 1 2014/10/20 08:15:51;
+  cltt 0 2014/07/13 08:15:51;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:ef:71:e5;
+}
+lease 10.1.1.16 {
+  starts 6 2014/07/26 04:13:22;
+  ends 6 2014/07/26 05:13:22;
+  tstp 6 2014/07/26 05:13:22;
+  cltt 6 2014/07/26 04:13:22;
+  binding state free;
+  hardware ethernet 00:1d:0f:17:f2:56;
+}
+lease 10.1.1.20 {
+  starts 6 2014/07/26 05:34:34;
+  ends 6 2014/07/26 06:34:34;
+  tstp 6 2014/07/26 06:34:34;
+  cltt 6 2014/07/26 05:34:34;
+  binding state free;
+  hardware ethernet 00:30:67:37:bd:d4;
+}
+lease 10.1.1.28 {
+  starts 6 2014/07/26 05:42:08;
+  ends 6 2014/07/26 06:42:08;
+  tstp 6 2014/07/26 06:42:08;
+  cltt 6 2014/07/26 05:42:08;
+  binding state free;
+  hardware ethernet 00:21:27:25:7b:7d;
+}
+lease 10.1.1.26 {
+  starts 6 2014/07/26 05:46:56;
+  ends 6 2014/07/26 06:46:56;
+  tstp 6 2014/07/26 06:46:56;
+  cltt 6 2014/07/26 05:46:56;
+  binding state free;
+  hardware ethernet 00:21:97:7c:06:09;
+}
+lease 10.1.1.251 {
+  starts 6 2014/07/26 06:04:26;
+  ends 6 2014/07/26 07:04:26;
+  tstp 6 2014/07/26 07:04:26;
+  cltt 6 2014/07/26 06:04:26;
+  binding state free;
+  hardware ethernet 00:30:67:37:b5:38;
+}
+lease 10.1.1.32 {
+  starts 6 2014/07/26 06:08:07;
+  ends 6 2014/07/26 07:08:07;
+  tstp 6 2014/07/26 07:08:07;
+  cltt 6 2014/07/26 06:08:07;
+  binding state free;
+  hardware ethernet d8:5d:4c:6e:65:bf;
+}
+lease 10.1.1.17 {
+  starts 6 2014/07/26 06:15:08;
+  ends 6 2014/07/26 07:15:08;
+  tstp 6 2014/07/26 07:15:08;
+  cltt 6 2014/07/26 06:15:08;
+  binding state free;
+  hardware ethernet 38:83:45:f1:5e:41;
+}
+lease 10.1.1.35 {
+  starts 6 2014/07/26 06:22:14;
+  ends 6 2014/07/26 07:22:14;
+  tstp 6 2014/07/26 07:22:14;
+  cltt 6 2014/07/26 06:22:14;
+  binding state free;
+  hardware ethernet 1c:6f:65:e4:d6:6e;
+}
+lease 10.1.1.31 {
+  starts 6 2014/07/26 06:22:55;
+  ends 6 2014/07/26 07:22:55;
+  tstp 6 2014/07/26 07:22:55;
+  cltt 6 2014/07/26 06:22:55;
+  binding state free;
+  hardware ethernet 00:30:67:76:5b:e1;
+}
+lease 10.1.1.15 {
+  starts 6 2014/07/26 06:24:01;
+  ends 6 2014/07/26 07:24:01;
+  tstp 6 2014/07/26 07:24:01;
+  cltt 6 2014/07/26 06:24:01;
+  binding state free;
+  hardware ethernet 54:04:a6:c1:79:ed;
+}
+lease 10.1.1.18 {
+  starts 6 2014/07/26 06:24:39;
+  ends 6 2014/07/26 07:24:39;
+  tstp 6 2014/07/26 07:24:39;
+  cltt 6 2014/07/26 06:24:39;
+  binding state free;
+  hardware ethernet 40:16:9f:f4:f3:0f;
+}
+lease 10.1.1.19 {
+  starts 6 2014/07/26 06:27:54;
+  ends 6 2014/07/26 07:27:54;
+  tstp 6 2014/07/26 07:27:54;
+  cltt 6 2014/07/26 06:27:54;
+  binding state free;
+  hardware ethernet 00:1e:90:e5:72:fa;
+}
+lease 10.1.1.13 {
+  starts 6 2014/07/26 06:28:40;
+  ends 6 2014/07/26 07:28:40;
+  tstp 6 2014/07/26 07:28:40;
+  cltt 6 2014/07/26 06:28:40;
+  binding state free;
+  hardware ethernet 00:25:86:8e:af:df;
+}
+lease 10.1.1.27 {
+  starts 6 2014/07/26 06:29:35;
+  ends 6 2014/07/26 07:29:35;
+  tstp 6 2014/07/26 07:29:35;
+  cltt 6 2014/07/26 06:29:35;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f1:7d;
+}
+lease 10.1.1.24 {
+  starts 6 2014/07/26 06:30:10;
+  ends 6 2014/07/26 07:30:10;
+  tstp 6 2014/07/26 07:30:10;
+  cltt 6 2014/07/26 06:30:10;
+  binding state free;
+  hardware ethernet 40:16:9f:f4:e3:e1;
+}
+lease 10.1.1.249 {
+  starts 6 2014/07/26 06:32:21;
+  ends 6 2014/07/26 07:32:21;
+  tstp 6 2014/07/26 07:32:21;
+  cltt 6 2014/07/26 06:32:21;
+  binding state free;
+  hardware ethernet 00:27:19:97:1a:50;
+}
+lease 10.1.1.21 {
+  starts 6 2014/07/26 06:36:10;
+  ends 6 2014/07/26 07:36:10;
+  tstp 6 2014/07/26 07:36:10;
+  cltt 6 2014/07/26 06:36:10;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f1:47;
+}
+lease 10.1.1.22 {
+  starts 6 2014/07/26 06:37:31;
+  ends 6 2014/07/26 07:37:31;
+  tstp 6 2014/07/26 07:37:31;
+  cltt 6 2014/07/26 06:37:31;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f8:f7;
+}
+lease 10.1.1.14 {
+  starts 6 2014/07/26 06:41:25;
+  ends 6 2014/07/26 07:41:25;
+  tstp 6 2014/07/26 07:41:25;
+  cltt 6 2014/07/26 06:41:25;
+  binding state free;
+  hardware ethernet 00:19:21:20:1b:18;
+}
+lease 10.1.1.36 {
+  starts 6 2014/07/26 06:47:10;
+  ends 6 2014/07/26 07:47:10;
+  tstp 6 2014/07/26 07:47:10;
+  cltt 6 2014/07/26 06:47:10;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f3:bf;
+}
+lease 10.1.1.38 {
+  starts 6 2014/07/26 08:24:54;
+  ends 6 2014/07/26 09:24:54;
+  tstp 6 2014/07/26 09:24:54;
+  cltt 6 2014/07/26 08:24:54;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f8:7b;
+}
+lease 10.1.1.34 {
+  starts 6 2014/07/26 09:01:07;
+  ends 6 2014/07/26 10:01:07;
+  tstp 6 2014/07/26 10:01:07;
+  cltt 6 2014/07/26 09:01:07;
+  binding state free;
+  hardware ethernet 08:00:27:96:8b:83;
+}
+lease 10.1.1.39 {
+  starts 0 2014/07/27 01:17:50;
+  ends 0 2014/07/27 01:25:21;
+  tstp 0 2014/07/27 01:25:21;
+  cltt 0 2014/07/27 01:17:50;
+  binding state free;
+  hardware ethernet 30:85:a9:23:3a:51;
+  uid "\0010\205\251#:Q";
+}
+lease 10.1.1.40 {
+  starts 0 2014/07/27 02:02:28;
+  ends 0 2014/07/27 03:02:28;
+  tstp 0 2014/07/27 03:02:28;
+  cltt 0 2014/07/27 02:02:28;
+  binding state free;
+  hardware ethernet 00:30:67:76:58:0e;
+}
+lease 10.1.1.33 {
+  starts 0 2014/07/27 03:46:13;
+  ends 0 2014/07/27 04:46:13;
+  tstp 0 2014/07/27 04:46:13;
+  cltt 0 2014/07/27 03:46:13;
+  binding state free;
+  hardware ethernet 00:25:11:0f:ec:42;
+}
+lease 10.1.1.41 {
+  starts 0 2014/07/27 04:59:43;
+  ends 0 2014/07/27 05:59:43;
+  tstp 0 2014/07/27 05:59:43;
+  cltt 0 2014/07/27 04:59:43;
+  binding state free;
+  hardware ethernet 20:6a:8a:48:6f:30;
+}
+lease 10.1.1.37 {
+  starts 0 2014/07/27 08:49:30;
+  ends 0 2014/07/27 09:49:30;
+  tstp 0 2014/07/27 09:49:30;
+  cltt 0 2014/07/27 08:49:30;
+  binding state free;
+  hardware ethernet 00:25:11:0f:f2:a5;
+}
+lease 10.1.1.252 {
+  starts 1 2014/06/30 02:00:39;
+  ends 2 2014/10/07 02:00:39;
+  tstp 2 2014/10/07 02:00:39;
+  cltt 1 2014/06/30 02:00:39;
+  binding state active;
+  next binding state free;
+  hardware ethernet 40:16:9f:f4:f3:0d;
+}
+lease 10.1.1.213 {
+  starts 1 2014/06/30 02:02:50;
+  ends 2 2014/10/07 02:02:50;
+  tstp 2 2014/10/07 02:02:50;
+  cltt 1 2014/06/30 02:02:50;
+  binding state active;
+  next binding state free;
+  hardware ethernet 40:16:9f:f4:b6:cf;
+}
+lease 10.1.1.215 {
+  starts 1 2014/06/30 02:15:29;
+  ends 2 2014/10/07 02:15:29;
+  tstp 2 2014/10/07 02:15:29;
+  cltt 1 2014/06/30 02:15:29;
+  binding state active;
+  next binding state free;
+  hardware ethernet 52:54:00:e5:7f:ae;
+}
+lease 10.1.1.218 {
+  starts 1 2014/06/30 02:16:18;
+  ends 2 2014/10/07 02:16:18;
+  tstp 2 2014/10/07 02:16:18;
+  cltt 1 2014/06/30 02:16:18;
+  binding state active;
+  next binding state free;
+  hardware ethernet 52:54:00:c0:ac:97;
+}
+lease 10.1.1.211 {
+  starts 1 2014/06/30 02:47:21;
+  ends 2 2014/10/07 02:47:21;
+  tstp 2 2014/10/07 02:47:21;
+  cltt 1 2014/06/30 02:47:21;
+  binding state active;
+  next binding state free;
+  hardware ethernet 54:04:a6:94:b6:de;
+}
+lease 10.1.1.220 {
+  starts 1 2014/06/30 02:48:50;
+  ends 2 2014/10/07 02:48:50;
+  tstp 2 2014/10/07 02:48:50;
+  cltt 1 2014/06/30 02:48:50;
+  binding state active;
+  next binding state free;
+  hardware ethernet 1c:6f:65:e7:d0:cf;
+}
+lease 10.1.1.214 {
+  starts 1 2014/06/30 02:49:01;
+  ends 2 2014/10/07 02:49:01;
+  tstp 2 2014/10/07 02:49:01;
+  cltt 1 2014/06/30 02:49:01;
+  binding state active;
+  next binding state free;
+  hardware ethernet 1c:6f:65:66:f2:7b;
+}
+lease 10.1.1.228 {
+  starts 1 2014/06/30 02:55:05;
+  ends 2 2014/10/07 02:55:05;
+  tstp 2 2014/10/07 02:55:05;
+  cltt 1 2014/06/30 02:55:05;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:3d:cb:b5;
+}
+lease 10.1.1.227 {
+  starts 1 2014/06/30 03:04:58;
+  ends 2 2014/10/07 03:04:58;
+  tstp 2 2014/10/07 03:04:58;
+  cltt 1 2014/06/30 03:04:58;
+  binding state active;
+  next binding state free;
+  hardware ethernet 54:04:a6:94:b6:92;
+}
+lease 10.1.1.221 {
+  starts 1 2014/06/30 03:05:45;
+  ends 2 2014/10/07 03:05:45;
+  tstp 2 2014/10/07 03:05:45;
+  cltt 1 2014/06/30 03:05:45;
+  binding state active;
+  next binding state free;
+  hardware ethernet 1c:6f:65:75:a2:26;
+}
+lease 10.1.1.216 {
+  starts 1 2014/06/30 03:06:26;
+  ends 2 2014/10/07 03:06:26;
+  tstp 2 2014/10/07 03:06:26;
+  cltt 1 2014/06/30 03:06:26;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:25:11:0b:60:eb;
+}
+lease 10.1.1.223 {
+  starts 1 2014/06/30 03:12:12;
+  ends 2 2014/10/07 03:12:12;
+  tstp 2 2014/10/07 03:12:12;
+  cltt 1 2014/06/30 03:12:12;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:3d:ae:29;
+}
+lease 10.1.1.219 {
+  starts 1 2014/06/30 03:28:45;
+  ends 2 2014/10/07 03:28:45;
+  tstp 2 2014/10/07 03:28:45;
+  cltt 1 2014/06/30 03:28:45;
+  binding state active;
+  next binding state free;
+  hardware ethernet 54:04:a6:c1:7c:94;
+}
+lease 10.1.1.217 {
+  starts 1 2014/06/30 03:49:29;
+  ends 2 2014/10/07 03:49:29;
+  tstp 2 2014/10/07 03:49:29;
+  cltt 1 2014/06/30 03:49:29;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:7a:78:fc;
+}
+lease 10.1.1.229 {
+  starts 2 2014/07/01 02:56:42;
+  ends 3 2014/10/08 02:56:42;
+  tstp 3 2014/10/08 02:56:42;
+  cltt 2 2014/07/01 02:56:42;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:ba:2b:89;
+}
+lease 10.1.1.231 {
+  starts 5 2014/07/04 04:54:19;
+  ends 6 2014/10/11 04:54:19;
+  tstp 6 2014/10/11 04:54:19;
+  cltt 5 2014/07/04 04:54:19;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:ea:6c:87;
+}
+lease 10.1.1.253 {
+  starts 5 2014/07/04 05:22:09;
+  ends 6 2014/10/11 05:22:09;
+  tstp 6 2014/10/11 05:22:09;
+  cltt 5 2014/07/04 05:22:09;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:76:5c:2d;
+}
+lease 10.1.1.233 {
+  starts 5 2014/07/11 03:16:59;
+  ends 6 2014/10/18 03:16:59;
+  tstp 6 2014/10/18 03:16:59;
+  cltt 5 2014/07/11 03:16:59;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:9d:05:2d;
+}
+lease 10.1.1.254 {
+  starts 5 2014/07/11 04:41:37;
+  ends 6 2014/10/18 04:41:37;
+  tstp 6 2014/10/18 04:41:37;
+  cltt 5 2014/07/11 04:41:37;
+  binding state active;
+  next binding state free;
+  hardware ethernet 1c:6f:65:e7:d1:66;
+}
+lease 10.1.1.234 {
+  starts 5 2014/07/11 04:47:14;
+  ends 6 2014/10/18 04:47:14;
+  tstp 6 2014/10/18 04:47:14;
+  cltt 5 2014/07/11 04:47:14;
+  binding state active;
+  next binding state free;
+  hardware ethernet 20:1a:06:5b:8c:b3;
+  client-hostname "ben-ThinkPad-Edge-E530c";
+}
+lease 10.1.1.232 {
+  starts 5 2014/07/11 07:06:48;
+  ends 6 2014/10/18 07:06:48;
+  tstp 6 2014/10/18 07:06:48;
+  cltt 5 2014/07/11 07:06:48;
+  binding state active;
+  next binding state free;
+  hardware ethernet 20:1a:06:5b:8c:b3;
+  uid "\001 \032\006[\214\263";
+  client-hostname "ben";
+}
+lease 10.1.1.235 {
+  starts 0 2014/07/13 08:12:53;
+  ends 1 2014/10/20 08:12:53;
+  tstp 1 2014/10/20 08:12:53;
+  cltt 0 2014/07/13 08:12:53;
+  binding state active;
+  next binding state free;
+  hardware ethernet 68:9c:5e:50:e7:50;
+  client-hostname "android_5e165e0f15e97661";
+}
+lease 10.1.1.236 {
+  starts 2 2014/07/22 01:28:14;
+  ends 3 2014/10/29 01:28:14;
+  tstp 3 2014/10/29 01:28:14;
+  cltt 2 2014/07/22 01:28:14;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:4c:2a:72;
+  uid "\001\000\014)L*r";
+  client-hostname "china-2df87a362";
+}
+lease 10.1.1.237 {
+  starts 2 2014/07/22 01:54:42;
+  ends 3 2014/10/29 01:54:42;
+  tstp 3 2014/10/29 01:54:42;
+  cltt 2 2014/07/22 01:54:42;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:72:c9:ec;
+}
+lease 10.1.1.238 {
+  starts 2 2014/07/22 02:49:32;
+  ends 3 2014/10/29 02:49:32;
+  tstp 3 2014/10/29 02:49:32;
+  cltt 2 2014/07/22 02:49:32;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:6c:fc:ca;
+}
+lease 10.1.1.239 {
+  starts 2 2014/07/22 03:45:35;
+  ends 3 2014/10/29 03:45:35;
+  tstp 3 2014/10/29 03:45:35;
+  cltt 2 2014/07/22 03:45:35;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:7f:e3:3b;
+  uid "\001\000\014)\177\343;";
+  client-hostname "china-1510c74c3";
+}
+lease 10.1.1.240 {
+  starts 2 2014/07/22 03:56:49;
+  ends 3 2014/10/29 03:56:49;
+  tstp 3 2014/10/29 03:56:49;
+  cltt 2 2014/07/22 03:56:49;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:c3:5a:d2;
+}
+lease 10.1.1.242 {
+  starts 2 2014/07/22 05:36:20;
+  ends 3 2014/10/29 05:36:20;
+  tstp 3 2014/10/29 05:36:20;
+  cltt 2 2014/07/22 05:36:20;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:bc:78:cf;
+}
+lease 10.1.1.243 {
+  starts 2 2014/07/22 06:10:41;
+  ends 3 2014/10/29 06:10:41;
+  tstp 3 2014/10/29 06:10:41;
+  cltt 2 2014/07/22 06:10:41;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:16:05:5d;
+}
+lease 10.1.1.246 {
+  starts 2 2014/07/22 07:15:14;
+  ends 3 2014/10/29 07:15:14;
+  tstp 3 2014/10/29 07:15:14;
+  cltt 2 2014/07/22 07:15:14;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:5a:77:0f;
+  uid "\001\000\014)Zw\017";
+  client-hostname "WIN-6D0IVD2LC8G";
+}
+lease 10.1.1.245 {
+  starts 2 2014/07/22 08:03:56;
+  ends 3 2014/10/29 08:03:56;
+  tstp 3 2014/10/29 08:03:56;
+  cltt 2 2014/07/22 08:03:56;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:79:f0:33;
+}
+lease 10.1.1.247 {
+  starts 2 2014/07/22 08:19:21;
+  ends 3 2014/10/29 08:19:21;
+  tstp 3 2014/10/29 08:19:21;
+  cltt 2 2014/07/22 08:19:21;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:f0:5a:e6;
+}
+lease 10.1.1.225 {
+  starts 3 2014/07/23 00:52:55;
+  ends 4 2014/10/30 00:52:55;
+  tstp 4 2014/10/30 00:52:55;
+  cltt 3 2014/07/23 00:52:55;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:24:0d:5e;
+}
+lease 10.1.1.230 {
+  starts 3 2014/07/23 04:04:43;
+  ends 4 2014/10/30 04:04:43;
+  tstp 4 2014/10/30 04:04:43;
+  cltt 3 2014/07/23 04:04:43;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:76:52:96;
+}
+lease 10.1.1.250 {
+  starts 3 2014/07/23 05:53:43;
+  ends 4 2014/10/30 05:53:43;
+  tstp 4 2014/10/30 05:53:43;
+  cltt 3 2014/07/23 05:53:43;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:e6:1b:84;
+  uid "\001\000\014)\346\033\204";
+  client-hostname "user1-7cd0210b2";
+}
+lease 10.1.1.248 {
+  starts 3 2014/07/23 05:55:42;
+  ends 4 2014/10/30 05:55:42;
+  tstp 4 2014/10/30 05:55:42;
+  cltt 3 2014/07/23 05:55:42;
+  binding state active;
+  next binding state free;
+  hardware ethernet 88:ae:1d:2c:e8:81;
+  uid "\001\210\256\035,\350\201";
+  client-hostname "WIN7-20140114TO";
+}
+lease 10.1.1.241 {
+  starts 4 2014/07/24 04:45:03;
+  ends 5 2014/10/31 04:45:03;
+  tstp 5 2014/10/31 04:45:03;
+  cltt 4 2014/07/24 04:45:03;
+  binding state active;
+  next binding state free;
+  hardware ethernet 28:d2:44:79:42:5c;
+  uid "\001(\322DyB\\";
+  client-hostname "chenshilei";
+}
+lease 10.1.1.212 {
+  starts 5 2014/07/25 01:55:08;
+  ends 6 2014/11/01 01:55:08;
+  tstp 6 2014/11/01 01:55:08;
+  cltt 5 2014/07/25 01:55:08;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:30:67:37:b5:2b;
+}
+lease 10.1.1.226 {
+  starts 5 2014/07/25 09:50:05;
+  ends 6 2014/11/01 09:50:05;
+  tstp 6 2014/11/01 09:50:05;
+  cltt 5 2014/07/25 09:50:05;
+  binding state active;
+  next binding state free;
+  hardware ethernet 54:04:a6:c1:7c:86;
+}
+lease 10.1.1.222 {
+  starts 6 2014/07/26 01:52:56;
+  ends 0 2014/11/02 01:52:56;
+  tstp 0 2014/11/02 01:52:56;
+  cltt 6 2014/07/26 01:52:56;
+  binding state active;
+  next binding state free;
+  hardware ethernet 1c:6f:65:e7:d1:82;
+}
+lease 10.1.1.244 {
+  starts 6 2014/07/26 01:54:53;
+  ends 0 2014/11/02 01:54:53;
+  tstp 0 2014/11/02 01:54:53;
+  cltt 6 2014/07/26 01:54:53;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:26:9e:6f:2b:5f;
+  uid "\001\000&\236o+_";
+  client-hostname "WIN-7M63CPR6EBN";
+}
+lease 10.1.1.224 {
+  starts 6 2014/07/26 02:57:59;
+  ends 0 2014/11/02 02:57:59;
+  tstp 0 2014/11/02 02:57:59;
+  cltt 6 2014/07/26 02:57:59;
+  binding state active;
+  next binding state free;
+  hardware ethernet e0:05:c5:ee:fa:c9;
+}
+server-duid "\000\001\000\001\033C\201\011\034oef\362U";
+
+lease 10.1.1.42 {
+  starts 1 2014/07/28 01:33:51;
+  ends 1 2014/07/28 01:33:51;
+  cltt 1 2014/07/28 01:33:51;
+  binding state abandoned;
+  next binding state free;
+  client-hostname "foundation20";
+}
+lease 10.1.1.43 {
+  starts 1 2014/07/28 01:34:04;
+  ends 1 2014/07/28 02:34:04;
+  cltt 1 2014/07/28 01:34:04;
+  binding state active;
+  next binding state free;
+  hardware ethernet 00:0c:29:7a:90:1a;
+  client-hostname "foundation20";
+}
+lease 10.1.1.42 {
+  starts 1 2014/07/28 01:33:51;
+  ends 1 2014/07/28 01:33:51;
+  cltt 1 2014/07/28 01:33:51;
+  binding state free;
+  client-hostname "foundation20";
+}

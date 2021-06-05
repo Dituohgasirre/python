@@ -1,0 +1,11 @@
+<html>
+<body>
+
+<ul>
+  {% for q in latest_questions %}
+  <li><a href="{% url 'polls:detail' q.pk %}">{{ q.question_text }}</a></li>
+  {% endfor %}
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+文件对象
+    创建文件对象
+        open(文件路径, 打开模式="r", 缓冲区=-1, 字符编码, 换行字符)
+            打开模式:
+                r       只读, 默认值
+                r+      可读可写
+                w       只写, 文件不存在创建文件，文件存在清空文件
+                w+      在w基础上增加可读功能
+                a       追加，文件不存在创建文件
+                a+      在a的基础上增加可读功能
+                rb      读取二进制文件(bytes)
+
+            缓冲区设置:
+                -1      默认缓冲区大小
+                0       关闭缓冲区
+                1       行缓冲
+                其它    指定缓冲区大小
+
+    文件对象的操作
+        f.read          读取指定大小字节数据，默认为读取所有数据
+        f.readline      读取文件一行数据
+        f.readlines     读取文件所有数据返回列表，一行对应列表一个元素
+        f.write         往文件写入一个字符串
+        f.writelines    往文件写入多个字符串，以列表形式存储传入
+        f.seek          移动文件指针(第一个参数偏移量， 第二个参数偏移类型)
+            必须打开模式加入b选项, 否则不能前后偏移
+        f.tell          报告当前文件指针位置
+        f.readable      判断文件是否可读
+        f.writeable     判断文件是否可写
+        f.seekable      判断文件是否可偏移
+        f.truncate      对文件进行截断操作
+        f.flush         刷新文件缓冲区
+        f.close         关闭文件对象
+        f.fileno        返回文件描述符
+        f.isatty        判断是否为终端文件
+
+    文件对象的属性
+        f.closed            文件对象是否关闭
+        f.name              文件路径
+        f.mode              文件打开模式
+        f.encoding          文件打开字符编码
+        f.newlines          文件的换行模式, 默认为\n
+        f.line_buffering    文件是否开启行缓冲
+
+-------------------------------------------------------------------------------
+标准文件(标准输入、标准输出和错误输出)
+    0   sys.stdin      标准输入
+    1   sys.stdout     标准输出
+    2   sys.stderr     错误输出
+
+-------------------------------------------------------------------------------
+文件系统的操作方法
+    os.access           检验权限模式(R_OK, W_OK, X_OK, F_OK)
+    os.chmod            修改文件权限
+    os.chown            修改文件所属用户及组
+    os.stat             获取文件信息
+        st_mode的组成定义在stat模块中
+    os.remove           删除文件
+    os.utime            修改文件时间
+    os.mkfifo           创建管道文件
+    os.pipe             创建匿名管道
+    os.popen            打开命令管道流
+    os.pclose           关闭命令管道流
+    os.umask            修改权限掩码
+    os.rename           修改文件名称
+
+    底层对文件操作接口:
+        os.open             打开文件返回文件描述符
+        os.read             对文件描述符进行读操作
+        os.write            对文件描述符进行写操作
+        os.lseek            对文件描述符进行偏移操作
+        os.close            关闭文件描述符
+        os.dup              复制文件描述符
+        os.dup2             复制文件描述符到指定文件描述符
+        os.fchdir           切换文件描述符对应的工作路径
+        os.fchmod           修改文件描述符对应文件的权限
+        os.fchown           修改文件描述符对应文件的所属用户及组
+        os.fdopen           文件描述符转换成文件对象
+        os.fstat            获取文件描述符对应文件的信息
+        os.isatty           判断文件描述符对应文件是否为终端文件
+
+    软链接文件操作:
+        os.symlink          创建软链接
+        os.lchmod           对软链接文件修改权限
+        os.lchown           对软链接文件修改所属用户及组
+        os.lstat            获取软链接文件信息(不是软链接也能获取信息)
+        os.readlink         读取软链接文件内容
+
+    目录路径操作:
+        os.chdir            切换当前工作目录
+        os.getcwd           获取当前工作路径
+        os.mkdir            创建目录
+        os.makedirs         递归创建目录树
+        os.rmdir            删除空目录
+        os.removedirs       递归删除目录树
+        os.listdir          以列表形式返回目录里所有文件及目录
+        glob.glob           返回使用通配符过滤文件的列表
+
+    路径操作: os.path模块
+        os.path.exists          判断文件是否存在
+        os.path.lexists         判断软链接文件的链接是否有效
+        os.path.isabs           判断路径是否为绝对路径
+        os.path.isfile          判断路径是否为文件
+        os.path.isdir           判断路径是否为目录
+        os.path.islink          判断路径是否为链接文件
+        os.path.ismount         判断路径是否为挂载点
+        os.path.samefile        判断两个文件是否相同
+        os.path.sameopenfile    判断两个打开的文件(文件对象)是否为同一文件
+        os.path.split           将路径分隔成dirname和basename返回
+        os.path.splittext       将路径分隔成路径名和文件扩展名
+        os.path.basename        返回路径中的文件名部分
+        os.path.dirname         返回路径中的目录部分
+        os.path.abspath         返回路径的绝对路径(转换..和去除多余/)
+        os.path.commonpath      返回多个路径的共公最长的路径
+        os.path.expanduser      解析带~的路径(~/~user)
+        os.path.expandvars      解析带$name或${name}环境变量的路径
+        os.path.join            组合路径
+        os.path.getsize         获取指定文件大小
+        os.path.getatime        获取路径最后访问时间(时间戳)
+        os.path.getmtime        获取路径最后修改时间(时间戳)
+        os.path.getctime        获取路径最后属性修改时间(时间戳)
+
+    临时文件： tempfile模块
+        tempfile.mktemp         返回临时文件路径的字符串
+        tempfile.TempporaryFile 创建临时文件并且返回文件对象
+
+-------------------------------------------------------------------------------
+对普通文件操作：
+    创建            touch               (open/umask/exists/isfile)
+    删除            rm                  (remove)
+    编辑            vim                 (read/write/seek...)
+    重命名          mv                  (rename)
+    获取文件属性    ls                  (stat/fstat)
+    文件属性修改    chown/chmod/touch   (chown/chmod/utime)
+
+对软链接操作：
+    创建            ln -s               (symlink/islink)
+    删除            rm                  (remove)
+    读取            readlink            (readlink)
+    重命名          mv                  (rename)
+    获取文件属性    ls                  (lstat)
+    文件属性修改    chown/chmod/touch   (lchown/lchmod/utime)
+
+对目录操作：
+    创建            mkdir               (mkdir/umask/exists/isdir)
+        获取当前工作路径    pwd         (getcwd)
+        切换当前工作路径    cd          (chdir)
+    删除            rmdir               (rmdir)
+    重命名          mv                  (rename)
+    获取属性        ls                  (stat)
+    属性修改        chown/chmod/touch   (chown/chmod/utime)
+    遍历目录        ls                  (listdir/walk/glob)
+
+-------------------------------------------------------------------------------
+高级文件处理模块(shutil)
+    shutil.copyfile         拷贝文件
+    shutil.copy             拷贝文件及权限
+    shutil.copy2            拷贝文件及状态信息
+    shutil.copymode         仅拷贝文件权限(内容 用户 组不变)
+    shutil.copystat         仅拷贝文件状态(atime mtime)
+    shutil.copytree         递归拷贝文件夹
+    shutil.rmtree           递归删除文件夹
+    shutil.move             递归移动文件
+    shutil.make_archive     打包压缩
+        shutil.make_archive('包名', '压缩格式', root_dir='要压缩的路径')
+            shutil.make_archive是调用zipfile和tarfile模块来实现压缩打包
+
+-------------------------------------------------------------------------------
+二进制文件读写(struct模块)
+    打包二进制数据
+        b = struct.pack('i', 34)
+
+    解包二进制数据
+        s = struct.unpack('i', b)
+
+    二进制数据格式
+        i   int             4个字节
+        I   unsigned int    4个字节
+        q   long long       8个字节
+        f   float           4个字节
+        d   double          8个字节
+        c   char            1个字节
+        h   short           2个字节
+        x   占位符          1个字节
+
+-------------------------------------------------------------------------------
+时间日期
+    time模块
+        time.time           返回1970年1月1号0点0分0秒到现在有多少浮点秒数
+        time.localtime      返回本地时区的time.struct_time结构
+        time.struct_time    时间日期结构
+            tm_year         4位数字的年
+            tm_mon          月 1-12
+            tm_mday         日 1-31
+            tm_hour         小时 0-23
+            tm_min          分钟 0-59
+            tm_sec          秒 0-61(60 61为闰秒)
+            tm_wday         一周的第几天 0-6(0为周日)
+            tm_yday         一年的第几天 1-366
+            tm_isdst        夏令时
+
+        time.mktime         将time.struct_time结构转换成时间戳
+        time.strftime       格式化输出time.struct_time结构
+            %y              两位数年
+            %Y              4位数年
+            %m              月份    01-12
+            %d              月内的一天
+            %H              24小时制 0-23
+            %I              12小时制 01-12
+            %M              分钟数 00-59
+            %a              本地简化星期名称
+            %A              本地完整星期名称
+            %b              本地简化月份名称
+            %B              本地完整月份名称
+            %p              本地AM/PM的等价符
+            %U              一年中星期数(00-53), 星期天为星期的开始
+            %W              一年中星期数(00-53), 星期一为星期的开始
+            %w              星期 0-6  0为星期天
+            %F              2015-10-23格式输出日期
+
+            更多参考帮助: man strftime
+
+        time.clock          返回当前CPU时间
+        time.sleep          延时
+
+    datetime模块
+        返回当前日期时间的datetime对象
+            dt = datetime.datetime.now()
+
+        返回指定日期时间的datetime对象
+            dt = datetime.datetime(2017, 3, 29, 12, 20)
+
+        字符串日期转datetime对象
+            dt = datetime.datetime.strptime('2017-03-12', '%Y-%m-%d')
+
+        时间戳转datetime对象
+            dt = datetime.datetime.fromtimestamp(time.time())
+
+        dt.timetuple()      返回当前日期时间的时间元组(time.struct_time)
+        dt.timestamp()      返回当前日期时间的时间戳
+        dt.strftime('%F')   返回格式化日期时间字符串
+        dt.replace(2017)    替换datetime对象中日期时间
+
+        datetime对象支持比较操作符
+            datetime.datetime.now() > datetime.datetime(2018, 10, 10)
+            datetime.datetime.now() < datetime.datetime(2018, 10, 10)
+            datetime.datetime.now() == datetime.datetime(2018, 10, 10)
+            datetime.datetime.now() != datetime.datetime(2018, 10, 10)
+
+        datetime对象加减运算符
+            dt = datetime.datetime.now()
+            dt - datetime.datetime(2018, 10, 10)    计算两个日期差
+            dt + datetime.timedelta(days=10)        返回10天后的datetime对象
+            dt + datetime.timedelta(days=-10)       返回10天前的datetime对象
+            dt + datetime.timedelta(hours=-10)      返回10小时前的datetime对象
+            dt + datetime.timedelta(seconds=120)    返回120秒后的datetime对象
+
+    calendar模块
+        calendar.calendar(year, w=2, l=1, c=6)
+            返回year指定年日历的字符串, w为日字符宽度，l星期占行数, c为月间距
+
+        calendar.prcal(year, w=2, l=1, c=6)
+            直接使用print输出年日历
+
+        calendar.month(year, month, w=2, l=1)
+            返回指定year和month的月日历字符串
+
+        calendar.prmonth(year, month, w=2, l=1)
+            直接使用print输出月日历
+
+        calendar.isleap(year)
+            判断year是否为闰年
+
+        calendar.leapdays(y1, y2)
+            返回y1 y2两年之间的闰年总数
+
+        calendar.monthcalendar(year, month)
+            返回嵌套列表，表示对应月历的数字，0为不显示
+
+        calendar.monthrange(year, month)
+            返回指定月的首日星期及本月天数
+
+        calendar.setfirstweekday(weekday)
+            设置每周起始星期码 0为星期一， 6为星期日
+
+        calendar.weekday(year, month, day)
+            返回指定年月日的星期码
+
+-------------------------------------------------------------------------------
+1. 实现cp -i单个文件功能(文件存在提示是否覆盖)
+    ./mycp.py /kyo/1_fopen.c /data/2_fopen.c
+
+2. 实现grep -n "root" passwd --color功能
+    到passwd文件中查找root关健词，打印查找到root所在行
+    ./mygrep root passwd
+
+3. 从A文件中读一个数字, 到B文件中取出对应数字的单词
+    A   3   到B文件取第三个单词(单词分隔符[^a-zA-Z])
+        num = 3
+        count = 0
+        w = ""
+        for c in open("B").read():
+            if 'a' <= c <= 'z' or 'A' <= c <= 'Z':
+                w += c
+            elif w:
+                count += 1
+                if count == num
+                    print("%d => %s" % (num, w))
+                    break
+                w = ""
+
+4. 实现电子词典
+
+5. 接受uid返回对应用户名
+    for u in open("/etc/passwd"):
+        u = u.split(":")
+        if uid == int(u[2]):
+            return u[0]
+
+6. 统计本操作系统有多少用户
+    l = 0
+    for u in open("/etc/passwd"):
+        l += 1
+    print(l)
+
+7. 接受用户名判断本机是否存在
+    for u in open("/etc/passwd"):
+        if u.startswith(user + ":"):
+            return True
+    return False
+
+8. 实现ls -l命令
+
+-------------------------------------------------------------------------------
+3. 实现电子词典
+2. 从A文件中读一个数字, 到B文件中取出对应数字的单词
+7. 接受用户名判断本机是否存在
+1. 实现grep -n "root" passwd --color功能
+4. 接受uid返回对应用户名
+6. 统计本操作系统有多少用户
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+apt install alsa-tools -y
+echo "options snd-hda-intel model=auto" >> /etc/modprobe.d/alsa-base.conf
+cat > /usr/local/bin/speaker-fix << EOF
+#!/bin/bash
+fix() {
+        /usr/bin/hda-verb /dev/snd/hwC0D0 0x01 SET_GPIO_MASK 0x01
+            /usr/bin/hda-verb /dev/snd/hwC0D0 0x01 SET_GPIO_DIRECTION 0x01
+                /usr/bin/hda-verb /dev/snd/hwC0D0 0x01 SET_GPIO_DATA 0x00
+}
+fix &> /dev/null
+EOF
+chmod a+x /usr/local/bin/speaker-fix
+

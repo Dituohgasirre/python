@@ -1,0 +1,30 @@
+
+{% for blog in blogs %}
+<div class="panel panel-default panel-body blog-list">
+  <div class="col-md-4">
+    <img src="http://images.china.cn/attachement/jpg/site1000/20150821/6c0b840a258b174110364c.jpg" alt="smiley-face" class="img-thumbnail blog-link" data-link="{% url 'blog:blog_detail' blog.pk %}" />
+  </div>
+  <div class="col-md-8">
+      <h3 class="blog-link" data-link="{% url 'blog:blog_detail' blog.pk %}">{{blog.title}}</h3>
+    <!-- <div class="barcode"><span class="glyphicon glyphicon-qrcode"></span></div> -->
+    <div class="row padding-bottom-10">
+      <span class="col-md-4 text-muted">{{blog.pub_date}}</span>
+      <span class="col-md-5 text-muted text-center blog-link" data-link="{% url 'blog:blog_search_category' blog.category.pk %}">{{blog.category.name}}</span>
+      <span class="col-md-3 text-muted text-right">{{blog.comment_set.all|length}} 条评论</span>
+    </div>
+
+    <div class="blog-list-content">
+        {{blog.content|slice:":350"}}
+    </div>
+
+    <div class="row padding-top-10">
+      <span class="col-md-10">
+      {% for tag in blog.tags.all %}
+      <button type="button" class="btn btn-default label label-default blog-link" data-link="{% url 'blog:blog_search_tag' tag.pk %}">{{tag.name}}</button>
+      {% endfor %}
+      </span>
+      <span class="col-md-2 text-muted text-right blog-link" data-link="{% url 'blog:blog_detail' blog.pk %}">继续阅读 >></span>
+    </div>
+  </div>
+</div>
+{% endfor %}

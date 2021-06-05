@@ -1,0 +1,14 @@
+<html>
+<head>
+<title>{{ current_time }}</title>
+</head>
+<body>
+<ul>
+{% for c in data %}
+
+<li><a href="{% url 'contact:detail' c.pk %}">{{ c.name }}</a></li>
+
+{% endfor %}
+</ul>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<html>
+<body>
+<form method="post">
+  {% csrf_token %}
+  <table>
+  {{ form }}
+  <tr><td></td><td><img id='captcha' src="{% url 'polls:captcha' %}"></td></tr>
+  </table>
+  <input type="submit" value="Log in">
+</form>
+
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script>
+function reload_img() {
+  $('#captcha').attr('src', "/polls/captcha/" + String(Math.random()));
+}
+$(document).ready(function() {
+    $('#captcha').click(reload_img);
+});
+</script>
+</body>
+</html>

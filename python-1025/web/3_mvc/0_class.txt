@@ -1,0 +1,52 @@
+WSGI应用的入口规定必须可执行对象并且规定参数, 所以不能执行多个WSGI应用文件
+需要对WSGI入口进行封装
+
+MVC设计模式, 分层架构, 用户交互与后端逻辑进行分离:
+    M   Model       模型        数据库
+    V   View        视图/模板   前端
+    C   Controller  控制器      后端
+
+MVC框架组成:
+    WSGI入口(mvc)
+    统一URL调试分发(Route)
+    请求封装类(Request)
+    响应封装类(Response)
+    异常处理(MVCException)
+    重定向(Redirect)
+    公共库(common)
+    自定义配置(Config)
+    模板(Template)
+    缓冲(Cache)
+    模型(Model)
+    表单处理
+    文件上传
+    Cookie & Session
+    AJAX
+
+Cookie: HTTP客户端(浏览器)存储的数据
+    HTTP通讯是无状态, 所以每一次HTTP交互之间没有关系
+    Cookie一般情况下是由服务器控制客户端怎么存储数据
+    Cookie的数据由几个字段组成:
+        name/value 数据字段, Key/Value类型
+        expires    过期时间    控制Cookie生存周期
+            没有指定此字段, 此Cookie为会话Cookie, 即浏览器关闭就会消失
+            指定了此字段, 代表Cookie在指定时间内都会有效(因为保存到文件)
+
+        domain     域名        控制浏览器请求时将数据发送给哪个服务器
+            设置必须两个点以上
+
+        path       路径        浏览器请求服务器时匹配的路径, 匹配成功才会发送Cookie
+
+        httponly   选项        只要带了此选项,浏览器的脚本不能访问
+
+        secure     选项        只有https才会发送
+
+    HTTP首部:
+        Set-Cookie      http响应带的首部, 服务器告诉客户端保存什么数据
+        Cookie          http请求带的首部, 客户端给服务器发送的Cookie数据
+
+
+
+
+
+

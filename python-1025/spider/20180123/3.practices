@@ -1,0 +1,154 @@
+一、用requests下载搜索引擎提供的图片
+
+    r = requests.get('https://example.com/a.jpg', stream=True)
+    with open('a.jpg', 'wb') as f:
+        for chunk in r:
+            f.write(chunk)
+
+
+
+二、操练XPath
+
+1. 利用lxml.etree创建树形结构，然后测试xpath表达式
+    from lxml import etree
+    code = """<zelin>
+            <python>
+                <class1025>
+                    <students>
+                        <student>
+                            <name>pengzhengjian</name>
+                            <gender>male</gender>
+                        </student>
+                        <student>
+                            <name>nicolasxiang</name>
+                            <gender>female</gender>
+                        </student>
+                    </students>
+                </class1025>
+            </python>
+        </zelin>"""
+
+    tree = etree.XML(code)
+    tree.xpath('/*')
+    tree.xpath('//student')
+    tree.xpath('//student/name/text()')
+
+2. 操练获取XPath的常用节点
+    code = """<bookstore>
+            <book>
+                <title lang="en">Python</title>
+                <author>Guido van Rossum</author>
+                <price>20</price>
+            </book>
+            <book>
+                <title lang="en">GNU</title>
+                <author>Richard M Stallman</author>
+                <price>30</price>
+            </book>
+        </bookstore>"""
+
+    tree = etree.XML(code)
+    tree.xpath('//title')
+    tree.xpath('//title/text()')
+    tree.xpath('//title/@lang')
+
+3. 写一个程序，要求：
+
+    1. 把网页 http://quotes.toscrape.com/page/1/ 的树形结构解析出来
+    2. 把结果输出到文本文件中，输出格式如下：
+        <html>
+            <head>
+                <title>
+                <link>
+            <body>
+                <div>
+                    <p>
+
+    参考代码：
+
+        from bs4.element import Tag
+
+        def subs(node):
+            return [sub for sub in node.contents if isinstance(sub, Tag)]
+
+        def print_sub_nodes(node, indent=0):
+            for c in subs(node):
+                print(' ' * indent, c.name, sep='')
+                print_sub_nodes(c, indent + 2)
+
+
+        def print_tree(top):
+            print('html')
+            print_sub_nodes(top.html, 2)
+
+
+4. 取出网页 http://quotes.toscrape.com/ 中的以下数据
+
+    1. 网页顶部的标题（不是<title>标签）
+    2. 取出第2到第5个quote的文本 (class是text的那部分)
+    3. 取出网页右侧的"Top Ten Tags"里面的所有标签
+    4. 取出网页中 "Next" 链接的url
+
+
+三、操练BeautifulSoup
+
+1. 操练基本用法：
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html_code, 'lxml')
+    soup.prettify()     <-- 输出内容到屏幕
+    soup.title          <-- 获取title标签的内容
+    soup.a              <-- 获取第一个a标签的内容
+    soup.p.attrs        <-- 获取标签的属性
+    soup.p.name         <-- 获取标签的名字
+    soup.p['class']     <-- 获取标签的某个属性
+    soup.p.string       <-- 获取标签内部的文字
+    soup.contents       <-- 所有的子节点的列表
+    soup.children       <-- 所有的子节点的可迭代对象
+    soup.descendants    <-- 所有的后代节点
+    soup.strings        <-- 所有节点的内容
+    soup.stripped_strings   <-- 所有节点的内容，除去空白
+    soup.title.parent   <-- 节点的父节点
+    soup.title.parents  <-- 节点所有的父节点
+
+2. 写一个过滤函数，给find_all调用，用来取出href属性中没有javascript字样的超链接
+    def matcher(e):
+        #return (e.name == 'a' and 'href' in e.attrs
+        #        and 'javascript' not in e.attrs['href'])
+
+        if e.name == 'a':
+            if 'href' in e.attrs:
+                return 'javascript' not in e.attrs['href']
+        return False
+
+
+四、按以下要求写一个爬虫
+
+1. 爬取网页 http://quotes.toscrape.com/page/1/ 上所有的 quote
+2. 提取每个quote的以下内容：
+    1. text
+    2. author
+    3. tag
+3. 使用工具：requests, lxml.etree
+4. 把结果存放到Json Lines 文件中（一条记录一行）
+5. 爬取全部10个页面
+
+
+五、按以下要求写一个爬虫
+
+1. 从网页 https://gitee.com/explore/recommend?page=1 开始爬取
+2. 爬网页中每一个项目的作者的信息
+    昵称            user_nick
+    用户名          user_name
+    用户描述        user_desc
+    加入时间        join_time
+    追随者          followers
+    星的数量        stars
+    关注了谁        following
+    被查看数        watches
+    用户额外信息    user_extra_info
+3. 跟踪页面中的“下一页”链接，持续爬取，直到爬完所有的页面为止
+4. 避免存放重复的记录
+5. 数据存放在Json Lines 中，一行一条记录
+
+
+六、修改爬虫 gitee_spider.py，用Beautifulsoup 替换xpath，确保功能不变。

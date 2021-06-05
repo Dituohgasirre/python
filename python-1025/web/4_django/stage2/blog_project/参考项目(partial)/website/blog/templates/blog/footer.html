@@ -1,0 +1,43 @@
+{% load static %}
+<div id="footer">
+</div>
+
+<script type="text/javascript" src="{% static 'blog/js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'blog/js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'blog/js/headroom.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'blog/js/main.js' %}"></script>
+{% block extjs %}
+<script>
+    $(function(){
+        var page = 1, hasNextPage = true;
+
+        function appendBlogs(html) {
+            var $blogs = $('#blog_list');
+            $blogs.append(html);
+        }
+
+        function updatePage(page) {
+            var url = location.href
+            $.post(url, {page: page}).done(function(data) {
+                appendBlogs(data.html);
+                hasNextPage = data.has_next;
+            });
+        }
+
+        function scroll_handler() {
+            var scrollTop = $(window).scrollTop();
+            var heightDiff = $(document).height() - $(window).height();
+            if (hasNextPage && Math.abs(scrollTop - heightDiff) <= 1){
+                page += 1;
+                console.log('scrolling to page: ' + page);
+                updatePage(page);
+            }
+        }
+
+        $(window).on('scroll', scroll_handler);
+
+    });
+</script>
+{% endblock %}
+</body>
+</html>

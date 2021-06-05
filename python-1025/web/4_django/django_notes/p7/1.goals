@@ -1,0 +1,6 @@
+# 能够在Django程序中使用静态文件 (css, js, image, p1)
+# 了解可重用的APP的构建注意事项 (template, static)
+# 了解打包应用程序所需的工具 (pip install setuptools)
+# 能够打包应用程序 (p2)
+# 能够用pip来安装打好的包
+# 能够把应用部署到apache服务器上 (p3)

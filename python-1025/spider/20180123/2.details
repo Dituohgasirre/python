@@ -1,0 +1,270 @@
+requests库的安装使用
+
+1. get (html, xml, json, binary file)
+    1. 下载文本文件
+    2. 下载二进制文件
+    3. 下载大文件 (stream=True)
+2. post (json, html, xml, binary file)
+    1. post常规信息
+        r = requests.post('http://localhost:8000/data/post/message/',
+                data={'a': 1, 'b': 2})
+    2. 上传文件
+        r = requests.post('http://localhost:8000/data/post/file/',
+                files={'bigfile': open('/bin/bash', 'rb')})
+
+
+安装requests库
+
+pip install requests
+
+
+用requests库下载html网页
+
+r = requests.get(url)
+open('file', 'w').write(r.text)
+
+
+用requests库下载json网页
+
+r = requests.get(url)
+data = r.json()
+
+
+用requests库下载二进制文件 (stream=True)
+
+r = requests.get(url, stream=True)
+with open('file.jpg', 'wb') as f:
+    for chunk in r:
+        f.write(chunk)
+
+
+用requests库post数据到服务器
+
+post常规信息
+r = requests.post('http://localhost:8000/data/post/message/',
+                  data={'a': 1, 'b': 2})
+
+上传文件
+r = requests.post('http://localhost:8000/data/post/file/',
+                  files={'bash': open('/bin/bash', 'rb')})
+
+
+
+XPath的使用
+
+关于XPath
+    XPath的全称是XML Path Language
+    XPath使用类似“路径”的语法来定位XML文档中的节点
+    XPath包含了超过200个的内置函数
+
+XPath的路径表达式
+    XPath使用路径表达式来选择节点和节点的集合
+    XPath所使用的路径与传统文件系统的树形结构非常相似
+    范例：
+        BOOKS
+            BOOK
+                TITLE
+                AUTHOR
+                    FIRSTNAME
+                    LASTNAME
+
+XPath标准函数
+    XPath包含了超过200个的内置函数
+    这些函数可用于处理字符串、数字、布尔值、日期时间，用于操纵节点、序列等
+    XPath表达式可用于多种语言中，比如说JavaScript, Python, Java, C, C++等
+
+XPath术语
+    XPath有7种节点
+        元素
+        属性 (attribute)
+        文本
+        名字空间
+        处理指令
+        注释
+        文档
+    XML文档被看成是一个节点树，最顶端的元素被称作“根元素”
+
+XML范例
+    <bookstore>
+      <book>
+        <title lang="en">Harry Potter</title>
+        <author>J K. Rowling</author>
+        <year>2005</year>
+        <price>29.99</price>
+      </book>
+    </bookstore>
+
+XML范例（续）
+    上例中，有这些节点
+        <bookstore> (root element node)
+        <author>J K. Rowling</author> (element node)
+        lang="en" (attribute node)
+
+原子值/项
+    原子值是一种节点，它没有父节点，也没有子节点
+    上例中，原子值有
+        J K. Rowling
+        "en"
+        29.99
+        2005
+    所谓的“项” (items) 就是节点或者原子值
+
+父节点
+    每一个元素或者属性都有一个父节点
+    下例中，book元素是title, author, year, price的父节点
+        <book>
+          <title>Harry Potter</title>
+          <author>J K. Rowling</author>
+          <year>2005</year>
+          <price>29.99</price>
+        </book>
+
+子节点
+    元素性的节点可以有零个、一个、或者多个子节点
+    下面代码中，title, author, year, price都是book的子节点
+    <book>
+      <title>Harry Potter</title>
+      <author>J K. Rowling</author>
+      <year>2005</year>
+      <price>29.99</price>
+    </book>
+
+兄弟节点
+    有共同父节点的节点叫做兄弟节点
+    下面代码中，title, author, year, price之间都是兄弟节点
+    <book>
+      <title>Harry Potter</title>
+      <author>J K. Rowling</author>
+      <year>2005</year>
+      <price>29.99</price>
+    </book>
+
+祖先节点
+    节点的父节点，父节点的父节点，以此类推，都是祖先节点
+    下面代码中，title的祖先节点是book和bookstore
+    <bookstore>
+      <book>
+        <title>Harry Potter</title>
+        <author>J K. Rowling</author>
+        <year>2005</year>
+        <price>29.99</price>
+      </book>
+    </bookstore>
+
+后代节点
+    节点的子节点，子节点的子节点，以此类推，都是后代节点
+    下面代码中，bookstore的后代节点是book, totle, author, year, price
+    <bookstore>
+    <book>
+      <title>Harry Potter</title>
+      <author>J K. Rowling</author>
+      <year>2005</year>
+      <price>29.99</price>
+    </book>
+    </bookstore>
+
+XPath的语法
+    nodename    按名字选取节点
+    /           路径开头的斜杠表示根元素，后续的斜杠用于分隔父子节点
+    //          路径开头的双斜杠表示整个文档范围，后续的双斜杠用于分隔祖先节点和后代节点
+    .           当前节点
+    ..          父节点
+    @           属性
+
+XPath的语法范例
+    book        当前节点下所有的book节点
+    /bookstore  根节点下名叫bookstore的节点
+    book/price  当前节点下所有book节点下所有的price节点
+    //book      由根节点开始所有后代节点中名叫book的节点
+    .//book     由当前节点开始所有后代节点中名叫book的节点
+    bookstore//book 当前节点下所有bookstore的名叫book的所有后代节点
+    //@lang     所有名叫lang的属性
+
+XPath的修饰词
+    修饰词可用来选取某个特定的节点，或者某个包含特定值的节点
+    修饰词总是写在中括号中
+    范例
+        book[1]                 第一个book节点
+        book[last()]            最后一个book节点
+        book[last()-1]          倒数第二个book节点
+        book[position()<3]      前面两个book节点
+        title[@lang]            包含lang属性的title节点
+        title[@lang='en']       包含lang属性且属性值为en的title节点
+        book[price>30]/title    包含price节点值大于30的book节点下的title节点
+
+选取未知节点
+    XPath支持通过通配符来选取未知的节点
+        *       匹配所有的元素型节点
+        @*      匹配所有的属性型节点
+        node()  匹配所有的任意类型的节点
+    范例
+        *               当前节点下所有的元素
+        //*             文档中所有的元素
+        //title[@*]     文档中包含了至少一个属性的title元素
+
+选取多个路径
+    通过竖线 | 可以选取多个路径
+    范例
+        ./price|./title             当前节点下的price和title元素
+        (//price|//title)/text()    文档中所有price和title的值
+
+XPath的轴(axis)
+    轴(axis)是相对于当前节点的节点集
+    范例
+        ancestor            当前节点所有的祖先节点
+        attribute           当前节点所有的属性节点
+        child               当前节点所有的子节点
+        following-sibling   当前节点后面所有的兄弟节点
+        preceding-sibling   当前节点前面所有的兄弟节点
+
+XPath的轴的用法
+    child::book         相当于 book
+    attribute::lang     相当于 @lang
+    child::*            相当于 *
+    ancestor::book      名叫book的祖先，没有对应的简单写法
+    following::a        后续所有的a元素
+
+XPath的操作符
+    |                   合并多个节点集
+    +,-,*,div,mod       加减乘除，求余
+    =,!=,>,>=,<,<=      比较操作符
+    or,and              逻辑操作符
+
+
+
+BeautifulSoup
+    BeautifulSoup可用于解析网页内容
+    BeautifulSoup提供了简单的方法，方便提取网页中的数据
+    安装
+        pip install beautifulsoup4
+
+创建和使用BeautifulSoup对象
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html_code, 'lxml')
+    soup.prettify()     <-- 输出内容到屏幕
+    soup.title          <-- 获取title标签的内容
+    soup.a              <-- 获取第一个a标签的内容
+    soup.p.attrs        <-- 获取标签的属性
+    soup.p.name         <-- 获取标签的名字
+    soup.p['class']     <-- 获取标签的某个属性
+    soup.p.string       <-- 获取标签内部的文字
+    soup.contents       <-- 所有的子节点的列表
+    soup.children       <-- 所有的子节点的可迭代对象
+    soup.descendants    <-- 所有的后代节点
+    soup.strings        <-- 所有节点的内容
+    soup.stripped_strings   <-- 所有节点的内容，除去空白
+    soup.title.parent   <-- 节点的父节点
+    soup.title.parents  <-- 节点所有的父节点
+
+搜索文档树
+    soup.find_all('b')              <-- 找名为b的标签
+    soup.find_all(['a', 'b'])       <-- 找列表中的名字
+    soup.find_all(re.compile('^b')) <-- 按正则表达式查找
+    soup.find_all(func)             <-- 用函数func来匹配
+    soup.find_all(id='link', href=re.compile('good')) <-- 匹配标签的属性
+    soup.find_all(class_=re.compile('xx'))      <-- 匹配标签的class属性
+    soup.find_all(attrs={'data-foo': 'bar'})    <-- 应付不能做关键字的属性名
+    soup.find_all(text='foo')   <-- 匹配标签的文本
+    soup.find_all(limit=2)      <-- 只返回部分节点而不是全部节点
+    soup.find_all(recursive=False)  <-- 只搜索直接的子节点
+    soup.find(...)                  <-- 只返回第一个匹配的节点

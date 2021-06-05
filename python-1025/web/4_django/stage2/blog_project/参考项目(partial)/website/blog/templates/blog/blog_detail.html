@@ -1,0 +1,61 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<div id="prev_tool" class="well">
+  <i class="glyphicon glyphicon-chevron-left"></i>
+</div>
+
+<div id="next_tool" class="well">
+  <i class="glyphicon glyphicon-chevron-right"></i>
+</div>
+
+
+<div class="panel panel-default panel-body col-md-12">
+  <h3 class="col-md-12 text-center">{{blog.title}}</h3>
+  <!-- <div class="barcode"><span class="glyphicon glyphicon-qrcode"></span></div> -->
+  <div class="row padding-bottom-10">
+    <span class="col-md-6 text-muted">{{blog.pub_date}}</span>
+    <span class="col-md-6 text-muted text-right">{{blog.comment_set.all|length}} 条评论</span>
+  </div>
+
+  <div class="blog-list-content blog-detail">
+    <!-- <img src="http://images.china.cn/attachement/jpg/site1000/20150821/6c0b840a258b174110364c.jpg" alt="smiley-face" class="img-thumbnail" style="max-width:100%;height:auto" /> -->
+    {{blog.content}}
+  </div>
+
+  <div class="row padding-top-10">
+    <span class="col-md-10">
+      {% for tag in blog.tags.all %}
+      <button type="button" class="btn btn-default label label-default blog-link" data-link="{% url 'blog:blog_search_tag' tag.pk %}">{{tag.name}}</button>
+      {% endfor %}
+    </span>
+  </div>
+</div>
+
+<div class="panel panel-default panel-body col-md-12">
+  <div class="page-header">
+    <h3>评论</h3>
+  </div>
+  {% for comment in blog.comment_set.all %}
+  <div class="row">
+    <div class="col-md-12">{{comment.content}}</div>
+    <div class="col-md-6 text-left padding-top-10">
+      <input type="button" class="btn btn-default" value="回复">
+    </div>
+    <div class="col-md-6 text-right padding-top-10">{{comment.pub_date}}</div>
+  </div>
+  <hr>
+  {% endfor %}
+
+  <div class="page-header">
+    <h3>发表评论</h3>
+  </div>
+  <div class="text-center">
+    <form action="">
+      <textarea class="form-control" id="" name="content" cols="30" rows="10"></textarea>
+      <button type="submit" class="btn btn-primary" style="margin-top: 20px;">提交评论</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

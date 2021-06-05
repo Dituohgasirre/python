@@ -1,0 +1,39 @@
+博客项目分组结果
+
+
+Group 1:
+
+    凌兴华 温利娜 曾召杰 何大伟 彭振健
+
+
+Group 2:
+
+    张鹏 张柱 陈靖 曾祥明 简玉龙
+
+
+
+选取方法：
+
+def pick(lines):
+    lines = lines[:]
+    res = []
+    nums = list(range(10))[::-1]
+    for i in nums:
+        idx = random.randint(0, i)
+        item = lines.pop(idx)
+        res.append(item)
+    return res
+
+
+def choose():
+    all_results = []
+    for i in range(100):
+        all_results.append(pick(lines))
+    return random.choice(all_results)
+
+
+In [26]: lines
+Out[26]: ['张柱', '温利娜', '曾召杰', '陈靖', '简玉龙', '张鹏', '曾祥明', '何大伟', '彭振健', '凌兴华']
+
+In [23]: choose()
+Out[23]: ['凌兴华', '温利娜', '曾召杰', '何大伟', '彭振健', '张鹏', '张柱', '陈靖', '曾祥明', '简玉龙']

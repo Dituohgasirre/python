@@ -1,0 +1,459 @@
+数据库查询
+    SELECT 是DQL的核心命令，也是查询数据库的唯一命令, 是SQL最大最复杂的命令
+    SELECT提供混合、比较和过滤数据的关系操作(基本、附加、扩展)
+    基本操作
+        Restriction         限制
+        Projection          投影
+        Cartesian Product   笛卡尔积
+        Union               联合
+        Difference          差
+        Rename              重命名
+
+    附加操作    由基本操作组成
+        Intersection        交叉
+        Natural Join        自然连接
+        Assign              赋值
+
+    扩展操作    由基本操作和附加操作组成
+        Generalized Projection  广义投影
+        Left Outer Join         左外连接
+        Right Outer Join        右外连接        不支持
+        Full Outer Join         全外连接        不支持
+
+    这些操作都定义在关系(表)中，将一个或多个关系作为输入, 然后产生另一个关系作为输出
+    即select语句的输出可以作为另一个select的输入，类似Unix Shell的管道
+
+    select命令用一系列子句将很多关系操作组合在一起，每个子句代表一个关系操作
+    在MySQL中所有子句都是可选, 给用户提供自由获取数据所需的操作
+    select通用形式:
+        select [distinct] heading       去重和指定要操作的列名或生成的列名
+            from tables                 指定要操作的一个或多个表、视图等
+            where predicate             设置逻辑表达式要过滤的行
+            group by columns            按指定列分组
+            having predicate            给分组设置条件过滤
+            order by columns            指定返回的结果按哪列排序
+            limit count,offset;         指定要返回的结果的数量
+
+        select命令从from开始接受一个或多个输入关系组合单一复合关系传递给后续操作链
+        除了select，其它的子句都是可选
+
+    select常见形式:
+        select heading from tables where predicate;
+
+    别名
+        select 原列名 as 别名 from 原表名 as 别名;
+        或
+        select 原列名 as 别名 from 原表名 别名;
+
+    过滤(where)
+        如果select是SQL最复杂的命令，那where子句则是select中最复杂的子句
+        where子句连接逻辑表达式，如果表达式结果为假则过滤
+
+    运算符
+        算术运算符: + - * / %
+
+        比较运算符: == = != <> > < >= <= !< !>
+            == / =      是否相等
+            != / <>     是否不等
+            !<          是否不小于
+            !>          是否不大于
+
+        逻辑运算符:
+            BETWEEN     指定范围搜索
+                select * from student where age between 10 and 30;
+
+            EXISTS      判断后面括号子句结果是否为真
+                select * from student where exists (select 1);
+                select * from student s where
+                    exists (select id where class where id=s.cid);
+
+            IN          判断某个值是否存在于某个结果
+                select * from student where name in ('mary', 'tom');
+
+            LIKE        将某个值与使用通配符的相似值比较
+                _   代表任意一个字符
+                %   代表0个或多个字符
+                select * from student where name like 'm_%';
+
+            NOT         除非的意思
+                NOT IN      判断某个值是否不存在于某个结果
+                    select * from student where name not in ('mary', 'tom');
+                NOT EXISTS  后面括号子句结果是否为假
+                    select * from student where not exists (select 1);
+                NOT BETWEEN 不在指定范围搜索数据
+                    select * from student where age not between 10 and 30;
+
+            AND         逻辑与, 左右表达式都为真，结果为真
+            OR          逻辑或
+            IS          与=相似
+            IS NOT      与!=相似
+            IS NULL     将某个值与NULL比较
+            ||          连接两个不同的字符串
+
+        位运算符: & | ~ << >>
+
+    限定(limit)
+        limit子句限定结果集的大小和范围
+        从第6条开始取10条记录
+            select * from student limit 10 offset 5;
+            或
+            select * from student limit 5,10;
+
+    排序(order by)
+        order by子句使结果集按一个或多个字段进行排序
+            asc     默认为升序
+            desc    降序
+
+        按name字段对结果集升序
+            select * from student order by name;
+        按先后字段对结果集升序
+            select * from student order by age, sex, name;
+        按先后字段对结果集降序
+            select * from student order by age, sex, name desc;
+
+    函数
+        MySQL提供了很多的内置函数和聚合.
+        函数名不分大小写
+        函数可以接受字段值作为参数
+        函数可以是任意表达式的一部分
+
+        ? functions         获取函数分组的帮助
+        ? 'date and time functions' 列出所有日期时间函数
+        ? concat            获取concat函数的帮助
+
+        user                当前登录用户
+        database            当前操作数据库
+        version             当前服务嚣版本
+        password            加密密码
+
+        字符串函数:
+            concat          字符串连接
+                select concat(ename,'  salary is ', sal) from emp;
+            left            从左边截取字符串
+            right           从右边截取字符串
+            length          求字符串长度
+            substr          截取字符串
+            lower           大写转化函数
+            upper           小写转化函数
+
+        数学函数
+            mod             取余
+            round           四舍五入
+
+        日期函数
+            current_time        当前时间
+            current_date        当前日期
+            current_timestamp   当前时间戳
+            now                 当前时间日期
+            year                取日期的年
+            month               取日期的月
+            day                 取日期的日
+            hour                取时间的时
+            minute              取时间的分
+            second              取时间的秒
+
+    聚合
+        聚合是一类特殊的函数，计算一组记录的聚合值
+            聚合不仅可以聚合字段，还可以聚合任何表达式，包括函数
+            sum         对字段求和
+            arg         对字段求平均值
+            max         对字段求最大值
+            min         对字段求最小值
+            count       返回关系中所有行的数目
+
+    分组(group by)
+        通过by指定规则对数据进行分组，
+        所谓分组就是将一个数据集划分成若干个小区域
+        然后针对若干小区域进行数据处理
+        group by子句必须在where子句后，在order by子句前
+        test表：
+            type   num    txt
+            a       5     a2002
+            a       2     a2001
+            b       10    b2003
+            b       6     b2002
+            b       3     b2001
+            c       9     c2005
+            c       9     c2004
+            c       8     c2003
+            c       7     c2002
+            c       4     c2001
+            a       11    a2001
+        简单group by:
+            select type, sum(num) from test group by type
+                结果：
+                    type   sum(num)
+                     a      18
+                     b      19
+                     c      37
+
+        having子句
+            having子句是对分组结果过滤, 必须在group by子句后
+            select type, sum(num) from test group by type having sum(*) > 20;
+                结果：
+                    type    sum(*)
+                     c       37
+
+    去掉重复(distinct子句)
+        distinct 处理select结果过滤掉其中重复的行
+        统计学生表中有多少个年龄层次
+            select distinct age from student;
+
+    多表连接查询
+            A表:                        B表：
+                ID     name                 ID      cname
+                1       张三                1       数学
+                2       李四                2       语文
+                3       王二                4       英语
+                                            7       音乐
+
+        内连接 (join 或 inner join) 两表都满足的组合(最为普遍)
+            select * from A inner join B on A.ID=B.ID
+                或
+            select * from A,B where A.ID.B.ID
+                结果：
+                    ID  Name  ID  cname
+                    1   张三   1   数学
+                    2   李四   2   语文
+
+        交叉连接 (cross join)
+            没有where子句的交叉连接将产生连接器所涉及的笛卡尔积,
+            A表行数乘以B表行数等于笛卡尔积结果集的大小
+                select * from A cross join B
+                    结果：
+                        ID  Name  ID   cname
+                        1   张三   1    数学
+                        2   李四   1    数学
+                        3   王二   1    数学
+                        1   张三   2    语文
+                        2   李四   2    语文
+                        3   王二   2    语文
+                        1   张三   4    英语
+                        2   李四   4    英语
+                        3   王二   4    英语
+                        1   张三   7    音乐
+                        2   李四   7    音乐
+                        3   王二   7    音乐
+
+        外连接
+            左连接(left join 或 left outer join)
+                A left join B
+                    以A表为基础 A表的全部数据，B表有的组合没有的为null
+                select * from A left outer join B on A.ID=B.ID
+                    结果：
+                        ID  Name  ID   cname
+                        1   张三   1    数学
+                        2   李四   2    语文
+                        3   王二  null  null
+
+            右连接(right join 或 right outer join)
+                A right join B
+                    以B表为基础 B表的全部数据，A表有的组合没有的为null
+                select * from A right outer join B on A.ID=B.ID
+                    结果：
+                        ID  Name  ID   cname
+                        1   张三   1    数学
+                        2   李四   2    语文
+                       null null   4    英语
+                       null null   7    音乐
+
+            完全外连接(full join 或 full outer join)
+                两表相同的组合
+                A表有，B表没有的数据为null
+                同样B表的数据A表没有也要为null
+                select * from A full outer join B on A.ID=B.ID
+                    结果：
+                        ID  Name  ID   cname
+                        1   张三   1    数学
+                        2   李四   2    语文
+                        3   王二  null  null
+                       null null   4    英语
+                       null null   7    音乐
+
+    复合查询
+        联合            union
+            联合两个表的不重复的数据
+                select c.name from class union select s.name from stu;
+
+            联合两个表的所有数据(不会消除重复数据)
+                select c.name from class union all select s.name from stu;
+
+        交叉连接        intersect
+            取出两个表的交叉数据
+                select c.name from class intersect select s.name from stu;
+
+        差集            except
+            取出两个表一个有的，另一个没有的数据
+                select c.name from class except select s.name from stu;
+
+    条件结果
+        根据值的不同显示不同的结果
+        select name,
+            case sex
+                when 1 then '男'
+                when 2 then '女'
+                else null
+            end
+            from student;
+
+    子查询
+        子查询即是select语句嵌套
+        统计PHP班级的学生个数
+            select count(*) from student where cid in
+                (select id from class where name='PHP');
+
+    处理NULL
+        null只是特殊的占位符，不是0,不是真，不是假，不是空字符串
+        与NULL的逻辑:
+            true and null   结果为NULL
+            false and null  结果为false
+            true or null    结果为真
+            false or null   结果为null
+
+        判断是否为null使用is null或is not null操作符来检测是否存在
+            select * from stuent where name = null;
+                值为null也不会返回数据
+            select * from stuent where name is null;
+
+-------------------------------------------------------------------------------
+练习:
+    创建员工表:
+        create table emp (
+            empno int primary key auto_increment,
+            ename varchar(20),
+            sex char(1),
+            birthday date,
+            hiredate date,
+            sal decimal(10,2),
+            deptno tinyint(1),
+            managerno int);
+
+        生成数据:
+            insert into emp values (1,'boss','m','1964-08-08','1995-01-01','20000','1','1'),
+            (2,'zhangsan','m','1967-04-05','1995-04-11','15000','2','1'),
+            (3,'lisi','f','1973-01-28','1998-11-21','13000','3','1'),
+            (4,'wangwu','f','1975-06-03','1999-12-12','12000','4','1'),
+            (5,'maliu','m','1982-08-18','2001-07-03','8000','2','2'),
+            (6,'tianqi','f','1983-02-15','2002-11-01','7000','2','2'),
+            (7,'mark','m','1984-08-12','2003-10-02','6500','3','3'),
+            (8,'john','m','1985-09-14','2005-04-03','6000','3','3'),
+            (9,'mm','f','1990-06-08','2008-09-13','4000','4','4');
+
+    创建部门表:
+        create table dept (deptno tinyint(1), deptname varchar(30),location varchar(50));
+
+        生成数据:
+            insert into dept values (1,'manager','beijing'), (2,'it','shenzhen'), (3,'sale','shanghai'), (4,'services','guangzhou');
+
+    写出以下需求对应的SQL:
+        显示员工所有信息包含所属上级名称及所属部门名称
+            select
+                e.empno '工号',
+                e.ename '姓名',
+                case e.sex when 'm' then '男' else '女' end '性别',
+                e.birthday '生日',
+                e.hiredate '入职日期',
+                e.sal '工资',
+                d.deptname '部门名称',
+                m.ename '上级领导'
+            from
+                emp e, emp m, dept d
+            where
+                m.empno=e.managerno and m.deptno=d.deptno;
+
+        把wangwu性别改成m
+            update emp set sex='m' where ename='wangwu';
+
+        wangwu的工资加500
+            update emp set sal=sal+500 where ename='wangwu';
+
+        mark由3号部门换成2号部门，同时工资加1000,上级管理者也改为2号部门的头
+            手动查询2号部门的头no:
+            update emp set deptno=2, sal=sal+1000, mangerno=2 where ename='mark';
+
+            自动查询2号部门的头no:
+            update emp set deptno=2, sal=sal+1000,
+                managerno=(
+                    select
+                        e.empno
+                    from
+                        (select empno from emp where deptno=2) e,
+                        (select distinct managerno from emp where deptno=2) m
+                    where
+                        e.empno=m.managerno)
+            where ename='mark';
+
+        2号部门的工资涨10%
+            update emp set sal=sal*1.1 where deptno=2;
+
+        工资就john和mark涨10%,其它人不涨
+            update emp set sal=sal*1.1 where ename='john' or ename='mark';
+                或
+            update emp set sal=sal*1.1 where ename in ('john', 'mark');
+
+        工资都涨10%，john和mark犯错误，就他们不涨
+            update emp set sal=sal*1.1 where ename not in ('john', 'mark');
+
+        查询所有男员工的姓名和工资
+            select ename, sal from emp where sex='m';
+
+        查询工资大于8000的员工的所有信息
+            select * from emp where sal > 8000;
+
+        查询工资在4000到8000之间的员工的所有信息（包含4000和8000的)
+            select * from emp where sal between 4000 and 8000;
+
+        查询入职时间在2001那年的员工的姓名和工资
+            select ename, sal from emp where year(hiredate)=2001;
+
+        查询2002年之后(包括2002年)入职的，并且工资大于8000的员工姓名
+            select ename from emp where year(hiredate)>=2002 and sal > 8000;
+
+        统计工资总额，最大工资，最小工资，平均工资
+            select sum(sal), max(sal), min(sal), avg(sal) from emp;
+
+        找出工资最低的三个人的姓名和工资
+            select ename, sal from emp order by sal limit 3;
+
+        找出工资最高的三个人的姓名和工资
+            select ename, sal from emp order by sal desc limit 3;
+
+        找出工资最低的女员工的姓名和工资
+            select ename, sal from emp where sex='f' order by sal limit 1;
+
+        找出工资从高到低第三到第五的人的姓名和工资
+            select ename, sal from emp order by sal desc limit 2, 3;
+
+        统计每个部门的人数
+            select deptno, count(*) from emp group by deptno;
+
+        统计男，女员工各有多少人
+            select sex, count(*) from emp group by sex;
+
+        统计每个部门里男女员工各有多少个
+            select deptno, sex, count(*) from emp group by deptno, sex;
+
+        查找部门人数大于2的部门号和人数
+            select deptno, count(*) as total from emp group by deptno having total > 2;
+
+        查找部门人数大于2的部门号 部门名称和人数
+            select
+                e.deptno, d.deptname, count(*) as total
+            from
+                emp e, dept d
+            where
+                e.deptno=d.deptno
+            group by
+                d.deptname, e.deptno
+            having
+                total > 2;
+
+        求每个部门的工资总额，最大工资，最小工资，平均工资
+            select deptno, sum(sal), max(sal), min(sal), avg(sal) from emp group by deptno;
+
+        查出员工姓名和其对应的工资，部门名，部门所在地，并显示
+            select ename, sal, deptname, location from emp e join dept d on e.deptno=d.deptno;
+
+        查出比wangwu工资高的人的姓名和工资
+            select ename, sal from emp where sal > (select sal from emp where ename='wangwu');
+
